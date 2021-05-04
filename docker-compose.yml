@@ -1,0 +1,34 @@
+version: "3"
+services:
+  showdown:
+    build:
+      context: showdown
+      dockerfile: Dockerfile
+    ports:
+      - 8081:8081
+    container_name: showdown-server
+    volumes:
+      - ./showdown/config.js:/pokemon-showdown/config/config.js
+  pmariglia_accept:
+    depends_on:
+      - showdown
+    build:
+      context: pmariglia
+      dockerfile: Dockerfile
+    expose:
+      - 8081
+    container_name: pmariglia-accept
+    volumes:
+      - ./pmariglia/accept:/showdown/.env
+  pmariglia_challenge:
+    depends_on:
+      - pmariglia_accept
+    build:
+      context: pmariglia
+      dockerfile: Dockerfile
+    expose:
+      - 8081
+    container_name: pmariglia-challenge
+    volumes:
+      - ./pmariglia/challenge:/showdown/.env
+

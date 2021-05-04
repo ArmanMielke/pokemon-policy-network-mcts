@@ -1,0 +1,5 @@
+WEBSOCKET_URI=showdown-server:8081
+PS_USERNAME=derkaczda_guest2
+BOT_MODE=ACCEPT_CHALLENGE
+POKEMON_MODE=gen8randombattle
+RUN_COUNT=10
