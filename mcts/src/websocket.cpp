@@ -1,4 +1,4 @@
-#include "showdown_websocket.h"
+#include "websocket.h"
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
@@ -19,7 +19,7 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 // Adapted from https://www.boost.org/doc/libs/develop/libs/beast/doc/html/beast/quick_start/websocket_client.html
 
 
-ShowdownWebsocket::ShowdownWebsocket(std::string const host, std::string const port) : ws{io_context} {
+WebSocket::WebSocket(std::string const host, std::string const port, std::string const target) : ws{io_context} {
     // These objects perform our I/O
     tcp::resolver resolver{io_context};
 
@@ -40,27 +40,30 @@ ShowdownWebsocket::ShowdownWebsocket(std::string const host, std::string const p
     ));
 
     // Perform the websocket handshake
-    this->ws.handshake(host_with_port, "/");
+    this->ws.handshake(host_with_port, target);
 }
 
-void ShowdownWebsocket::send_message(std::string const message) {
+void WebSocket::send_message(std::string const message) {
     // Send the message
     this->ws.write(net::buffer(message));
+    std::cout << "[WebSocket] Sent message: " << message << std::endl;
 }
 
-std::string ShowdownWebsocket::receive_message() {
+std::string WebSocket::receive_message() {
     // This buffer will hold the incoming message
     beast::flat_buffer buffer;
     // Read a message into our buffer
     this->ws.read(buffer);
 
     // Convert the ConstBufferSequence to a string
-    return beast::buffers_to_string(buffer.data());
+    std::string const message = beast::buffers_to_string(buffer.data());
+    std::cout << "[WebSocket] Received message: " << message << std::endl;
+    return message;
 }
 
-ShowdownWebsocket::~ShowdownWebsocket() {
+WebSocket::~WebSocket() {
     // Close the WebSocket connection
     this->ws.close(websocket::close_code::normal);
     // If we get here then the connection is closed gracefully
-    std::cout << "[ShowdownWebsocket] Connection closed." << std::endl;
+    std::cout << "[WebSocket] Connection closed." << std::endl;
 }

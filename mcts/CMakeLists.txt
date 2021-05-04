@@ -10,6 +10,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 add_executable(pokemon_mcts
     src/main.cpp
 
-    src/showdown_websocket.cpp
-    src/showdown_websocket.h
+    src/showdown_client.cpp
+    src/showdown_client.h
+    src/showdown_login_request.cpp
+    src/showdown_login_request.h
+    src/websocket.cpp
+    src/websocket.h
 )
