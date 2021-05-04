@@ -3,6 +3,13 @@ project(pokemon_mcts)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# Linking fails without -pthread
+# https://stackoverflow.com/questions/56092464/linking-errors-for-boost-for-visual-studio-linux-project
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
 add_executable(pokemon_mcts
     src/main.cpp
+
+    src/showdown_websocket.cpp
+    src/showdown_websocket.h
 )

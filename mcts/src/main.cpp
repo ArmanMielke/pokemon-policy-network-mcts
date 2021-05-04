@@ -1,5 +1,5 @@
-#include <iostream>
+#include "showdown_websocket.h"
 
 int main() {
-    std::cout << "Asdf" << std::endl;
+    ShowdownWebsocket websocket{"echo.websocket.org", "80", "Asdf"};
 }
