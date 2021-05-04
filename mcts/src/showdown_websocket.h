@@ -14,17 +14,11 @@ using tcp = boost::asio::ip::tcp;              // from <boost/asio/ip/tcp.hpp>
 class ShowdownWebsocket {
 public:
     /// Establishes a WebSocket connection.
-    ///
-    /// @param host
-    /// @param port
     explicit ShowdownWebsocket(std::string const host, std::string const port);
-
-    /// Sends a message via the WebSocket and receives the response.
-    ///
-    /// @param message
-    /// @return The response.
-    std::string send_message(std::string const message);
-
+    /// Sends a message via the WebSocket.
+    void send_message(std::string const message);
+    /// Receives a message from the WebSocket.
+    std::string receive_message();
     /// Closes the WebSocket connection.
     ~ShowdownWebsocket();
 

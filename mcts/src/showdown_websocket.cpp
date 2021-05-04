@@ -43,16 +43,18 @@ ShowdownWebsocket::ShowdownWebsocket(std::string const host, std::string const p
     this->ws.handshake(host_with_port, "/");
 }
 
-std::string ShowdownWebsocket::send_message(std::string const message) {
+void ShowdownWebsocket::send_message(std::string const message) {
     // Send the message
     this->ws.write(net::buffer(message));
+}
 
+std::string ShowdownWebsocket::receive_message() {
     // This buffer will hold the incoming message
     beast::flat_buffer buffer;
     // Read a message into our buffer
     this->ws.read(buffer);
 
-    // The make_printable() function helps print a ConstBufferSequence
+    // Convert the ConstBufferSequence to a string
     return beast::buffers_to_string(buffer.data());
 }
 
@@ -60,5 +62,5 @@ ShowdownWebsocket::~ShowdownWebsocket() {
     // Close the WebSocket connection
     this->ws.close(websocket::close_code::normal);
     // If we get here then the connection is closed gracefully
-    std::cout << "ShowdownWebsocket: Connection closed." << std::endl;
+    std::cout << "[ShowdownWebsocket] Connection closed." << std::endl;
 }
