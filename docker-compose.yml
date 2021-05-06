@@ -19,7 +19,7 @@ services:
       - 8081
     container_name: pmariglia-accept
     volumes:
-      - ./pmariglia/accept:/showdown/.env
+      - ./pmariglia/envs/accept:/showdown/.env
   pmariglia_challenge:
     depends_on:
       - pmariglia_accept
@@ -30,5 +30,5 @@ services:
       - 8081
     container_name: pmariglia-challenge
     volumes:
-      - ./pmariglia/challenge:/showdown/.env
+      - ./pmariglia/envs/challenge:/showdown/.env
 
