@@ -1,5 +1,5 @@
 import requests
-from websocket import create_connection
+from websocket import create_connection, WebSocket
 
 
 ###################################################
@@ -15,32 +15,41 @@ from websocket import create_connection
 
 
 LOGIN_URI = "https://play.pokemonshowdown.com/action.php"
-USERNAME = "python-rtzaisdua"
+USERNAME = "aisufaisudfh"
 
 
-# establish connection
-ws = create_connection("ws://localhost:8808/showdown/websocket")
-ws.recv()
+def establish_connection() -> WebSocket:
+    ws = create_connection("ws://localhost:8808/showdown/websocket")
+    print(ws.recv())
+    return ws
 
-# log in to Pokémon Showdown
-challstr_message = ws.recv()
-_, _, client_id, challstr = challstr_message.split('|')
-login_request_data = {
-    'act': 'getassertion',
-    'userid': USERNAME,
-    'challstr': '|'.join([client_id, challstr])
-}
-response = requests.post(LOGIN_URI, data=login_request_data)
-ws.send(f"|/trn {USERNAME},0,{response.text}")
-ws.recv()
-ws.recv()
 
-# join Lobby
-ws.send("|/join Lobby")
-ws.recv()
+def log_in_without_password(ws: WebSocket, username: str):
+    challstr_message = ws.recv()
+    _, _, client_id, challstr = challstr_message.split('|')
+    login_request_data = {
+        'act': 'getassertion',
+        'userid': username,
+        'challstr': '|'.join([client_id, challstr])
+    }
+    response = requests.post(LOGIN_URI, data=login_request_data)
+    ws.send(f"|/trn {username},0,{response.text}")
+    print(ws.recv())
+    print(ws.recv())
 
-# challenge user
-user_to_challenge = "dhasuizdhfuia"
-battle_format = "gen8randombattle"
-ws.send(f"|/challenge {user_to_challenge},{battle_format}")
-ws.recv()
+
+def join_lobby(ws: WebSocket):
+    ws.send("|/join Lobby")
+    print(ws.recv())
+
+
+def challenge_user(user_to_challenge: str = "dhasuizdhfuia", battle_format: str = "gen8randombattle"):
+    ws.send(f"|/challenge {user_to_challenge},{battle_format}")
+    print(ws.recv())
+
+
+if __name__ == "__main__":
+    ws = establish_connection()
+    log_in_without_password(ws, USERNAME)
+    join_lobby(ws)
+    challenge_user()
