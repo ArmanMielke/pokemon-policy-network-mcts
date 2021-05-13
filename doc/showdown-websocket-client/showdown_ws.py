@@ -1,3 +1,5 @@
+import json
+
 import requests
 from websocket import create_connection, WebSocket
 
@@ -30,10 +32,27 @@ def log_in_without_password(ws: WebSocket, username: str):
     login_request_data = {
         'act': 'getassertion',
         'userid': username,
-        'challstr': '|'.join([client_id, challstr])
+        'challstr': '|'.join([client_id, challstr]),
     }
     response = requests.post(LOGIN_URI, data=login_request_data)
     ws.send(f"|/trn {username},0,{response.text}")
+    print(ws.recv())
+    print(ws.recv())
+
+
+def log_in_with_password(ws: WebSocket, username: str, password: str):
+    challstr_message = ws.recv()
+    _, _, client_id, challstr = challstr_message.split('|')
+    login_request_data = {
+        'act': 'login',
+        'name': username,
+        'pass': password,
+        'challstr': '|'.join([client_id, challstr]),
+    }
+    response = requests.post(LOGIN_URI, data=login_request_data)
+    response_json = json.loads(response.text[1:])
+    assertion = response_json.get('assertion')
+    ws.send(f"|/trn {username},0,{assertion}")
     print(ws.recv())
     print(ws.recv())
 
@@ -43,7 +62,7 @@ def join_lobby(ws: WebSocket):
     print(ws.recv())
 
 
-def challenge_user(user_to_challenge: str = "dhasuizdhfuia", battle_format: str = "gen8randombattle"):
+def challenge_user(ws: WebSocket, user_to_challenge: str = "dhasuizdhfuia", battle_format: str = "gen8randombattle"):
     ws.send(f"|/challenge {user_to_challenge},{battle_format}")
     print(ws.recv())
 
