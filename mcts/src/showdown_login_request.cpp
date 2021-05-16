@@ -6,9 +6,11 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/lexical_cast.hpp>
+#include <nlohmann/json.hpp>
 
 #include <cstdlib>
 #include <iostream>
+#include <optional>
 #include <string>
 
 namespace beast = boost::beast; // from <boost/beast.hpp>
@@ -25,7 +27,33 @@ std::string const SHOWDOWN_LOGIN_TARGET = "/action.php";
 int const HTTP_VERSION = 11;
 
 
-std::string send_login_request(std::string const username, std::string const challstr) {
+std::string construct_request_body(
+        std::string const username,
+        std::string const challstr,
+        std::optional<std::string> const password
+) {
+    if (password.has_value()) {
+        return "act=login&name=" + username + "&pass=" + *password + "&challstr=" + challstr;
+    } else {
+        return "act=getassertion&userid=" + username + "&challstr=" + challstr;
+    }
+}
+
+std::string extract_assertion(std::string const response_body, bool const using_password) {
+    if (using_password) {
+        // skip the first character. for some reason there is a "]" before the actual json
+        nlohmann::json response_json = nlohmann::json::parse(response_body.substr(1));
+        return response_json["assertion"];
+    } else {
+        return response_body;
+    }
+}
+
+std::string send_login_request(
+    std::string const username,
+    std::string const challstr,
+    std::optional<std::string> const password
+) {
 
     // Establish connection
     // ====================
@@ -51,7 +79,7 @@ std::string send_login_request(std::string const username, std::string const cha
     req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
     req.set(http::field::content_type, "application/x-www-form-urlencoded");
     // send username and challstr
-    req.body() = "act=getassertion&userid=" + username + "&challstr=" + challstr;
+    req.body() = construct_request_body(username, challstr, password);
     req.prepare_payload();
 
     // Send the HTTP request to the remote host
@@ -95,5 +123,5 @@ std::string send_login_request(std::string const username, std::string const cha
     }
     // If we get here then the connection is closed gracefully
 
-    return response_body;
+    return extract_assertion(response_body, password.has_value());
 }

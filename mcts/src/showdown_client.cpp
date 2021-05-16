@@ -13,7 +13,8 @@ std::string const SHOWDOWN_PORT = "8808";
 std::string const SHOWDOWN_TARGET = "/showdown/websocket";
 
 
-ShowdownClient::ShowdownClient(std::string const username) : websocket{SHOWDOWN_HOST, SHOWDOWN_PORT, SHOWDOWN_TARGET} {
+ShowdownClient::ShowdownClient(std::string const username, std::optional<std::string> const password)
+: websocket{SHOWDOWN_HOST, SHOWDOWN_PORT, SHOWDOWN_TARGET} {
     // the first message after connecting only contains some unimportant info
     this->websocket.receive_message();
 
@@ -27,8 +28,8 @@ ShowdownClient::ShowdownClient(std::string const username) : websocket{SHOWDOWN_
     }
     std::string const challstr = challstr_message[2] + "|" + challstr_message[3];
 
-    // choose username (= log in to a new, temporary account without password)
-    std::string const assertion = send_login_request(username, challstr);
+    // log in
+    std::string const assertion = send_login_request(username, challstr, password);
     this->send_message("/trn " + username + ",0," + assertion);
 
     // the next two messages have no useful information

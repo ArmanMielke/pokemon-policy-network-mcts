@@ -1,4 +1,5 @@
 #include "default_action_agent.h"
+#include "../showdown_client.h"
 
 #include <stdlib.h>
 #include <string>
