@@ -1,7 +1,7 @@
 #ifndef POKEMON_MCTS_DEFAULT_ACTION_AGENT_H
 #define POKEMON_MCTS_DEFAULT_ACTION_AGENT_H
 
-#include "../showdown_client.h"
+#include "../showdown_client/showdown_client.h"
 
 #include <string>
 

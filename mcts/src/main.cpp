@@ -1,4 +1,4 @@
-#include "showdown_client.h"
+#include "showdown_client/showdown_client.h"
 #include "agents/default_action_agent.h"
 
 #include <string>
