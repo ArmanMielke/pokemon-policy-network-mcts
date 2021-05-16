@@ -27,6 +27,21 @@ std::string const SHOWDOWN_LOGIN_TARGET = "/action.php";
 int const HTTP_VERSION = 11;
 
 
+beast::tcp_stream establish_connection() {
+    // The io_context is required for all I/O
+    net::io_context ioc;
+    // These objects perform our I/O
+    tcp::resolver resolver(ioc);
+    beast::tcp_stream stream(ioc);
+
+    // Look up the domain name
+    auto const results = resolver.resolve(SHOWDOWN_LOGIN_HOST, SHOWDOWN_LOGIN_PORT);
+    // Make the connection on the IP address we get from a lookup
+    stream.connect(results);
+
+    return stream;
+}
+
 std::string construct_request_body(
         std::string const username,
         std::string const challstr,
@@ -39,40 +54,12 @@ std::string construct_request_body(
     }
 }
 
-std::string extract_assertion(std::string const response_body, bool const using_password) {
-    if (using_password) {
-        // skip the first character. for some reason there is a "]" before the actual json
-        nlohmann::json response_json = nlohmann::json::parse(response_body.substr(1));
-        return response_json["assertion"];
-    } else {
-        return response_body;
-    }
-}
-
-std::string send_login_request(
+void send_http_request(
+    beast::tcp_stream& stream,
     std::string const username,
     std::string const challstr,
     std::optional<std::string> const password
 ) {
-
-    // Establish connection
-    // ====================
-
-    // The io_context is required for all I/O
-    net::io_context ioc;
-    // These objects perform our I/O
-    tcp::resolver resolver(ioc);
-    beast::tcp_stream stream(ioc);
-
-    // Look up the domain name
-    auto const results = resolver.resolve(SHOWDOWN_LOGIN_HOST, SHOWDOWN_LOGIN_PORT);
-    // Make the connection on the IP address we get from a lookup
-    stream.connect(results);
-
-
-    // Send request
-    // ============
-
     // Set up an HTTP POST request message
     http::request<http::string_body> req{http::verb::post, SHOWDOWN_LOGIN_TARGET, HTTP_VERSION};
     req.set(http::field::host, SHOWDOWN_LOGIN_HOST);
@@ -84,11 +71,10 @@ std::string send_login_request(
 
     // Send the HTTP request to the remote host
     http::write(stream, req);
+}
 
-
-    // Receive response
-    // ================
-
+/// @return the response body.
+std::string receive_response(beast::tcp_stream& stream) {
     // This buffer is used for reading and must be persisted
     beast::flat_buffer buffer;
     // Declare a container to hold the response
@@ -109,10 +95,10 @@ std::string send_login_request(
         response_body.append(cbuf, net::buffer_size(seq));
     }
 
+    return response_body;
+}
 
-    // Close connection
-    // ================
-
+void close_connection(beast::tcp_stream& stream) {
     // Gracefully close the socket
     beast::error_code ec;
     stream.socket().shutdown(tcp::socket::shutdown_both, ec);
@@ -122,6 +108,27 @@ std::string send_login_request(
         throw beast::system_error{ec};
     }
     // If we get here then the connection is closed gracefully
+}
 
-    return extract_assertion(response_body, password.has_value());
+std::string extract_assertion(std::string const response_body, bool const using_password) {
+    if (using_password) {
+        // skip the first character. for some reason there is a "]" before the actual json
+        nlohmann::json response_json = nlohmann::json::parse(response_body.substr(1));
+        return response_json["assertion"];
+    } else {
+        return response_body;
+    }
+}
+
+std::string send_login_request(
+    std::string const username,
+    std::string const challstr,
+    std::optional<std::string> const password
+) {
+    beast::tcp_stream stream = establish_connection();
+    send_http_request(stream, username, challstr, password);
+    std::string const response_body = receive_response(stream);
+    close_connection(stream);
+    std::string const assertion = extract_assertion(response_body, password.has_value());
+    return assertion;
 }
