@@ -16,8 +16,6 @@ public:
     /// then returns the name of the room.
     std::string challenge_user(std::string const user, std::string const battle_format);
 
-    void do_default_action(std::string const room_name);
-
 private:
     WebSocket websocket;
 };

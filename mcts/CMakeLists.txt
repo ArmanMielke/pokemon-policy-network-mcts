@@ -16,4 +16,7 @@ add_executable(pokemon_mcts
     src/showdown_login_request.h
     src/websocket.cpp
     src/websocket.h
+
+    src/agents/default_action_agent.cpp
+    src/agents/default_action_agent.h
 )

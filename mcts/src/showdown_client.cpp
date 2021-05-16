@@ -64,7 +64,3 @@ std::string ShowdownClient::challenge_user(std::string const user, std::string c
     std::cout << "[ShowdownClient] Started battle in room " << battle_room_name << std::endl;
     return battle_room_name;
 }
-
-void ShowdownClient::do_default_action(std::string const room_name) {
-    this->send_message("/choose default", room_name);
-}
