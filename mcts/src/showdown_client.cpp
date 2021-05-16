@@ -69,3 +69,22 @@ std::string ShowdownClient::challenge_user(std::string const user, std::string c
     std::cout << "[ShowdownClient] Started battle in room " << battle_room_name << std::endl;
     return battle_room_name;
 }
+
+std::string ShowdownClient::request_input_log(std::string const battle_room_name) {
+    this->send_message("/evalbattle battle.inputLog.join('\\n')", battle_room_name);
+
+    // receive messages until we get the one that contains the input log
+    std::string input_log;
+    do {
+        input_log = this->websocket.receive_message();
+    } while (!boost::algorithm::contains(input_log, ">>> battle.inputLog.join"));
+
+    // there are some extra bits at the start and a double quote (") at the end that need to be thrown away
+    std::size_t start = input_log.find("<<< \"") + 5;
+    std::size_t end = input_log.length() - 1;
+    input_log = input_log.substr(start, end - start);
+    // there is no line break at the end. add one so that there is a line break after each input
+    input_log.append("\n");
+
+    return input_log;
+}
