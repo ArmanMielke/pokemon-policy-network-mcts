@@ -71,4 +71,4 @@ if __name__ == "__main__":
     ws = establish_connection()
     log_in_without_password(ws, USERNAME)
     join_lobby(ws)
-    challenge_user()
+    challenge_user(ws)
