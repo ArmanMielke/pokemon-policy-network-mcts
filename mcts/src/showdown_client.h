@@ -14,8 +14,8 @@ public:
     explicit ShowdownClient(std::string const username, std::optional<std::string> const password = std::nullopt);
     void send_message(std::string const message, std::string const room_name = "");
     void join_room(std::string const room_name);
-    /// Challenges the given user to a battle, waits until they accept (or 7 messages have been received),
-    /// then returns the name of the room.
+    /// Challenges the given user to a battle, waits until they accept, then returns the name of the room.
+    /// May not work if this client's user has another battle in progress.
     std::string challenge_user(std::string const user, std::string const battle_format);
 
 private:
