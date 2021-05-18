@@ -15,7 +15,7 @@ namespace bp = boost::process;
 std::string const SHOWDOWN_EXECUTABLE = "";
 std::string const ARGUMENT = "simulate-battle";
 
-std::string const MARK_STRING = "#*mark*#";
+std::string const MARK_STRING = "#*0-mark-*0#";
 
 
 ShowdownSimulator::ShowdownSimulator() {
@@ -45,21 +45,15 @@ std::vector<int> ShowdownSimulator::get_remaining_pokemon(Player const player) {
     return remaining_pokemon;
 }
 
-int ShowdownSimulator::set_mark() {
-    int mark = this->next_mark;
-    this->next_mark++;
-    this->execute_commands(">chat " + MARK_STRING + std::to_string(mark) + MARK_STRING);
-    return mark;
-}
-
-void ShowdownSimulator::skip_to_mark(int const mark) {
-    std::string out_line;
+void ShowdownSimulator::skip_output() {
+    // set a mark so that we can skip everything up to the mark
+    this->execute_commands(">chat " + MARK_STRING);
 
     // read output lines until the line where the mark was set appears
-    std::string const mark_line = "|chat|" + MARK_STRING + std::to_string(mark) + MARK_STRING;
+    std::string out_line;
     do {
         std::getline(this->child_output, out_line);
-    } while (out_line != mark_line);
+    } while (out_line != "|chat|" + MARK_STRING);
 
     // there is one empty line in the output immediately after the mark
     this->skip_output_lines(1);
