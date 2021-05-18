@@ -31,6 +31,10 @@ public:
     /// Each command must be preceded by a `>`, with no space between the `>` and the command.
     /// If there are multiple commands, commands must be separated by line breaks.
     void execute_commands(std::string const commands);
+    /// Assumes that there is no unread output.
+    /// @return for the given player, the indices of the Pokémon that haven't fainted.
+    ///         Indices are in ascending order.
+    std::vector<int> get_remaining_pokemon(Player const player);
 
 private:
     /// The child process that runs the battle simulator.

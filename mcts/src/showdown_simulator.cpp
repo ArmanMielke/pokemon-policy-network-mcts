@@ -31,6 +31,20 @@ void ShowdownSimulator::execute_commands(std::string const commands) {
     this->child_input << commands << std::endl;
 }
 
+std::vector<int> ShowdownSimulator::get_remaining_pokemon(Player const player) {
+    std::vector<bool> pokemon_fainted = this->get_pokemon_fainted(player);
+    std::vector<int> remaining_pokemon;
+
+    for (int i = 0; i < pokemon_fainted.size(); i++) {
+        // add a Pokémon's index to the list if it hasn't fainted
+        if (!pokemon_fainted[i]) {
+            remaining_pokemon.push_back(i);
+        }
+    }
+
+    return remaining_pokemon;
+}
+
 int ShowdownSimulator::set_mark() {
     int mark = this->next_mark;
     this->next_mark++;
