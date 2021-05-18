@@ -7,6 +7,21 @@
 
 namespace bp = boost::process;
 
+/// Must be either 1 or 2.
+typedef int Player;
+
+/// Determines what actions a player has available.
+enum RequestState {
+    TEAM_PREVIEW,
+    /// The player can attack or switch.
+    /// Occurs at the beginning of a turn.
+    MOVE,
+    /// The player must switch in a Pokémon.
+    /// Occurs e.g. if a Pokémon has fainted, or if a move that switches in another Pokémon was used.
+    SWITCH,
+    /// The player can't do anything at the moment.
+    NONE,
+};
 
 class ShowdownSimulator {
 public:
@@ -34,6 +49,11 @@ private:
     int set_mark();
     /// Skips the output up to the given mark.
     void skip_to_mark(int const mark);
+    /// Skips the given number of lines in the output.
+    void skip_output_lines(int const number_of_lines);
+    /// Assumes that there is no unread output.
+    /// @return the request state for the given player.
+    RequestState get_request_state(Player const player);
 };
 
 
