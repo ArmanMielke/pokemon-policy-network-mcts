@@ -3,7 +3,9 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <vector>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/process.hpp>
 
 namespace bp = boost::process;
@@ -58,7 +60,7 @@ void ShowdownSimulator::skip_output_lines(int const number_of_lines) {
 RequestState ShowdownSimulator::get_request_state(Player const player) {
     this->execute_commands(">eval p" + std::to_string(player) + ".requestState");
 
-    // the command outputs 4 lines, the third of which contains our output
+    // the command outputs 4 lines, the third of which contains the info we need
     skip_output_lines(2);
     std::string out_line;
     std::getline(this->child_output, out_line);
@@ -73,4 +75,31 @@ RequestState ShowdownSimulator::get_request_state(Player const player) {
     } else {
         return RequestState::NONE;
     }
+}
+
+std::vector<bool> ShowdownSimulator::get_pokemon_fainted(const Player player) {
+    this->execute_commands(">eval p" + std::to_string(player) + ".pokemon.map(p => p.fainted)");
+
+    // the command outputs 4 lines, the third of which contains the info we need
+    skip_output_lines(2);
+    std::string out_line;
+    std::getline(this->child_output, out_line);
+    skip_output_lines(1);
+
+    // out_line looks something like this: "||<<< [false, true, true, false, false, false]"
+    // only keep what's inside the brackets so that we have this: "false, true, true, false, false, false"
+    out_line = out_line.substr(7, out_line.size() - 8);
+
+    // split into separate strings
+    std::vector<std::string> fainted_string;
+    boost::split(fainted_string, out_line, boost::is_any_of(","));
+
+    // convert to bool
+    std::vector<bool> fainted_bool(fainted_string.size());
+    std::transform(
+        fainted_string.begin(), fainted_string.end(), fainted_bool.begin(),
+        [](std::string fainted){ return boost::trim_copy(fainted) == "true"; }
+    );
+
+    return fainted_bool;
 }

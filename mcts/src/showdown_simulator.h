@@ -2,6 +2,7 @@
 #define POKEMON_MCTS_SHOWDOWN_SIMULATOR_H
 
 #include <string>
+#include <vector>
 
 #include <boost/process.hpp>
 
@@ -54,6 +55,9 @@ private:
     /// Assumes that there is no unread output.
     /// @return the request state for the given player.
     RequestState get_request_state(Player const player);
+    /// Assumes that there is no unread output.
+    /// @return a vector indicating for each pokemon whether it has fainted.
+    std::vector<bool> get_pokemon_fainted(Player const player);
 };
 
 
