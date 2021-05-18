@@ -23,6 +23,17 @@ private:
     bp::opstream child_input;
     /// std_out of the child process.
     bp::ipstream child_output;
+    /// The number of the next mark that will be set.
+    int next_mark = 0;
+
+    /// Sets a mark in the battle simulator's output so that everything up to that mark can easily be skipped.
+    /// This is useful when executing many commands at once and reading the output of the final command.
+    /// Before the last command, set a mark, then skip to that mark.
+    /// The output of the commands before the mark will be skipped, so that the next output is that of the last command.
+    /// @return a number identifying the mark.
+    int set_mark();
+    /// Skips the output up to the given mark.
+    void skip_to_mark(int const mark);
 };
 
 
