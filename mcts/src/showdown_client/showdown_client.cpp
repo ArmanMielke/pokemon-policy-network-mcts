@@ -83,8 +83,6 @@ std::string ShowdownClient::request_input_log(std::string const battle_room_name
     std::size_t start = input_log.find("<<< \"") + 5;
     std::size_t end = input_log.length() - 1;
     input_log = input_log.substr(start, end - start);
-    // there is no line break at the end. add one so that there is a line break after each input
-    input_log.append("\n");
 
     return input_log;
 }
