@@ -18,6 +18,24 @@ std::string const ARGUMENT = "simulate-battle";
 std::string const MARK_STRING = "#*0-mark-*0#";
 
 
+// Helper Functions
+// //////////////// //
+
+/// For each Pokémon index, this creates an action that switches in that Pokémon.
+/// @return the created actions.
+std::vector<std::string> pokemon_indices_to_switch_actions(std::vector<int> const pokemon_indices) {
+    std::vector<std::string> actions{pokemon_indices.size()};
+    std::transform(
+        pokemon_indices.begin(), pokemon_indices.end(), actions.begin(),
+        [](int pokemon){ return "switch " + std::to_string(pokemon); }
+    );
+    return actions;
+}
+
+// End Helper Functions
+// //////////////////// //
+
+
 ShowdownSimulator::ShowdownSimulator() {
     this->child_process = bp::child{
         SHOWDOWN_EXECUTABLE,
@@ -31,10 +49,38 @@ void ShowdownSimulator::execute_commands(std::string const commands) {
     this->child_input << commands << std::endl;
 }
 
+std::vector<std::string> ShowdownSimulator::get_actions(Player const player) {
+    switch(this->get_request_state(player)) {
+        case RequestState::MOVE: {
+            // switch actions: the player can switch in any Pokémon other than the active one
+            std::vector<int> available_pokemon = this->get_remaining_pokemon(player);
+            // cannot switch in the first pokemon, since it's already active
+            available_pokemon.erase(available_pokemon.begin());
+            std::vector<std::string> actions = pokemon_indices_to_switch_actions(available_pokemon);
+
+            // move actions: the player can attack with any move of the active pokemon
+            // move indices start at 1
+            // TODO implement this properly instead of assuming that the Pokémon has two moves
+            actions.push_back("move 1");
+            actions.push_back("move 2");
+            return actions;
+        }
+        case RequestState::SWITCH: {
+            // there is one action for each available Pokémon (to switch in that Pokémon)
+            return pokemon_indices_to_switch_actions(this->get_remaining_pokemon(player));
+        }
+        case RequestState::TEAM_PREVIEW:
+        case RequestState::NONE:
+        default:
+            return std::vector<std::string>{};
+    }
+}
+
 std::vector<int> ShowdownSimulator::get_remaining_pokemon(Player const player) {
-    std::vector<bool> pokemon_fainted = this->get_pokemon_fainted(player);
+    std::vector<bool> const pokemon_fainted = this->get_pokemon_fainted(player);
     std::vector<int> remaining_pokemon;
 
+    // Pokémon indices start at 0
     for (int i = 0; i < pokemon_fainted.size(); i++) {
         // add a Pokémon's index to the list if it hasn't fainted
         if (!pokemon_fainted[i]) {

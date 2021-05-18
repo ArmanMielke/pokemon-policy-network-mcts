@@ -8,6 +8,7 @@
 
 namespace bp = boost::process;
 
+
 /// Must be either 1 or 2.
 typedef int Player;
 
@@ -32,9 +33,19 @@ public:
     /// If there are multiple commands, commands must be separated by line breaks.
     void execute_commands(std::string const commands);
     /// Assumes that there is no unread output.
+    /// @return all actions available to the given player.
+    ///         Each action is given as a command that can be executed with execute_commands() by prepending ">p",
+    ///         then the number of the player followed by a space.
+    ///         E.g. if `player` is 1 and one of the actions is "move 2", then the corresponding command would
+    ///         be ">p1 move 2".
+    std::vector<std::string> get_actions(Player const player);
+    /// Assumes that there is no unread output.
     /// @return for the given player, the indices of the Pokémon that haven't fainted.
     ///         Indices are in ascending order.
     std::vector<int> get_remaining_pokemon(Player const player);
+    /// Discards any output of the child process that hasn't been read yet.
+    /// If a command is run after skip_output(), the next output line will be from that command.
+    void skip_output();
 
 private:
     /// The child process that runs the battle simulator.
@@ -44,9 +55,6 @@ private:
     /// std_out of the child process.
     bp::ipstream child_output;
 
-    /// Discards any output of the child process that hasn't been read yet.
-    /// If a command is run after skip_output(), the next output line will be from that command.
-    void skip_output();
     /// Skips the given number of lines in the output of the child process.
     void skip_output_lines(int const number_of_lines);
     /// Assumes that there is no unread output.
