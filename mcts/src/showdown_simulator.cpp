@@ -27,7 +27,8 @@ std::vector<std::string> pokemon_indices_to_switch_actions(std::vector<int> cons
     std::vector<std::string> actions{pokemon_indices.size()};
     std::transform(
         pokemon_indices.begin(), pokemon_indices.end(), actions.begin(),
-        [](int pokemon){ return "switch " + std::to_string(pokemon); }
+        // need to add 1 to pokemon, since pokemon indices start at one when the player makes a switch
+        [](int pokemon){ return "switch " + std::to_string(pokemon + 1); }
     );
     return actions;
 }
@@ -80,7 +81,7 @@ std::vector<int> ShowdownSimulator::get_remaining_pokemon(Player const player) {
     std::vector<bool> const pokemon_fainted = this->get_pokemon_fainted(player);
     std::vector<int> remaining_pokemon;
 
-    // Pokémon indices start at 0
+    // Pokémon indices start at 0 in the simulator
     for (int i = 0; i < pokemon_fainted.size(); i++) {
         // add a Pokémon's index to the list if it hasn't fainted
         if (!pokemon_fainted[i]) {
