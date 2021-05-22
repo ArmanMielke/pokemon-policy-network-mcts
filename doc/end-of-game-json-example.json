@@ -1,0 +1,481 @@
+{
+    "winner": "cpp-djcoaisjdcoai",
+    "seed": [
+        53307,
+        52933,
+        17723,
+        61709
+    ],
+    "turns": 30,
+    "p1": "cpp-djcoaisjdcoai",
+    "p2": "GuentherProd",
+    "p1team": [
+        {
+            "name": "Kingler",
+            "species": "Kingler",
+            "gender": "",
+            "shiny": false,
+            "gigantamax": false,
+            "moves": [
+                "rockslide",
+                "xscissor",
+                "swordsdance",
+                "liquidation"
+            ],
+            "ability": "Sheer Force",
+            "evs": {
+                "hp": 85,
+                "atk": 85,
+                "def": 85,
+                "spa": 85,
+                "spd": 85,
+                "spe": 85
+            },
+            "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+            },
+            "item": "Life Orb",
+            "level": 84
+        },
+        {
+            "name": "Arctozolt",
+            "species": "Arctozolt",
+            "gender": "N",
+            "shiny": false,
+            "gigantamax": false,
+            "moves": [
+                "iciclecrash",
+                "freezedry",
+                "thunderwave",
+                "boltbeak"
+            ],
+            "ability": "Volt Absorb",
+            "evs": {
+                "hp": 85,
+                "atk": 85,
+                "def": 85,
+                "spa": 85,
+                "spd": 85,
+                "spe": 85
+            },
+            "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+            },
+            "item": "Heavy-Duty Boots",
+            "level": 86
+        },
+        {
+            "name": "Zygarde",
+            "species": "Zygarde",
+            "gender": "N",
+            "shiny": false,
+            "gigantamax": false,
+            "moves": [
+                "outrage",
+                "dragondance",
+                "thousandarrows",
+                "substitute"
+            ],
+            "ability": "Power Construct",
+            "evs": {
+                "hp": 73,
+                "atk": 85,
+                "def": 85,
+                "spa": 85,
+                "spd": 85,
+                "spe": 85
+            },
+            "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+            },
+            "item": "Leftovers",
+            "level": 72
+        },
+        {
+            "name": "Absol",
+            "species": "Absol",
+            "gender": "",
+            "shiny": false,
+            "gigantamax": false,
+            "moves": [
+                "swordsdance",
+                "suckerpunch",
+                "closecombat",
+                "knockoff"
+            ],
+            "ability": "Justified",
+            "evs": {
+                "hp": 85,
+                "atk": 85,
+                "def": 85,
+                "spa": 85,
+                "spd": 85,
+                "spe": 85
+            },
+            "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+            },
+            "item": "Life Orb",
+            "level": 84
+        },
+        {
+            "name": "Marowak",
+            "species": "Marowak-Alola",
+            "gender": "",
+            "shiny": false,
+            "gigantamax": false,
+            "moves": [
+                "poltergeist",
+                "stoneedge",
+                "earthquake",
+                "flareblitz"
+            ],
+            "ability": "Rock Head",
+            "evs": {
+                "hp": 85,
+                "atk": 85,
+                "def": 85,
+                "spa": 85,
+                "spd": 85,
+                "spe": 85
+            },
+            "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+            },
+            "item": "Thick Club",
+            "level": 84
+        },
+        {
+            "name": "Mr. Mime",
+            "species": "Mr. Mime",
+            "gender": "",
+            "shiny": false,
+            "gigantamax": false,
+            "moves": [
+                "dazzlinggleam",
+                "nastyplot",
+                "focusblast",
+                "psychic"
+            ],
+            "ability": "Filter",
+            "evs": {
+                "hp": 85,
+                "atk": 0,
+                "def": 85,
+                "spa": 85,
+                "spd": 85,
+                "spe": 85
+            },
+            "ivs": {
+                "hp": 31,
+                "atk": 0,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+            },
+            "item": "Life Orb",
+            "level": 86
+        }
+    ],
+    "p2team": [
+        {
+            "name": "Ludicolo",
+            "species": "Ludicolo",
+            "gender": "",
+            "shiny": false,
+            "gigantamax": false,
+            "moves": [
+                "scald",
+                "raindance",
+                "icebeam",
+                "gigadrain"
+            ],
+            "ability": "Swift Swim",
+            "evs": {
+                "hp": 85,
+                "atk": 0,
+                "def": 85,
+                "spa": 85,
+                "spd": 85,
+                "spe": 85
+            },
+            "ivs": {
+                "hp": 31,
+                "atk": 0,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+            },
+            "item": "Life Orb",
+            "level": 86
+        },
+        {
+            "name": "Trevenant",
+            "species": "Trevenant",
+            "gender": "",
+            "shiny": false,
+            "gigantamax": false,
+            "moves": [
+                "hornleech",
+                "earthquake",
+                "trickroom",
+                "poltergeist"
+            ],
+            "ability": "Natural Cure",
+            "evs": {
+                "hp": 85,
+                "atk": 85,
+                "def": 85,
+                "spa": 85,
+                "spd": 85,
+                "spe": 0
+            },
+            "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 0
+            },
+            "item": "Life Orb",
+            "level": 86
+        },
+        {
+            "name": "Kyurem",
+            "species": "Kyurem",
+            "gender": "N",
+            "shiny": false,
+            "gigantamax": false,
+            "moves": [
+                "roost",
+                "earthpower",
+                "icebeam",
+                "substitute"
+            ],
+            "ability": "Pressure",
+            "evs": {
+                "hp": 85,
+                "atk": 0,
+                "def": 85,
+                "spa": 85,
+                "spd": 85,
+                "spe": 85
+            },
+            "ivs": {
+                "hp": 31,
+                "atk": 0,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+            },
+            "item": "Heavy-Duty Boots",
+            "level": 80
+        },
+        {
+            "name": "Toxtricity",
+            "species": "Toxtricity",
+            "gender": "",
+            "shiny": false,
+            "gigantamax": false,
+            "moves": [
+                "boomburst",
+                "sludgewave",
+                "shiftgear",
+                "overdrive"
+            ],
+            "ability": "Punk Rock",
+            "evs": {
+                "hp": 85,
+                "atk": 0,
+                "def": 85,
+                "spa": 85,
+                "spd": 85,
+                "spe": 85
+            },
+            "ivs": {
+                "hp": 31,
+                "atk": 0,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+            },
+            "item": "Life Orb",
+            "level": 82
+        },
+        {
+            "name": "Gyarados",
+            "species": "Gyarados",
+            "gender": "",
+            "shiny": false,
+            "gigantamax": false,
+            "moves": [
+                "dragondance",
+                "waterfall",
+                "bounce",
+                "powerwhip"
+            ],
+            "ability": "Moxie",
+            "evs": {
+                "hp": 85,
+                "atk": 85,
+                "def": 85,
+                "spa": 85,
+                "spd": 85,
+                "spe": 85
+            },
+            "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+            },
+            "item": "Heavy-Duty Boots",
+            "level": 76
+        },
+        {
+            "name": "Registeel",
+            "species": "Registeel",
+            "gender": "N",
+            "shiny": false,
+            "gigantamax": false,
+            "moves": [
+                "bodypress",
+                "stealthrock",
+                "ironhead",
+                "toxic"
+            ],
+            "ability": "Clear Body",
+            "evs": {
+                "hp": 85,
+                "atk": 85,
+                "def": 85,
+                "spa": 85,
+                "spd": 85,
+                "spe": 85
+            },
+            "ivs": {
+                "hp": 31,
+                "atk": 31,
+                "def": 31,
+                "spa": 31,
+                "spd": 31,
+                "spe": 31
+            },
+            "item": "Leftovers",
+            "level": 82
+        }
+    ],
+    "score": [
+        1,
+        0
+    ],
+    "inputLog": [
+        ">start {\"formatid\":\"gen8randombattle\",\"seed\":[53307,52933,17723,61709]}",
+        ">player p1 {\"name\":\"cpp-djcoaisjdcoai\",\"avatar\":\"266\",\"rating\":0,\"seed\":[20414,38742,50583,22036]}",
+        ">player p2 {\"name\":\"GuentherProd\",\"avatar\":\"gentleman\",\"rating\":0,\"seed\":[31932,34131,12521,62280]}",
+        ">p1 move rockslide",
+        ">p2 move gigadrain",
+        ">p1 switch 2",
+        ">p1 move iciclecrash",
+        ">p2 switch 6",
+        ">p1 move iciclecrash",
+        ">p2 move stealthrock",
+        ">p1 move iciclecrash",
+        ">p2 move toxic",
+        ">p1 move iciclecrash",
+        ">p2 move bodypress",
+        ">chat ☆GuentherProd|this is a chat message",
+        ">p1 move iciclecrash",
+        ">p2 move bodypress",
+        ">eval JSON.stringify(battle.toJSON())",
+        ">p1 move iciclecrash",
+        ">p2 move bodypress",
+        ">p1 switch 3",
+        ">p1 move outrage",
+        ">p2 move bodypress",
+        ">p1 move outrage",
+        ">p2 move bodypress",
+        ">p1 move outrage",
+        ">p2 move bodypress",
+        ">p1 move outrage",
+        ">p2 move bodypress",
+        ">p1 move outrage",
+        ">p2 move bodypress",
+        ">p1 move outrage",
+        ">p2 move bodypress",
+        ">p1 move outrage",
+        ">p2 move bodypress",
+        ">p1 move outrage",
+        ">p2 move bodypress",
+        ">p1 switch 4",
+        ">p1 move swordsdance",
+        ">p2 move bodypress",
+        ">p1 switch 5",
+        ">p1 move poltergeist",
+        ">p2 move bodypress",
+        ">p1 move poltergeist",
+        ">p2 move bodypress",
+        ">p2 switch 2",
+        ">p1 move poltergeist",
+        ">p2 move hornleech",
+        ">p2 switch 3",
+        ">p1 move poltergeist",
+        ">p2 move roost",
+        ">p1 move poltergeist",
+        ">p2 move roost",
+        ">p1 move poltergeist",
+        ">p2 move roost",
+        ">p1 move stoneedge",
+        ">p2 move roost",
+        ">p2 switch 4",
+        ">p1 move stoneedge",
+        ">p2 move boomburst",
+        ">p1 move stoneedge",
+        ">p2 move boomburst",
+        ">p2 switch 5",
+        ">p1 move stoneedge",
+        ">p2 move dragondance",
+        ">p1 move stoneedge",
+        ">p2 move dragondance",
+        ">p2 switch 6",
+        ">p1 move stoneedge",
+        ">p2 move scald",
+        ">p1 switch 6",
+        ">p1 move dazzlinggleam",
+        ">p2 move scald",
+        ">p1 move dazzlinggleam",
+        ">p2 move scald"
+    ]
+}
