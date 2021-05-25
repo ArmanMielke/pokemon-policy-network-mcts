@@ -25,4 +25,6 @@ add_executable(pokemon_mcts
 
     src/agents/mcts/node.cpp
     src/agents/mcts/node.h
+    src/agents/mcts/uct_score.cpp
+    src/agents/mcts/uct_score.h
 )
