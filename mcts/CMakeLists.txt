@@ -22,6 +22,8 @@ add_executable(pokemon_mcts
 
     src/agents/default_action_agent.cpp
     src/agents/default_action_agent.h
+    src/agents/mcts_agent.cpp
+    src/agents/mcts_agent.h
 
     src/agents/mcts/mcts.cpp
     src/agents/mcts/mcts.h
