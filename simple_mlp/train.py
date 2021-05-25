@@ -31,23 +31,18 @@ class SimpleMLP(nn.Module):
     def __init__(self):
         super(SimpleMLP, self).__init__()
 
-        # self.mlp_stack = nn.Sequential(
-        #     nn.Linear(2, args.neurons),
-        #     nn.ReLU(),
-        #     nn.Linear(args.neurons, 2),
-        #     nn.Softmax()
-        # )
-
         self.mlp_stack = nn.ModuleList([nn.Linear(2, args.neurons)])
         self.mlp_stack.extend([nn.Linear(args.neurons, args.neurons) for i in range(args.layers-2)])
         self.mlp_stack.append(nn.Linear(args.neurons, 2))
 
     def forward(self, x):
-        #return self.mlp_stack(x)
         result = x
         for i in range(args.layers-1):
             result = F.relu(self.mlp_stack[i](result))
-        return F.softmax(self.mlp_stack[-1](result))
+        # We don't need a activation here because
+        # Softmax is included in CrossEntropyLoss
+        # (needs to be changed if we switch the loss function)
+        return self.mlp_stack[-1](result) 
 
 
 class DataGenerator():
@@ -57,7 +52,6 @@ class DataGenerator():
     def generate(self, min, max):
         one, two = float(random.randint(min, max)), float(random.randint(min, max))
         total = one + two
-        #one_n, two_n = float(one / total), float(two / total)
         return torch.tensor([one, two], dtype=torch.float)
 
     def generate_choice(self, min, max):
@@ -86,11 +80,9 @@ class DataGenerator():
 
 
 def train(datagen, model, loss_fn, optimizer, batch_size):
-    #data = datagen.generate()
     batch, labels = datagen.batch(batch_size, args.min, args.max)
     preds = torch.zeros((batch_size, 2)).to(DEVICE)
-    for i in range(batch_size):
-        preds[i] = model(batch[i])
+    preds = model(batch)
     loss = loss_fn(preds, labels)
 
     optimizer.zero_grad()
@@ -105,12 +97,9 @@ def test(datagen, model, loss_fn, val_size):
     with torch.no_grad():
         preds = torch.zeros((val_size, 2), dtype=torch.float).to(DEVICE)
         batch, labels = datagen.batch(val_size, args.min + args.max, args.max * 2)
-        for i in range(val_size):
-            preds[i] = model(batch[i])
+        preds = model(batch)
         test_loss = loss_fn(preds, labels).item()
         correct += (preds.argmax(1) == labels).type(torch.float).sum().item()
-    # test_loss /= val_size
-    # correct /= val_size
 
     return test_loss, correct
 
