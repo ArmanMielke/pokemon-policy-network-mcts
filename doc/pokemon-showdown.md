@@ -52,3 +52,8 @@ When running the battle simulator on the command line, replace `/evalbattle` wit
     - Simply feed the entire string to the stdin of `pokemon-showdown simulate-battle`
     - This reproduces the exact state of the original battle
 - The same instance of `pokemon-showdown simulate-battle` can be re-used multiple times
+
+## Using custom teams
+
+- specify the team files as described in the pmariglia README
+- POKEMON_MODE in the env file needs to be changed to gen8custombattle 
