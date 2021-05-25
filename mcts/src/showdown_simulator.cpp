@@ -54,6 +54,11 @@ void ShowdownSimulator::execute_commands(std::string const commands) {
 }
 
 std::vector<std::string> ShowdownSimulator::get_actions(Player const player) {
+    this->skip_output();
+    if (this->finished) {
+        return std::vector<std::string>{};
+    }
+
     switch(this->get_request_state(player)) {
         case RequestState::MOVE: {
             // switch actions: the player can switch in any Pokémon other than the active one
@@ -104,6 +109,8 @@ std::array<int, 2> ShowdownSimulator::get_num_remaining_pokemon() {
 }
 
 void ShowdownSimulator::skip_output() {
+    if (this->finished) { return; }
+
     // set a mark so that we can skip everything up to the mark
     this->execute_commands(">chat " + MARK_STRING);
 
