@@ -2,11 +2,13 @@
 
 #include <iostream>
 #include <limits>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/process.hpp>
+#include <nlohmann/json.hpp>
 
 namespace bp = boost::process;
 
@@ -96,30 +98,62 @@ void ShowdownSimulator::skip_output() {
     // set a mark so that we can skip everything up to the mark
     this->execute_commands(">chat " + MARK_STRING);
 
-    // read output lines until the line where the mark was set appears
+    // read output lines until the line where the mark was set appears, or we find out that the game has ended
     std::string out_line;
     do {
-        std::getline(this->child_output, out_line);
-    } while (out_line != "|chat|" + MARK_STRING);
+        out_line = this->read_output_line();
+    } while (out_line != "|chat|" + MARK_STRING && out_line != "end");
 
     // there is one empty line in the output immediately after the mark
-    this->skip_output_lines(1);
+    this->read_output_line();  // skip
 }
 
-void ShowdownSimulator::skip_output_lines(int const number_of_lines) {
-    for (int i = 0; i < number_of_lines; i++) {
-        this->child_output.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+bool ShowdownSimulator::is_finished() const {
+    return this->finished;
+}
+
+std::optional<Player> ShowdownSimulator::get_winner() const {
+    return this->winner;
+}
+
+std::string ShowdownSimulator::read_output_line() {
+    // read line from stdout of the child process
+    std::string out_line;
+    std::getline(this->child_output, out_line);
+
+    // check if the game has ended
+    if (out_line == "end") {
+        this->finished = true;
+
+        // find out who won
+        std::getline(this->child_output, out_line);
+        nlohmann::json game_result = nlohmann::json::parse(out_line);
+        // for each player, this holds how many Pokémon they have left
+        std::array<int, 2> scores = game_result["score"];
+
+        if (scores[0] > 0 && scores[1] == 0) {
+            this->winner = 1;
+        } else if (scores[0] == 0 && scores[1] > 0) {
+            this->winner = 2;
+        } else {
+            std::cout << "[ShowdownSimulator] ERROR: Game has ended, but no winner could be determined. "
+                      << "Scores: [p1: " << scores[0] << ", p2: " << scores[2] << "]" << std::endl;
+        }
+
+        return "end";
     }
+
+    return out_line;
 }
 
 RequestState ShowdownSimulator::get_request_state(Player const player) {
     this->execute_commands(">eval p" + std::to_string(player) + ".requestState");
 
     // the command outputs 4 lines, the third of which contains the info we need
-    skip_output_lines(2);
-    std::string out_line;
-    std::getline(this->child_output, out_line);
-    skip_output_lines(1);
+    this->read_output_line();  // skip
+    this->read_output_line();  // skip
+    std::string out_line = this->read_output_line();
+    this->read_output_line();  // skip
 
     if (out_line == "||<<< \"teampreview\"") {
         return RequestState::TEAM_PREVIEW;
@@ -136,10 +170,10 @@ std::vector<bool> ShowdownSimulator::get_pokemon_fainted(const Player player) {
     this->execute_commands(">eval p" + std::to_string(player) + ".pokemon.map(p => p.fainted)");
 
     // the command outputs 4 lines, the third of which contains the info we need
-    skip_output_lines(2);
-    std::string out_line;
-    std::getline(this->child_output, out_line);
-    skip_output_lines(1);
+    this->read_output_line();  // skip
+    this->read_output_line();  // skip
+    std::string out_line = this->read_output_line();
+    this->read_output_line();  // skip
 
     // out_line looks something like this: "||<<< [false, true, true, false, false, false]"
     // only keep what's inside the brackets so that we have this: "false, true, true, false, false, false"

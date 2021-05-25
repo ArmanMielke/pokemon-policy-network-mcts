@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <optional>
 
 #include <boost/process.hpp>
 
@@ -46,6 +47,11 @@ public:
     /// Discards any output of the child process that hasn't been read yet.
     /// If a command is run after skip_output(), the next output line will be from that command.
     void skip_output();
+    /// @return `true`, iff the game has ended.
+    bool is_finished() const;
+    /// @return `std::nullopt` as long as `is_finished()` returns false.
+    ///         After the game has ended, this returns the winner, if a winner could be determined.
+    std::optional<Player> get_winner() const;
 
 private:
     /// The child process that runs the battle simulator.
@@ -53,11 +59,20 @@ private:
     /// std_in of the child process.
     bp::opstream child_input;
     /// std_out of the child process.
+    /// Output should not be read from `child_output` directly.
+    /// Instead, `read_output_line()` should be used.
     bp::ipstream child_output;
+    /// `true` iff the game has ended.
+    bool finished = false;
+    /// This is `std::nullopt` before the game ends.
+    /// It is set at the end of the game if a winner could be determined.
+    std::optional<Player> winner = std::nullopt;
 
-    /// Skips the given number of lines in the output of the child process.
-    void skip_output_lines(int const number_of_lines);
-    /// Assumes that there is no unread output.
+    /// Reads a line from the output of the child process.
+    /// This also checks whether the game has ended during that line and updates `this.finished` and `this.winner`
+    /// accordingly.
+    std::string read_output_line();
+    /// Assumes that there is no unread output and that the game has not ended.
     /// @return the request state for the given player.
     RequestState get_request_state(Player const player);
     /// Assumes that there is no unread output.
