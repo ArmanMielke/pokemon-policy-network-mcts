@@ -48,6 +48,10 @@ void ShowdownClient::join_room(std::string const room_name) {
     this->websocket.receive_message();
 }
 
+void ShowdownClient::set_team(std::string const team) {
+    this->send_message("/utm " + team);
+}
+
 std::string ShowdownClient::challenge_user(std::string const user, std::string const battle_format) {
     this->send_message("/challenge " + user + "," + battle_format);
 
