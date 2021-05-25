@@ -112,7 +112,7 @@ void ShowdownSimulator::skip_output() {
     if (this->finished) { return; }
 
     // set a mark so that we can skip everything up to the mark
-    this->execute_commands(">chat " + MARK_STRING);
+    this->child_input << ">chat " << MARK_STRING << std::endl;
 
     // read output lines until the line where the mark was set appears, or we find out that the game has ended
     std::string out_line;
@@ -162,20 +162,27 @@ std::string ShowdownSimulator::read_output_line() {
     return out_line;
 }
 
-RequestState ShowdownSimulator::get_request_state(Player const player) {
-    this->execute_commands(">eval p" + std::to_string(player) + ".requestState");
+std::string ShowdownSimulator::eval(std::string const command) {
+    this->child_input << ">eval " << command << std::endl;
 
     // the command outputs 4 lines, the third of which contains the info we need
     this->read_output_line();  // skip
     this->read_output_line();  // skip
-    std::string out_line = this->read_output_line();
+    std::string const out_line = this->read_output_line();
     this->read_output_line();  // skip
 
-    if (out_line == "||<<< \"teampreview\"") {
+    // the line starts with "||<<< ", followed by the output of the eval command. remove that first part
+    return out_line.substr(6);
+}
+
+RequestState ShowdownSimulator::get_request_state(Player const player) {
+    std::string const request_state = this->eval("p" + std::to_string(player) + ".requestState");
+
+    if (request_state == "\"teampreview\"") {
         return RequestState::TEAM_PREVIEW;
-    } else if (out_line == "||<<< \"move\"") {
+    } else if (request_state == "\"move\"") {
         return RequestState::MOVE;
-    } else if (out_line == "||<<< \"switch\"") {
+    } else if (request_state == "\"switch\"") {
         return RequestState::SWITCH;
     } else {
         return RequestState::NONE;
@@ -183,28 +190,22 @@ RequestState ShowdownSimulator::get_request_state(Player const player) {
 }
 
 std::vector<bool> ShowdownSimulator::get_pokemon_fainted(const Player player) {
-    this->execute_commands(">eval p" + std::to_string(player) + ".pokemon.map(p => p.fainted)");
+    std::string fainted_string = this->eval("p" + std::to_string(player) + ".pokemon.map(p => p.fainted)");
 
-    // the command outputs 4 lines, the third of which contains the info we need
-    this->read_output_line();  // skip
-    this->read_output_line();  // skip
-    std::string out_line = this->read_output_line();
-    this->read_output_line();  // skip
-
-    // out_line looks something like this: "||<<< [false, true, true, false, false, false]"
+    // fainted_string looks something like this: "[false, true, true, false, false, false]"
     // only keep what's inside the brackets so that we have this: "false, true, true, false, false, false"
-    out_line = out_line.substr(7, out_line.size() - 8);
+    fainted_string = fainted_string.substr(1, fainted_string.size() - 2);
 
     // split into separate strings
-    std::vector<std::string> fainted_string;
-    boost::split(fainted_string, out_line, boost::is_any_of(","));
+    std::vector<std::string> fainted_strings;
+    boost::split(fainted_strings, fainted_string, boost::is_any_of(","));
 
     // convert to bool
-    std::vector<bool> fainted_bool(fainted_string.size());
+    std::vector<bool> fainted_bools(fainted_strings.size());
     std::transform(
-        fainted_string.begin(), fainted_string.end(), fainted_bool.begin(),
+        fainted_strings.begin(), fainted_strings.end(), fainted_bools.begin(),
         [](std::string fainted){ return boost::trim_copy(fainted) == "true"; }
     );
 
-    return fainted_bool;
+    return fainted_bools;
 }

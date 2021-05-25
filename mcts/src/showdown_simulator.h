@@ -79,6 +79,11 @@ private:
     /// This also checks whether the game has ended during that line and updates `this.finished` and `this.winner`
     /// accordingly.
     std::string read_output_line();
+    /// Runs a JavaScript command on the simulator in the child process using ">eval".
+    /// Assumes that the command's output is one line.
+    /// Assumes that the game has not ended.
+    /// @return the output of the command.
+    std::string eval(std::string const command);
     /// Assumes that there is no unread output and that the game has not ended.
     /// @return the request state for the given player.
     RequestState get_request_state(Player const player);
