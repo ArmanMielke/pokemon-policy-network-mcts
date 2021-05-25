@@ -103,13 +103,20 @@ std::optional<Player> ShowdownSimulator::get_winner() const {
 }
 
 std::string ShowdownSimulator::read_output_line() {
+    if (this->finished) { return "end"; }
+
     // read line from stdout of the child process
     std::string out_line;
     std::getline(this->child_output, out_line);
 
     // check if the game has ended
-    if (out_line == "end") {
+    if (out_line.substr(0, 5) == "|win|") {
         this->finished = true;
+
+        // skip to the end
+        do {
+            std::getline(this->child_output, out_line);
+        } while (out_line != "end");
 
         // find out who won
         std::getline(this->child_output, out_line);
