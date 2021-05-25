@@ -43,17 +43,8 @@ public:
     ///         be ">p1 move 2".
     std::vector<std::string> get_actions(Player const player);
     /// Assumes that the game has not ended.
-    /// @return for the given player, the indices of the Pokémon that haven't fainted.
-    ///         Indices are in ascending order.
-    // TODO make private
-    std::vector<int> get_remaining_pokemon(Player const player);
-    /// Assumes that the game has not ended.
     /// @return the number of remaining Pokémon for each player.
     std::array<int, 2> get_num_remaining_pokemon();
-    /// Discards any output of the child process that hasn't been read yet.
-    /// If a command is run after skip_output(), the next output line will be from that command.
-    // TODO make private
-    void skip_output();
     /// @return `true`, iff the game has ended.
     bool is_finished() const;
     /// @return `std::nullopt` as long as `is_finished()` returns false.
@@ -82,11 +73,18 @@ private:
     /// This also checks whether the game has ended during that line and updates `this.finished` and `this.winner`
     /// accordingly.
     std::string read_output_line();
+    /// Discards any output of the child process that hasn't been read yet.
+    /// If a command is run after skip_output(), the next output line will be from that command.
+    void skip_output();
     /// Runs a JavaScript command on the simulator in the child process using ">eval".
     /// Assumes that the command's output is one line.
     /// Assumes that the game has not ended.
     /// @return the output of the command.
     std::string eval(std::string const command);
+    /// Assumes that the game has not ended.
+    /// @return for the given player, the indices of the Pokémon that haven't fainted.
+    ///         Indices are in ascending order.
+    std::vector<int> get_remaining_pokemon(Player const player);
     /// Assumes that the game has not ended.
     /// @return the request state for the given player.
     RequestState get_request_state(Player const player);

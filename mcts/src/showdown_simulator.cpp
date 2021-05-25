@@ -86,43 +86,12 @@ std::vector<std::string> ShowdownSimulator::get_actions(Player const player) {
     }
 }
 
-std::vector<int> ShowdownSimulator::get_remaining_pokemon(Player const player) {
-    std::vector<bool> const pokemon_fainted = this->get_pokemon_fainted(player);
-    std::vector<int> remaining_pokemon;
-
-    // Pokémon indices start at 0 in the simulator
-    for (int i = 0; i < pokemon_fainted.size(); i++) {
-        // add a Pokémon's index to the list if it hasn't fainted
-        if (!pokemon_fainted[i]) {
-            remaining_pokemon.push_back(i);
-        }
-    }
-
-    return remaining_pokemon;
-}
-
 std::array<int, 2> ShowdownSimulator::get_num_remaining_pokemon() {
     // TODO get the info directly from the simulator
     return {
         this->get_remaining_pokemon(1).size(),
         this->get_remaining_pokemon(2).size()
     };
-}
-
-void ShowdownSimulator::skip_output() {
-    if (this->finished) { return; }
-
-    // set a mark so that we can skip everything up to the mark
-    this->child_input << ">chat " << MARK_STRING << std::endl;
-
-    // read output lines until the line where the mark was set appears, or we find out that the game has ended
-    std::string out_line;
-    do {
-        out_line = this->read_output_line();
-    } while (out_line != "|chat|" + MARK_STRING && out_line != "end");
-
-    // there is one empty line in the output immediately after the mark
-    this->read_output_line();  // skip
 }
 
 bool ShowdownSimulator::is_finished() const {
@@ -163,6 +132,22 @@ std::string ShowdownSimulator::read_output_line() {
     return out_line;
 }
 
+void ShowdownSimulator::skip_output() {
+    if (this->finished) { return; }
+
+    // set a mark so that we can skip everything up to the mark
+    this->child_input << ">chat " << MARK_STRING << std::endl;
+
+    // read output lines until the line where the mark was set appears, or we find out that the game has ended
+    std::string out_line;
+    do {
+        out_line = this->read_output_line();
+    } while (out_line != "|chat|" + MARK_STRING && out_line != "end");
+
+    // there is one empty line in the output immediately after the mark
+    this->read_output_line();  // skip
+}
+
 std::string ShowdownSimulator::eval(std::string const command) {
     this->child_input << ">eval " << command << std::endl;
 
@@ -174,6 +159,21 @@ std::string ShowdownSimulator::eval(std::string const command) {
 
     // the line starts with "||<<< ", followed by the output of the eval command. remove that first part
     return out_line.substr(6);
+}
+
+std::vector<int> ShowdownSimulator::get_remaining_pokemon(Player const player) {
+    std::vector<bool> const pokemon_fainted = this->get_pokemon_fainted(player);
+    std::vector<int> remaining_pokemon;
+
+    // Pokémon indices start at 0 in the simulator
+    for (int i = 0; i < pokemon_fainted.size(); i++) {
+        // add a Pokémon's index to the list if it hasn't fainted
+        if (!pokemon_fainted[i]) {
+            remaining_pokemon.push_back(i);
+        }
+    }
+
+    return remaining_pokemon;
 }
 
 RequestState ShowdownSimulator::get_request_state(Player const player) {
