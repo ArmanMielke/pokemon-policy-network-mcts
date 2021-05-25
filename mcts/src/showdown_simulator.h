@@ -1,6 +1,7 @@
 #ifndef POKEMON_MCTS_SHOWDOWN_SIMULATOR_H
 #define POKEMON_MCTS_SHOWDOWN_SIMULATOR_H
 
+#include <array>
 #include <string>
 #include <vector>
 #include <optional>
@@ -43,7 +44,11 @@ public:
     /// Assumes that there is no unread output.
     /// @return for the given player, the indices of the Pokémon that haven't fainted.
     ///         Indices are in ascending order.
+    // TODO make private
     std::vector<int> get_remaining_pokemon(Player const player);
+    /// Assumes that there is no unread output and that the game has not ended.
+    /// @return the number of remaining Pokémon for each player.
+    std::array<int, 2> get_num_remaining_pokemon();
     /// Discards any output of the child process that hasn't been read yet.
     /// If a command is run after skip_output(), the next output line will be from that command.
     void skip_output();

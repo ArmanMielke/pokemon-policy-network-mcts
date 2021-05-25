@@ -1,5 +1,6 @@
 #include "showdown_simulator.h"
 
+#include <array>
 #include <iostream>
 #include <limits>
 #include <optional>
@@ -92,6 +93,14 @@ std::vector<int> ShowdownSimulator::get_remaining_pokemon(Player const player) {
     }
 
     return remaining_pokemon;
+}
+
+std::array<int, 2> ShowdownSimulator::get_num_remaining_pokemon() {
+    // TODO get the info directly from the simulator
+    return {
+        this->get_remaining_pokemon(1).size(),
+        this->get_remaining_pokemon(2).size()
+    };
 }
 
 void ShowdownSimulator::skip_output() {
