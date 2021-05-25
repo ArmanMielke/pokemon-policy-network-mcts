@@ -22,4 +22,7 @@ add_executable(pokemon_mcts
 
     src/agents/default_action_agent.cpp
     src/agents/default_action_agent.h
+
+    src/agents/mcts/node.cpp
+    src/agents/mcts/node.h
 )
