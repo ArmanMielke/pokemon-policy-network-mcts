@@ -1,0 +1,51 @@
+version: "3"
+services:
+  showdown:
+    build:
+      context: showdown
+      dockerfile: Dockerfile
+    ports:
+      - 8081:8081
+    container_name: showdown-server
+    volumes:
+      - ./showdown/config.js:/pokemon-showdown/config/config.js
+      - ./showdown/usergroups.csv:/pokemon-showdown/config/usergroups.csv
+    networks:
+      - back
+  pmariglia_accept:
+    depends_on:
+      - showdown
+    build:
+      context: pmariglia
+      dockerfile: Dockerfile
+    expose:
+      - 8081
+    container_name: pmariglia-accept
+    volumes:
+      - ./pmariglia/envs/accept:/showdown/.env
+      - ./datasets:/showdown/dataset
+      - ./tmp/log_accept.txt:/showdown/log.txt
+    networks:
+      - back
+  pmariglia_challenge:
+    depends_on:
+      - pmariglia_accept
+    build:
+      context: pmariglia
+      dockerfile: Dockerfile
+    expose:
+      - 8081
+    container_name: pmariglia-challenge
+    volumes:
+      - ./pmariglia/envs/challenge:/showdown/.env
+      - ./datasets:/showdown/dataset
+      - ./tmp/log_challenge.txt:/showdown/log.txt
+    networks:
+      back:
+        ipv4_address: 172.25.0.101
+networks:
+  back:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.25.0.0/24

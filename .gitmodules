@@ -1,0 +1,3 @@
+[submodule "pmariglia"]
+	path = pmariglia
+	url = https://github.com/derkaczda/showdown.git
