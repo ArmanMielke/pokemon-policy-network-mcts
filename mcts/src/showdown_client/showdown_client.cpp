@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 
 std::string const SHOWDOWN_HOST = "localhost";
@@ -87,6 +88,8 @@ std::string ShowdownClient::request_input_log(std::string const battle_room_name
     std::size_t start = input_log.find("<<< \"") + 5;
     std::size_t end = input_log.length() - 1;
     input_log = input_log.substr(start, end - start);
+
+    boost::replace_all(input_log, "\n||", "\n");
 
     return input_log;
 }
