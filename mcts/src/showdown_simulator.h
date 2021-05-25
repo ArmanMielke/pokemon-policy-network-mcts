@@ -33,6 +33,7 @@ public:
     /// Executes one or multiple commands on the battle simulator.
     /// Each command must be preceded by a `>`, with no space between the `>` and the command.
     /// If there are multiple commands, commands must be separated by line breaks.
+    /// The outputs of the commands are discarded.
     /// Assumes that the game has not ended.
     void execute_commands(std::string const commands);
     /// @return all actions available to the given player.
@@ -41,21 +42,20 @@ public:
     ///         E.g. if `player` is 1 and one of the actions is "move 2", then the corresponding command would
     ///         be ">p1 move 2".
     std::vector<std::string> get_actions(Player const player);
-    /// Assumes that there is no unread output and that the game has not ended.
+    /// Assumes that the game has not ended.
     /// @return for the given player, the indices of the Pokémon that haven't fainted.
     ///         Indices are in ascending order.
     // TODO make private
     std::vector<int> get_remaining_pokemon(Player const player);
-    /// Assumes that there is no unread output and that the game has not ended.
+    /// Assumes that the game has not ended.
     /// @return the number of remaining Pokémon for each player.
     std::array<int, 2> get_num_remaining_pokemon();
     /// Discards any output of the child process that hasn't been read yet.
     /// If a command is run after skip_output(), the next output line will be from that command.
+    // TODO make private
     void skip_output();
-    /// Assumes that there is no unread output.
     /// @return `true`, iff the game has ended.
     bool is_finished() const;
-    /// Assumes that there is no unread output.
     /// @return `std::nullopt` as long as `is_finished()` returns false.
     ///         After the game has ended, this returns the winner, if a winner could be determined.
     std::optional<Player> get_winner() const;
@@ -68,6 +68,9 @@ private:
     /// std_out of the child process.
     /// Output should not be read from `child_output` directly.
     /// Instead, `read_output_line()` should be used.
+    ///
+    /// All methods should ensure that there are no unread lines in `child_output` after they complete,
+    /// since methods implicitly assume that there is no unread output.
     bp::ipstream child_output;
     /// `true` iff the game has ended.
     bool finished = false;
@@ -84,10 +87,10 @@ private:
     /// Assumes that the game has not ended.
     /// @return the output of the command.
     std::string eval(std::string const command);
-    /// Assumes that there is no unread output and that the game has not ended.
+    /// Assumes that the game has not ended.
     /// @return the request state for the given player.
     RequestState get_request_state(Player const player);
-    /// Assumes that there is no unread output and that the game has not ended.
+    /// Assumes that the game has not ended.
     /// @return a vector indicating for each pokemon whether it has fainted.
     std::vector<bool> get_pokemon_fainted(Player const player);
 };

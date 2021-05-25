@@ -51,10 +51,10 @@ ShowdownSimulator::ShowdownSimulator() {
 
 void ShowdownSimulator::execute_commands(std::string const commands) {
     this->child_input << commands << std::endl;
+    this->skip_output();
 }
 
 std::vector<std::string> ShowdownSimulator::get_actions(Player const player) {
-    this->skip_output();
     if (this->finished) {
         return std::vector<std::string>{};
     }
@@ -64,6 +64,7 @@ std::vector<std::string> ShowdownSimulator::get_actions(Player const player) {
             // switch actions: the player can switch in any Pokémon other than the active one
             std::vector<int> available_pokemon = this->get_remaining_pokemon(player);
             // cannot switch in the first pokemon, since it's already active
+            // TODO double check if this is correct
             available_pokemon.erase(available_pokemon.begin());
             std::vector<std::string> actions = pokemon_indices_to_switch_actions(available_pokemon);
 
