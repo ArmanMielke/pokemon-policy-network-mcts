@@ -7,6 +7,7 @@ from tensorboardX import SummaryWriter
 import argparse
 import pickle
 import matplotlib.pyplot as plt
+from dataloader.dataloader import Dataloader
 
 
 parser = argparse.ArgumentParser()
@@ -49,12 +50,12 @@ class DataGenerator():
     def __init__(self):
         pass
 
-    def generate(self, min, max):
+    def generate(self, min, max, normalized):
         one, two = float(random.randint(min, max)), float(random.randint(min, max))
         total = one + two
         return torch.tensor([one, two], dtype=torch.float)
 
-    def generate_choice(self, min, max):
+    def generate_choice(self, min, max, normalized):
         range = max - min
         diff = range / 5
         values = [min, min+diff, min+2*diff, min+3*diff, min+4*diff]
@@ -74,7 +75,7 @@ class DataGenerator():
         batch = torch.zeros((batch_size, 2), dtype=torch.float)
         labels = torch.zeros(batch_size, dtype=torch.long)
         for i in range(batch_size):
-            batch[i] = self.generate_without_doubles(min, max, normalized)
+            batch[i] = self.generate(min, max, normalized)
             labels[i] = np.argmax(batch[i])
         return batch.to(DEVICE), labels.to(DEVICE)
 
@@ -125,6 +126,9 @@ def save_figure(train_loss, val_loss):
 
 
 model = SimpleMLP()
+# trace the model to create a torch script instance
+# you need to provide a example input
+script_model = torch.jit.trace(model, torch.rand(1,2))
 model.to(DEVICE)
 datagen = DataGenerator()
 loss_fn = nn.CrossEntropyLoss()
@@ -136,25 +140,37 @@ train_loss, test_loss = [], []
 
 if args.eval == "":
 
-    for t in range(args.epochs):
-        loss = train(datagen, model, loss_fn, optimizer, args.batch)
-        tloss, correct = test(datagen, model, loss_fn, 100)
-        print(f"Epoch {t}\n-----------------")
-        print(f"loss: {loss:>7f}")
-        print(f"val loss: {tloss:>7f}")
-        print(f"DEVICE {DEVICE}")
-        writer.add_scalar('loss', loss, t)
-        writer.add_scalar('test_loss', tloss, t)
-        writer.add_scalar('correct', 100*correct, t)
-        train_loss.append(loss)
-        test_loss.append(tloss)
+    dataloader = Dataloader("datasets/no_type_only_damage", 10)
+    dataloader.load_data()
+    for X, y, end in dataloader:
+        #X, y = dataloader.get_batch()
+        print(f"X: {X}\n\n")
+        print(f"y: {y}")
+        print(f"end: {end}\n")
+        if end:
+            dataloader.reset()
+            dataloader.load_data()
 
-    torch.save(model.state_dict(), f"runs/{args.name}/model.pth")
-    print(len(train_loss))
-    save_figure(train_loss, test_loss)
-    with open(f"runs/{args.name}/data.pkl", "wb") as f:
-        pickle.dump({"train_loss": train_loss, "test_loss": test_loss}, f)
-    print(f"saved model to runs/{args.name}/model.pth")
+    # for t in range(args.epochs):
+    #     loss = train(datagen, model, loss_fn, optimizer, args.batch)
+    #     tloss, correct = test(datagen, model, loss_fn, 100)
+    #     print(f"Epoch {t}\n-----------------")
+    #     print(f"loss: {loss:>7f}")
+    #     print(f"val loss: {tloss:>7f}")
+    #     print(f"DEVICE {DEVICE}")
+    #     writer.add_scalar('loss', loss, t)
+    #     writer.add_scalar('test_loss', tloss, t)
+    #     writer.add_scalar('correct', 100*correct, t)
+    #     train_loss.append(loss)
+    #     test_loss.append(tloss)
+
+    # torch.save(model.state_dict(), f"runs/{args.name}/model.pth")
+    # script_model.save(f"runs/{args.name}/model_script.pt")
+    # print(len(train_loss))
+    # save_figure(train_loss, test_loss)
+    # with open(f"runs/{args.name}/data.pkl", "wb") as f:
+    #     pickle.dump({"train_loss": train_loss, "test_loss": test_loss}, f)
+    # print(f"saved model to runs/{args.name}/model.pth")
 
 else:
     model.load_state_dict(torch.load("model.pth"))
