@@ -51,8 +51,9 @@ Action select_final_action(std::shared_ptr<Node> const root) {
     float best_win_rate = - std::numeric_limits<float>::infinity();
 
     for (auto const [action, child]: root->children) {
-        if (child->win_rate() > best_win_rate) {
-            best_win_rate = child->win_rate();
+        std::cout << "[MCTS] Final action \"" << action << "\" has win rate " << child->opponent_win_rate() << std::endl;
+        if (child->opponent_win_rate() > best_win_rate) {
+            best_win_rate = child->opponent_win_rate();
             best_action = action;
         }
     }

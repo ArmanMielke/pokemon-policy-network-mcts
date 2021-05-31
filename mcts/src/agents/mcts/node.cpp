@@ -27,11 +27,11 @@ bool Node::is_expanded() const {
     return !this->children.empty();
 }
 
-float Node::win_rate() const {
+float Node::opponent_win_rate() const {
     if (this->visit_count == 0) {
         return 0;
     } else {
-        return static_cast<float>(this->number_of_wins) / this->visit_count;
+        return 1 - static_cast<float>(this->number_of_wins) / this->visit_count;
     }
 }
 
