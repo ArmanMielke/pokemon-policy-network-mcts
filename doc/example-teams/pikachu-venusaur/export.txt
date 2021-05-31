@@ -1,0 +1,15 @@
+Pikachu
+Ability: Lightning Rod
+EVs: 4 HP / 252 SpA / 252 Spe
+Hasty Nature
+IVs: 0 Atk
+- Surf
+- Rising Voltage
+
+Venusaur
+Ability: Chlorophyll
+EVs: 4 HP / 252 SpA / 252 Spe
+Modest Nature
+IVs: 0 Atk
+- Venoshock
+- Grass Pledge
