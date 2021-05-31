@@ -21,6 +21,17 @@ int const MAX_ROLLOUT_LENGTH = 100;
 //      Ideally, choose a random action in this case instead of the first action,
 //      or sample from a distribution determined by the scores
 std::pair<Action, std::shared_ptr<Node>> select_action(std::shared_ptr<Node> const node) {
+    if (node->visit_count == 0) {
+        // we haven't explored this node before => choose a random action
+        std::random_device r;
+        std::default_random_engine generator{r()};
+        std::uniform_int_distribution<> action_distribution{0, node->children.size() - 1};
+        int const action_index = action_distribution(generator);
+
+        auto const pair = std::next(std::begin(node->children), action_index);
+        return std::pair<Action, std::shared_ptr<Node>>{pair->first, pair->second};
+    }
+
     std::pair<Action, std::shared_ptr<Node>> best_action;
     float best_score = - std::numeric_limits<float>::infinity();
 
@@ -101,7 +112,8 @@ Action run_mcts(std::string const input_log) {
                 // draw => choose winner randomly
                 // TODO we could just not backpropagate anything, but currently the algorithm has no other source of
                 //      randomness, so the next iteration would also end up in a draw
-                std::default_random_engine generator;
+                std::random_device r;
+                std::default_random_engine generator{r()};
                 std::uniform_int_distribution<> winner_distribution{1, 2};
                 winner = winner_distribution(generator);
                 std::cout << "[MCTS i=" << i << "] WARNING: Could not determine winner after " << MAX_ROLLOUT_LENGTH
