@@ -5,7 +5,7 @@
 #include <memory>
 
 
-float const EXPLORATION_FACTOR = 1;
+float const EXPLORATION_FACTOR = 5;
 
 float uct_score(std::shared_ptr<Node> const parent, std::shared_ptr<Node> const child) {
     // TODO sanity check
