@@ -46,7 +46,6 @@ WebSocket::WebSocket(std::string const host, std::string const port, std::string
 void WebSocket::send_message(std::string const message) {
     // Send the message
     this->ws.write(net::buffer(message));
-    std::cout << "[WebSocket] Sent message: " << message << std::endl;
 }
 
 std::string WebSocket::receive_message() {
@@ -57,7 +56,6 @@ std::string WebSocket::receive_message() {
 
     // Convert the ConstBufferSequence to a string
     std::string const message = beast::buffers_to_string(buffer.data());
-    std::cout << "[WebSocket] Received message: " << message << std::endl;
     return message;
 }
 
