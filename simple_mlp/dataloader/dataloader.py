@@ -88,7 +88,7 @@ class Dataloader():
         # TODO change this because get_batch also needs
         # the input size
         _, y = self.get_batch()
-        return y.shape
+        return y.shape[1]
 
     def shape(self):
         return self.get_input_size(), self.get_output_size()
