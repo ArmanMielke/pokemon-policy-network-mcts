@@ -6,13 +6,15 @@ import os
 import numpy as np
 
 class Dataloader():
-    def __init__(self, data_path, batch_size):
+    def __init__(self, data_path, batch_size, features):
         self.data_path = data_path
         self.batch_size = batch_size
         self.data_converter = DataConverter()
         self.data = []
         self.turn = 0
         self.max_turns = 0
+        self.features = [f.split("/") for f in features]
+        print(f"selected features {self.features}")
 
     def __iter__(self):
         self.turn = 0
@@ -72,11 +74,37 @@ class Dataloader():
                 for y in range(diff_to_max):
                     self.data[i].append(last_entry)
 
+    def get_input_size(self):
+        if self.data == []:
+            print("The data is not loaded yet please call load_data")
+            return 0
+        X, _ = self.get_batch()
+        return X.shape[1]
+
+    def get_output_size(self):
+        if self.data == []:
+            print("The data is not loaded yet please call load_data")
+            return 0
+        # TODO change this because get_batch also needs
+        # the input size
+        _, y = self.get_batch()
+        return y.shape
+
+    def shape(self):
+        return self.get_input_size(), self.get_output_size()
+
     def get_batch(self):
-        X = np.ndarray((self.batch_size, 2))
+        # TODO automatic input size detection
+        X = np.ndarray((self.batch_size, 11))
         y = np.ndarray((self.batch_size, 4))
         for i in range(self.batch_size):
-            X[i] = self.data[i][self.turn]['p1']['moves']
+            X[i] = np.concatenate((
+                self.data[i][self.turn]['p2']['hp'],  # 1 values
+                [self.turn],                                # 1 value
+                self.data[i][self.turn]['p1']['hp'],        # 1 value
+                self.data[i][self.turn]['p1']['last_move'], # 4 values
+                self.data[i][self.turn]['p2']['last_move'] # 4 values          
+            ))
             y[i] = self.data[i][self.turn]['p1']['chosenMove']
         return X, y
 

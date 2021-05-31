@@ -29,12 +29,12 @@ normalized = True if args.normalized == "yes" else False
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 class SimpleMLP(nn.Module):
-    def __init__(self):
+    def __init__(self, input_size):
         super(SimpleMLP, self).__init__()
 
-        self.mlp_stack = nn.ModuleList([nn.Linear(2, args.neurons)])
+        self.mlp_stack = nn.ModuleList([nn.Linear(input_size, args.neurons)])
         self.mlp_stack.extend([nn.Linear(args.neurons, args.neurons) for i in range(args.layers-2)])
-        self.mlp_stack.append(nn.Linear(args.neurons, 2))
+        self.mlp_stack.append(nn.Linear(args.neurons, 4))
 
     def forward(self, x):
         result = x
@@ -80,29 +80,52 @@ class DataGenerator():
         return batch.to(DEVICE), labels.to(DEVICE)
 
 
-def train(datagen, model, loss_fn, optimizer, batch_size):
-    batch, labels = datagen.batch(batch_size, args.min, args.max)
-    preds = torch.zeros((batch_size, 2)).to(DEVICE)
-    preds = model(batch)
-    loss = loss_fn(preds, labels)
+def train(dataloader, model, loss_fn, optimizer, batch_size):
+    # batch, labels = datagen.batch(batch_size, args.min, args.max)
+    # preds = torch.zeros((batch_size, 2)).to(DEVICE)
+    # preds = model(batch)
+    # loss = loss_fn(preds, labels)
 
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+    # optimizer.zero_grad()
+    # loss.backward()
+    # optimizer.step()
 
-    return loss.item()
+    # return loss.item()
+    losses = []
+    for X, y, end in dataloader:
+        X = torch.from_numpy(X).float().to(DEVICE)
+        # y = torch.from_numpy(y, dtype=torch.float).to(DEVICE)
+        labels = torch.from_numpy(np.array([np.argmax(y[i]) for i in range(len(y))])).long().to(DEVICE)
+        preds = model(X)
+        loss = loss_fn(preds, labels)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        losses.append(loss.item())
+        if end:
+            return np.mean(losses)
 
-def test(datagen, model, loss_fn, val_size):
+
+def test(dataloader, model, loss_fn, val_size):
     model.eval()
     test_loss, correct = 0, 0
+    losses = []
     with torch.no_grad():
-        preds = torch.zeros((val_size, 2), dtype=torch.float).to(DEVICE)
-        batch, labels = datagen.batch(val_size, args.min + args.max, args.max * 2)
-        preds = model(batch)
-        test_loss = loss_fn(preds, labels).item()
-        correct += (preds.argmax(1) == labels).type(torch.float).sum().item()
+        for X, y, end in dataloader:
+            X = torch.from_numpy(X).float().to(DEVICE)
+            label = torch.from_numpy(np.array([np.argmax(y[i]) for i in range(len(y))])).long().to(DEVICE)
+            preds = model(X)
+            losses.append( loss_fn(preds, label).item() )
+            if end:
+                return np.mean(losses)
 
-    return test_loss, correct
+    #     preds = torch.zeros((val_size, 2), dtype=torch.float).to(DEVICE)
+    #     batch, labels = datagen.batch(val_size, args.min + args.max, args.max * 2)
+    #     preds = model(batch)
+    #     test_loss = loss_fn(preds, labels).item()
+    #     correct += (preds.argmax(1) == labels).type(torch.float).sum().item()
+
+    # return test_loss, correct
 
 def dump_parameters():
     with open(f"runs/{args.name}/params.txt", "w") as f:
@@ -125,10 +148,19 @@ def save_figure(train_loss, val_loss):
     plt.close()
 
 
-model = SimpleMLP()
+dataloader = Dataloader("datasets/no_type_only_damage", args.batch,
+    ['p1/hp', 'p2/hp', 'p1/last_move', 'p2/last_move', 'turn']
+)
+dataloader.load_data()
+print(f"input size {dataloader.get_input_size()}")
+val_dataloader = Dataloader("datasets/no_type_only_damage_1000_runs", args.batch,
+    ['p1/hp', 'p2/hp', 'p1/last_move', 'p2/last_move', 'turn']
+)
+val_dataloader.load_data()
+model = SimpleMLP(dataloader.get_input_size())
 # trace the model to create a torch script instance
 # you need to provide a example input
-script_model = torch.jit.trace(model, torch.rand(1,2))
+script_model = torch.jit.trace(model, torch.rand(1,dataloader.get_input_size()))
 model.to(DEVICE)
 datagen = DataGenerator()
 loss_fn = nn.CrossEntropyLoss()
@@ -140,37 +172,28 @@ train_loss, test_loss = [], []
 
 if args.eval == "":
 
-    dataloader = Dataloader("datasets/no_type_only_damage", 10)
-    dataloader.load_data()
-    for X, y, end in dataloader:
-        #X, y = dataloader.get_batch()
-        print(f"X: {X}\n\n")
-        print(f"y: {y}")
-        print(f"end: {end}\n")
-        if end:
-            dataloader.reset()
-            dataloader.load_data()
 
-    # for t in range(args.epochs):
-    #     loss = train(datagen, model, loss_fn, optimizer, args.batch)
-    #     tloss, correct = test(datagen, model, loss_fn, 100)
-    #     print(f"Epoch {t}\n-----------------")
-    #     print(f"loss: {loss:>7f}")
-    #     print(f"val loss: {tloss:>7f}")
-    #     print(f"DEVICE {DEVICE}")
-    #     writer.add_scalar('loss', loss, t)
-    #     writer.add_scalar('test_loss', tloss, t)
-    #     writer.add_scalar('correct', 100*correct, t)
-    #     train_loss.append(loss)
-    #     test_loss.append(tloss)
+    for t in range(args.epochs):
+        loss = train(dataloader, model, loss_fn, optimizer, args.batch)
+        tloss = test(val_dataloader, model, loss_fn, 100)
+        print(f"Epoch {t}\n-----------------")
+        print(f"loss: {loss:>7f}")
+        print(f"val loss: {tloss:>7f}")
+        print(f"DEVICE {DEVICE}")
+        writer.add_scalar('loss', loss, t)
+        writer.add_scalar('test_loss', tloss, t)
+        train_loss.append(loss)
+        test_loss.append(tloss)
+        dataloader.reset()
+        dataloader.load_data()
 
-    # torch.save(model.state_dict(), f"runs/{args.name}/model.pth")
-    # script_model.save(f"runs/{args.name}/model_script.pt")
-    # print(len(train_loss))
-    # save_figure(train_loss, test_loss)
-    # with open(f"runs/{args.name}/data.pkl", "wb") as f:
-    #     pickle.dump({"train_loss": train_loss, "test_loss": test_loss}, f)
-    # print(f"saved model to runs/{args.name}/model.pth")
+    torch.save(model.state_dict(), f"runs/{args.name}/model.pth")
+    script_model.save(f"runs/{args.name}/model_script.pt")
+    print(len(train_loss))
+    save_figure(train_loss, test_loss)
+    with open(f"runs/{args.name}/data.pkl", "wb") as f:
+        pickle.dump({"train_loss": train_loss, "test_loss": test_loss}, f)
+    print(f"saved model to runs/{args.name}/model.pth")
 
 else:
     model.load_state_dict(torch.load("model.pth"))
