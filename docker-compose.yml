@@ -25,6 +25,7 @@ services:
       - ./pmariglia/envs/accept:/showdown/.env
       - ./datasets:/showdown/dataset
       - ./tmp/log_accept.txt:/showdown/log.txt
+      - ./teams:/showdown/teams/teams
     networks:
       - back
   pmariglia_challenge:
@@ -40,6 +41,7 @@ services:
       - ./pmariglia/envs/challenge:/showdown/.env
       - ./datasets:/showdown/dataset
       - ./tmp/log_challenge.txt:/showdown/log.txt
+      - ./teams:/showdown/teams/teams
     networks:
       back:
         ipv4_address: 172.25.0.101
