@@ -129,8 +129,10 @@ std::string ShowdownSimulator::read_output_line() {
         } else if (scores[0] == 0 && scores[1] > 0) {
             this->winner = 2;
         } else {
+            // TODO sometimes both scores are 0, even though there is a winner.
             std::cout << "[ShowdownSimulator] ERROR: Game has ended, but no winner could be determined. "
-                      << "Scores: [p1: " << scores[0] << ", p2: " << scores[2] << "]" << std::endl;
+                      << "Scores: [p1: " << scores[0] << ", p2: " << scores[1] << "]" << std::endl;
+            std::cout << "                           Winner: " << game_result["winner"] << std::endl;
         }
 
         return "end";
