@@ -93,11 +93,11 @@ Action run_mcts(std::string const input_log) {
         }
 
         Player winner;
-        if (simulator.is_finished()) {
+        if (simulator.is_finished() && simulator.get_winner().has_value()) {
             // game has ended => can use the actual result of the game
             winner = simulator.get_winner().value();
             std::cout << "[MCTS i=" << i << "] Player " << winner << " wins" << std::endl;
-        } else {
+        } else if (!simulator.is_finished()) {
             // game has not yet ended => find out who has more Pokémon left and use that to approximate the result
             std::array<int, 2> num_remaining_pokemon = simulator.get_num_remaining_pokemon();
             if (num_remaining_pokemon[0] > num_remaining_pokemon[1]) {
@@ -109,16 +109,13 @@ Action run_mcts(std::string const input_log) {
                 std::cout << "[MCTS i=" << i << "] Player 2 wins (more Pokémon left)" << std::endl;
                 winner = 2;
             } else {
-                // draw => choose winner randomly
-                // TODO we could just not backpropagate anything, but currently the algorithm has no other source of
-                //      randomness, so the next iteration would also end up in a draw
-                std::random_device r;
-                std::default_random_engine generator{r()};
-                std::uniform_int_distribution<> winner_distribution{1, 2};
-                winner = winner_distribution(generator);
-                std::cout << "[MCTS i=" << i << "] WARNING: Could not determine winner after " << MAX_ROLLOUT_LENGTH
-                          << " turns. Choosing random winner: Player " << winner << std::endl;
+                std::cout << "[MCTS i=" << i << "] WARNING: Game has not ended in " << MAX_ROLLOUT_LENGTH
+                          << " turns, and it's not clear who's ahead. Skipping backpropagation." << std::endl;
+                continue;
             }
+        } else {
+            std::cout << "[MCTS i=" << i << "] WARNING: Game ended in a draw(?) Skipping backpropagation." << std::endl;
+            continue;
         }
         // backpropagate the result of the game
         backpropagate(search_path, winner);
