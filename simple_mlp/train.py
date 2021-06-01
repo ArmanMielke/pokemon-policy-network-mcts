@@ -11,8 +11,6 @@ from network import SimpleMLP
 from utils import copy_config_to_output_dir, save_model, save_figure, save_loss
 from config import SimpleMLPConfig
 
-from captum.attr import IntegratedGradients
-
 def generate_dir_name():    
     """Create a unique hash for the filename"""
     hash = hashlib.sha1()
@@ -20,7 +18,6 @@ def generate_dir_name():
     return str(hash.hexdigest())
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--eval", type=str, default="")
 parser.add_argument("--dir", type=str, default=generate_dir_name(), 
     help="the directory to store the data, e.g. model, plots etc.")
 parser.add_argument("--config", type=str)
@@ -104,8 +101,7 @@ writer = SummaryWriter(RUN_DIR)
 copy_config_to_output_dir(RUN_DIR, config.config)
 train_loss, test_loss = [], []
 
-if args.eval == "":
-
+if __name__ == "__main__":
 
     for t in range(config.epochs):
         loss = train(dataloader, model, loss_fn, optimizer)
@@ -128,34 +124,3 @@ if args.eval == "":
     save_figure(config.epochs, train_loss, test_loss, RUN_DIR)
     save_model(model, script_model, RUN_DIR)
     save_loss(train_loss, test_loss, RUN_DIR)
-    
-
-else:
-    model.load_state_dict(torch.load(os.path.join(args.eval,"model.pth")))
-    model.eval()
-    np.random.seed(123)
-    torch.manual_seed(123)
-    input, y, _ = next(val_dataloader)
-    label = torch.from_numpy(np.array([np.argmax(y[i]) for i in range(len(y))])) \
-                .long().to(DEVICE)
-    ig = IntegratedGradients(model)
-    attribution_t0 = ig.attribute(torch.from_numpy(input).float().to(DEVICE), 
-        target=0)
-    attribution_t1 = ig.attribute(torch.from_numpy(input).float().to(DEVICE), 
-        target=1)
-    attribution_t2 = ig.attribute(torch.from_numpy(input).float().to(DEVICE), 
-        target=2)
-    attribution_t3 = ig.attribute(torch.from_numpy(input).float().to(DEVICE), 
-        target=3)
-    print({
-        "t0" : [attribution_t0.mean(axis=0), attribution_t0.std(axis=0)],
-        "t1" : [attribution_t1.mean(axis=0), attribution_t1.std(axis=0)],
-        "t2" : [attribution_t2.mean(axis=0), attribution_t2.std(axis=0)],
-        "t3" : [attribution_t3.mean(axis=0), attribution_t3.std(axis=0)]
-    })
-    # while True:
-    #     tmp_input = input('some input:')
-    #     values = tmp_input.split(',')
-    #     x = torch.tensor([float(values[0]), float(values[1])], dtype=torch.float)
-    #     pred = model(x)
-    #     print(f"the prediction is {pred}")
