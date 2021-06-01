@@ -3,7 +3,7 @@ Ability: Lightning Rod
 EVs: 4 HP / 252 SpA / 252 Spe
 Hasty Nature
 IVs: 0 Atk
-- Surf
+- Double-Edge
 - Rising Voltage
 
 Venusaur

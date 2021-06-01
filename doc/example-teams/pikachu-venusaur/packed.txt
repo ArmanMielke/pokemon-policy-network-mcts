@@ -1,1 +1,1 @@
-Pikachu|||LightningRod|Surf,RisingVoltage|Hasty|4,,,252,,252||,0,,,,|||]Venusaur|||Chlorophyll|Venoshock,GrassPledge|Modest|4,,,252,,252||,0,,,,|||
+Pikachu|||LightningRod|Double-Edge,RisingVoltage|Hasty|4,,,252,,252||,0,,,,|||]Venusaur|||Chlorophyll|Venoshock,GrassPledge|Modest|4,,,252,,252||,0,,,,|||
