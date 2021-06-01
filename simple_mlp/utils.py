@@ -3,14 +3,12 @@ import matplotlib.pyplot as plt
 import torch
 import os
 import numpy as np
+import json
 
 
-def dump_parameters(args, path):
-    with open(os.path.join(path, "params.txt"), "w") as f:
-        f.write(f"Learning rate {args.lr}\n")
-        f.write(f"Num Neurons {args.neurons}\n")
-        f.write(f"Epochs {args.epochs}\n")
-        f.write(f"Batch size {args.batch}\n")
+def copy_config_to_output_dir(output_path, config):
+    with open(os.path.join(output_path, "config.json"), "w") as f:
+        f.write(json.dumps(config, indent=4, separators=(',', ': ')))
 
 def save_figure(epochs, train_loss, val_loss, path):
     fig = plt.figure()

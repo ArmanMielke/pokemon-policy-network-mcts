@@ -1,0 +1,9 @@
+{
+    "epochs": 1000,
+    "neurons": 20,
+    "learning_rate": 1e-3,
+    "layers": 3,
+    "batch_size": 32,
+    "train_data_path": "datasets/no_type_only_damage",
+    "val_data_path": "datasets/no_type_only_damage_1000_runs"
+}
