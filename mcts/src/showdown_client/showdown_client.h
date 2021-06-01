@@ -25,9 +25,14 @@ public:
     /// This string can be used to reproduce the current state of the battle using Pokémon Showdown's command line
     /// battle simulator, `pokemon-showdown simulate-battle`.
     std::string request_input_log(std::string const battle_room_name);
+    /// @return `std::nullopt`, if the battle is still ongoing,
+    ///         `true`, if the battle is won,
+    ///         `false`, if the battle is lost.
+    std::optional<bool> check_battle_over(std::string const battle_room_name);
 
 private:
     WebSocket websocket;
+    std::string const username;
 };
 
 

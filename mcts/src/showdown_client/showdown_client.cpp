@@ -2,6 +2,7 @@
 #include "showdown_login_request.h"
 
 #include <iostream>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -15,7 +16,7 @@ std::string const SHOWDOWN_TARGET = "/showdown/websocket";
 
 
 ShowdownClient::ShowdownClient(std::string const username, std::optional<std::string> const password)
-: websocket{SHOWDOWN_HOST, SHOWDOWN_PORT, SHOWDOWN_TARGET} {
+: websocket{SHOWDOWN_HOST, SHOWDOWN_PORT, SHOWDOWN_TARGET}, username{username} {
     // the first message after connecting only contains some unimportant info
     this->websocket.receive_message();
 
@@ -92,4 +93,22 @@ std::string ShowdownClient::request_input_log(std::string const battle_room_name
     boost::replace_all(input_log, "\n||", "\n");
 
     return input_log;
+}
+
+std::optional<bool> ShowdownClient::check_battle_over(std::string const battle_room_name) {
+    this->send_message("/evalbattle battle.winner", battle_room_name);
+
+    // receive messages until we get the one that contains the relevant information
+    std::string response;
+    do {
+        response = this->websocket.receive_message();
+    } while (!boost::algorithm::contains(response, ">>> battle.winner"));
+
+    if (boost::algorithm::contains(response, "undefined")) {
+        return std::nullopt;
+    } else if (boost::algorithm::contains(response, this->username)) {
+        return true;
+    } else {
+        return false;
+    }
 }
