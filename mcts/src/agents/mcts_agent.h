@@ -6,7 +6,7 @@
 #include <string>
 
 
-void start_mcts_agent(ShowdownClient& client, std::string const battle_room_name);
+bool start_mcts_agent(ShowdownClient& client, std::string const battle_room_name);
 
 
 #endif //POKEMON_MCTS_MCTS_AGENT_H
