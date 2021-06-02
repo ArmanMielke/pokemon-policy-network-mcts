@@ -203,3 +203,8 @@ wget https://play.pokemonshowdown.com/data/abilities.js\?a49dd006
 wget https://play.pokemonshowdown.com/data/pokedex.js\?40a315c2
 wget https://play.pokemonshowdown.com/data/items.js\?575c8aee
 ```
+
+Because the JSON is not valid in Python (keys are not in quotations)
+we need to fix this, a good tool here is https://jsonformatter.curiousconcept.com/# (you need to remove the variable name at the beginning and the semicolon at the end). There is probably a way to do this automatically but I didn't find a
+quick way and the payoff is maybe not that great because we should
+probably only do this once.
