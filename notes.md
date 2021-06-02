@@ -189,8 +189,17 @@ I changed in ```pmariglia/data/parse_smogon_stats.py``` the ```month```
 variable in the function ```get_smogon_stats_file_name```. Need
 to see if this now happens every month.
 
-# Getting all moves from showdown
+# Getting all moves, Pokemon, items, abilities from showdown
+
+https://dex.pokemonshowdown.com/pokemon/ <br>
+This link provides a visualization for all Pokemon and Moves in 
+showdown. With the Developer Tool of your Browser you can 
+see in the Network tab the different requested files and there
+you can find the files with the Pokemon, Moves, Abilities etc.
 
 ```
 wget https://play.pokemonshowdown.com/data/moves.js\?594c6a22
+wget https://play.pokemonshowdown.com/data/abilities.js\?a49dd006
+wget https://play.pokemonshowdown.com/data/pokedex.js\?40a315c2
+wget https://play.pokemonshowdown.com/data/items.js\?575c8aee
 ```
