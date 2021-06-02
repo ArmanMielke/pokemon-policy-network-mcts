@@ -188,3 +188,9 @@ month but somehow this data is not available at that point.
 I changed in ```pmariglia/data/parse_smogon_stats.py``` the ```month```
 variable in the function ```get_smogon_stats_file_name```. Need
 to see if this now happens every month.
+
+# Getting all moves from showdown
+
+```
+wget https://play.pokemonshowdown.com/data/moves.js\?594c6a22
+```
