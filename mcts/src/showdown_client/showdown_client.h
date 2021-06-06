@@ -26,6 +26,9 @@ public:
     /// This string can be used to reproduce the current state of the battle using Pokémon Showdown's command line
     /// battle simulator, `pokemon-showdown simulate-battle`.
     std::string request_input_log(std::string const battle_room_name);
+    /// Like `request_input_log`, but removes the seed from the start of the game.
+    /// Does not remove the seeds for the individual players (if any), since they determine the teams in random battles.
+    std::string request_input_log_without_seed(std::string const battle_room_name);
     /// @return `std::nullopt`, if the battle is still ongoing,
     ///         `true`, if the battle is won,
     ///         `false`, if the battle is lost.

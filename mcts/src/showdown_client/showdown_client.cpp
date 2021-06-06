@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <optional>
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -15,6 +16,9 @@
 std::string const SHOWDOWN_HOST = "localhost";
 std::string const SHOWDOWN_PORT = "8808";
 std::string const SHOWDOWN_TARGET = "/showdown/websocket";
+
+// search and replace this with the contents of capture groups 1 and 2 to remove the seed
+std::regex const REMOVE_SEED_RE{R"((\n>start \{"formatid":"[a-zA-Z0-9]+"),"seed":\[[0-9,]+\](\}\n))"};
 
 
 ShowdownClient::ShowdownClient(std::string const username, std::optional<std::string> const password)
@@ -106,6 +110,15 @@ std::string ShowdownClient::request_input_log(std::string const battle_room_name
     boost::replace_all(input_log, "\n||", "\n");
 
     return input_log;
+}
+
+std::string ShowdownClient::request_input_log_without_seed(const std::string battle_room_name) {
+    std::string const input_log = this->request_input_log(battle_room_name);
+    std::string const input_log_without_seed = std::regex_replace(input_log, REMOVE_SEED_RE, "$1$2");
+    if (input_log == input_log_without_seed) {
+        std::cout << "[ShowdownClient] WARNING: Seed could not be found in the input log. Input log unchanged" << std::endl;
+    }
+    return input_log_without_seed;
 }
 
 std::optional<bool> ShowdownClient::check_battle_over(std::string const battle_room_name) {

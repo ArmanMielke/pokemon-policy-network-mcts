@@ -8,11 +8,12 @@
 #include <string>
 
 
+// TODO the MCTS agent assumes that it is player 1, i.e. the one who challenged the other player. doesn't work otherwise
 bool start_mcts_agent(ShowdownClient& client, std::string const battle_room_name) {
     std::optional<bool> battle_won = std::nullopt;
 
     do {
-        std::string const input_log = client.request_input_log(battle_room_name);
+        std::string const input_log = client.request_input_log_without_seed(battle_room_name);
 
         std::string action = run_mcts(input_log);
         std::cout << "[MCTS Agent] Selected action: " << action << std::endl;
