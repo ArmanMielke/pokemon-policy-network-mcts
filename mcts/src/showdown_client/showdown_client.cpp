@@ -2,12 +2,14 @@
 #include "showdown_login_request.h"
 
 #include <iostream>
+#include <map>
 #include <optional>
 #include <string>
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <nlohmann/json.hpp>
 
 
 std::string const SHOWDOWN_HOST = "localhost";
@@ -58,22 +60,33 @@ std::string ShowdownClient::challenge_user(std::string const user, std::string c
     this->send_message("/challenge " + user + "," + battle_format);
 
     // wait until the challenge was accepted and the first message in the battle room appears
-    // the first message in the battle room
-    std::string battle_room_message;
-    // a message starting with this string is a message in the battle room
-    std::string const battle_room_prefix = ">battle-" + boost::algorithm::to_lower_copy(battle_format) + "-";
+    return this->get_battle_room_name(battle_format);
+}
+
+std::string ShowdownClient::accept_challenge() {
+    std::string challenger_username;
+    std::string battle_format;
+
+    // receive messages until one contains a challenge from another user
     do {
-        battle_room_message = this->websocket.receive_message();
-    } while (!boost::algorithm::starts_with(battle_room_message, battle_room_prefix));
+        std::vector<std::string> message_split;
+        boost::split(message_split, this->websocket.receive_message(), boost::is_any_of("|"));
+        if (message_split[1] == "updatechallenges") {
+            nlohmann::json challenge_data = nlohmann::json::parse(message_split[2]);
+            // a map where the key is the name of the challenger and the value is the battle format
+            std::map<std::string, std::string> challenges_from = challenge_data["challengesFrom"];
+            if (!challenges_from.empty()) {
+                // get the first entry in the map
+                auto const challenger_format_pair = std::next(std::begin(challenges_from), 2);
+                challenger_username = challenger_format_pair->first;
+                battle_format = challenger_format_pair->second;
+            }
+        }
+    } while (challenger_username.empty());
 
-    // extract the name of the room from battle_room_message
-    std::vector<std::string> battle_room_message_split;
-    boost::split(battle_room_message_split, battle_room_message, boost::is_any_of("|"));
-    // there is a ">" before and a "\n" after the room name
-    std::string battle_room_name = battle_room_message_split[0].substr(1, battle_room_message_split[0].length() - 2);
+    this->send_message("/accept " + challenger_username);
 
-    std::cout << "[ShowdownClient] Started battle in room " << battle_room_name << std::endl;
-    return battle_room_name;
+    return this->get_battle_room_name(battle_format);
 }
 
 std::string ShowdownClient::request_input_log(std::string const battle_room_name) {
@@ -111,4 +124,23 @@ std::optional<bool> ShowdownClient::check_battle_over(std::string const battle_r
     } else {
         return false;
     }
+}
+
+std::string ShowdownClient::get_battle_room_name(std::string const battle_format) {
+    // the first message in the battle room
+    std::string battle_room_message;
+    // a message starting with this string is a message in the battle room
+    std::string const battle_room_prefix = ">battle-" + boost::algorithm::to_lower_copy(battle_format) + "-";
+    do {
+        battle_room_message = this->websocket.receive_message();
+    } while (!boost::algorithm::starts_with(battle_room_message, battle_room_prefix));
+
+    // extract the name of the room from battle_room_message
+    std::vector<std::string> battle_room_message_split;
+    boost::split(battle_room_message_split, battle_room_message, boost::is_any_of("|"));
+    // there is a ">" before and a "\n" after the room name
+    std::string battle_room_name = battle_room_message_split[0].substr(1, battle_room_message_split[0].length() - 2);
+
+    std::cout << "[ShowdownClient] Started battle in room " << battle_room_name << std::endl;
+    return battle_room_name;
 }
