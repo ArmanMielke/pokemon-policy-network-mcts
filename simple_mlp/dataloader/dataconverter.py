@@ -2,12 +2,25 @@ import numpy as np
 
 class DataConverter():
     def __init__(self):
-        self.last_move = np.array([0,0,0,1])
-        self.current_move = np.array([0,0,0,1])
+        self.last_move = np.array([0,0,0,1,0])
+        self.current_move = np.array([0,0,0,1,0])
+
+        self.move_lookup = {
+            "tackle" : 1,
+            "slash"  : 2,
+            "scratch": 3
+        }
+
+        self.damage_lookup = {
+            2 : 70,
+            3 : 40
+        }
 
     def convert(self, data):
         num_turns = len(data['game'])
         converted_data = []
+        # remove the first 2 turns because there are 
+        # wrong moves
         for i in range(num_turns):
             turn = data['game'][i]
             converted_data.append( {
@@ -35,41 +48,37 @@ class DataConverter():
             if pokemon["isActive"]:
                 moves = []
                 move_slots = pokemon["moveSlots"]
-                move_lookup = {
-                    "tackle" : 1,
-                    "slash"  : 2,
-                    "scratch": 3
-                }
                 for move in move_slots:
                     moves.append(
-                        move_lookup[move["id"]]
+                        self.move_lookup[move["id"]]
                     )
                 return np.array(moves)
 
     def get_active_moves_damage(self, my_pokemon):
         active_moves = self.get_active_moves(my_pokemon)
-        damage_lookup = {
-            2 : 70,
-            3 : 40
-        }
+        
         damage = []
         for move in active_moves:
-            damage.append(damage_lookup[move])
+            damage.append(self.damage_lookup[move])
         return np.array(damage)
 
     def get_chosen_move(self, my_side):
-        move = my_side["action"][0].split(" ")[-1]
-        move_pos = self.get_move_position(move, my_side)
+        action = my_side["action"][0].split(" ")
         self.last_move = self.current_move
-      
-        if move_pos == 0:
-            self.current_move = np.array([1, 0, 0, 0])
-        elif move_pos == 1:
-            self.current_move = np.array([0, 1, 0, 0])
-        elif move_pos == 2:
-            self.current_move = np.array([0, 0, 1, 0])
+        if action[0] == "/switch":
+            self.current_move = np.array([0, 0, 0, 0, 1])
         else:
-            self.current_move = np.array([0, 0, 0, 1])
+            move = action[-1]
+            move_pos = self.get_move_position(move, my_side)
+        
+            if move_pos == 0:
+                self.current_move = np.array([1, 0, 0, 0, 0])
+            elif move_pos == 1:
+                self.current_move = np.array([0, 1, 0, 0, 0])
+            elif move_pos == 2:
+                self.current_move = np.array([0, 0, 1, 0, 0])
+            else:
+                self.current_move = np.array([0, 0, 0, 1, 0])
         return self.current_move
 
     def get_move_position(self, move, my_side):
@@ -88,3 +97,9 @@ class DataConverter():
 
     def get_last_move(self):
         return self.last_move
+
+    def get_move_name(self, move):
+        moveid = np.argmax(move)
+        for name, id in self.move_lookup.items():
+            if id == moveid:
+                return name

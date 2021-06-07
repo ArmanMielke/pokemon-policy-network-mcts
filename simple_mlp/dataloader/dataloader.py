@@ -14,6 +14,9 @@ class Dataloader():
         self.turn = 0
         self.max_turns = 0
         self.features = [f.split("/") for f in features]
+        self.selected_files = []
+        self.current_batch = None
+        self.current_label = None
         print(f"selected features {self.features}")
 
     def __iter__(self):
@@ -51,6 +54,7 @@ class Dataloader():
         for i in range(self.batch_size):
             file_path = file_list[indices[i]]
             raw_data = self.load_json(file_path)
+            self.selected_files.append( file_path )
             # convert the data from json to a vector representation
             self.data.append( self.data_converter.convert(raw_data) )
 
@@ -61,6 +65,7 @@ class Dataloader():
 
     def reset(self):
         self.data = []
+        self.selected_files = []
         self.turn = 0 
         self.max_turns = 0
         
@@ -95,18 +100,27 @@ class Dataloader():
 
     def get_batch(self):
         # TODO automatic input size detection
-        X = np.ndarray((self.batch_size, 11))
-        y = np.ndarray((self.batch_size, 4))
+        X = np.ndarray((self.batch_size, 2))
+        y = np.ndarray((self.batch_size, 5))
         for i in range(self.batch_size):
             X[i] = np.concatenate((
-                self.data[i][self.turn]['p2']['hp'],  # 1 values
-                [self.turn],                                # 1 value
-                self.data[i][self.turn]['p1']['hp'],        # 1 value
-                self.data[i][self.turn]['p1']['last_move'], # 4 values
-                self.data[i][self.turn]['p2']['last_move'] # 4 values          
+                self.data[i][self.turn]['p2']['hp'],        # 1 values
+                #[self.turn],                                # 1 value
+                self.data[i][self.turn]['p1']['hp']        # 1 value
+                #self.data[i][self.turn]['p1']['last_move'], # 5 values
+                #self.data[i][self.turn]['p2']['last_move']  # 5 values          
             ))
             y[i] = self.data[i][self.turn]['p1']['chosenMove']
+        self.current_batch, self.current_label = X, y
         return X, y
 
+    def trace_back(self, prediction):
+        with open('tmp/trace.txt', 'a') as f:
+            f.write("-----------------------\n")
+            f.write(f"turn: {self.turn}\n")
+            for file in self.selected_files:
+                f.write(f"{file}\n")
 
-
+            f.write("Prediction          |      Ground Truth\n")
+            for i in range(len(self.current_label)):
+                f.write(f"{prediction[i]}          |      {self.current_label[i]}\n")

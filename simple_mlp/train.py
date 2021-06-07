@@ -29,18 +29,21 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 def train(dataloader, model, loss_fn, optimizer):
     losses = []
-
+    last_loss = 0
     # play batch_size many games
     # until the end
     for X, y, end in dataloader:
         X = torch.from_numpy(X).float().to(DEVICE)
-
         # CrossEntropyLoss does not like a one-hot vector but
         # a sigle integer indicating which class it belongs to
         label = torch.from_numpy(np.array([np.argmax(y[i]) for i in range(len(y))])) \
                 .long().to(DEVICE)
         preds = model(X)
         loss = loss_fn(preds, label)
+        diff = abs(loss - last_loss)
+        if diff > 5:
+            dataloader.trace_back(preds)
+        last_loss = loss
         losses.append(loss.item())
         optimizer.zero_grad()
         loss.backward()
@@ -55,13 +58,13 @@ def validate(dataloader, model, loss_fn):
     losses = []
     with torch.no_grad():
         for X, y, end in dataloader:
+
             X = torch.from_numpy(X).float().to(DEVICE)
             label = torch.from_numpy(np.array([np.argmax(y[i]) for i in range(len(y))]))\
                 .long().to(DEVICE)
             preds = model(X)
             losses.append( loss_fn(preds, label).item() )
             if end:
-                print(losses)
                 return np.mean(losses)
 
 # TODO: maybe merge training and validation dataloader into
