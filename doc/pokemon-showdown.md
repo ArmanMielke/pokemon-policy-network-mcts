@@ -52,3 +52,27 @@ When running the battle simulator on the command line, replace `/evalbattle` wit
     - Simply feed the entire string to the stdin of `pokemon-showdown simulate-battle`
     - This reproduces the exact state of the original battle
 - The same instance of `pokemon-showdown simulate-battle` can be re-used multiple times
+
+### Example Input Log
+
+```
+>version 1d27dfcc204f0b46448874ca19e087563bd2525f
+>start {"formatid":"gen8randombattle","seed":[53307,52933,17723,61709]}
+>player p1 {"name":"cpp-djcoaisjdcoai","avatar":"266","rating":0,"seed":[20414,38742,50583,22036]}
+>player p2 {"name":"GuentherProd","avatar":"gentleman","rating":0,"seed":[31932,34131,12521,62280]}
+>p1 move rockslide
+>p2 move gigadrain
+>p1 switch 2
+>p1 move iciclecrash
+>p2 switch 6
+>p1 move iciclecrash
+>p2 move stealthrock
+>p1 move iciclecrash
+>p2 move toxic
+>p1 move iciclecrash
+>p2 move bodypress
+>chat ☆GuentherProd|this is a chat message
+>p1 move iciclecrash
+>p2 move bodypress
+>eval JSON.stringify(battle.toJSON())
+```

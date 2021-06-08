@@ -1,8 +1,10 @@
 #ifndef POKEMON_MCTS_SHOWDOWN_SIMULATOR_H
 #define POKEMON_MCTS_SHOWDOWN_SIMULATOR_H
 
+#include <array>
 #include <string>
 #include <vector>
+#include <optional>
 
 #include <boost/process.hpp>
 
@@ -31,21 +33,23 @@ public:
     /// Executes one or multiple commands on the battle simulator.
     /// Each command must be preceded by a `>`, with no space between the `>` and the command.
     /// If there are multiple commands, commands must be separated by line breaks.
+    /// The outputs of the commands are discarded.
+    /// Assumes that the game has not ended.
     void execute_commands(std::string const commands);
-    /// Assumes that there is no unread output.
     /// @return all actions available to the given player.
     ///         Each action is given as a command that can be executed with execute_commands() by prepending ">p",
     ///         then the number of the player followed by a space.
     ///         E.g. if `player` is 1 and one of the actions is "move 2", then the corresponding command would
     ///         be ">p1 move 2".
     std::vector<std::string> get_actions(Player const player);
-    /// Assumes that there is no unread output.
-    /// @return for the given player, the indices of the Pokémon that haven't fainted.
-    ///         Indices are in ascending order.
-    std::vector<int> get_remaining_pokemon(Player const player);
-    /// Discards any output of the child process that hasn't been read yet.
-    /// If a command is run after skip_output(), the next output line will be from that command.
-    void skip_output();
+    /// Assumes that the game has not ended.
+    /// @return the number of remaining Pokémon for each player.
+    std::array<int, 2> get_num_remaining_pokemon();
+    /// @return `true`, iff the game has ended.
+    bool is_finished() const;
+    /// @return `std::nullopt` as long as `is_finished()` returns false.
+    ///         After the game has ended, this returns the winner, if a winner could be determined.
+    std::optional<Player> get_winner() const;
 
 private:
     /// The child process that runs the battle simulator.
@@ -53,14 +57,38 @@ private:
     /// std_in of the child process.
     bp::opstream child_input;
     /// std_out of the child process.
+    /// Output should not be read from `child_output` directly.
+    /// Instead, `read_output_line()` should be used.
+    ///
+    /// All methods should ensure that there are no unread lines in `child_output` after they complete,
+    /// since methods implicitly assume that there is no unread output.
     bp::ipstream child_output;
+    /// `true` iff the game has ended.
+    bool finished = false;
+    /// This is `std::nullopt` before the game ends.
+    /// It is set at the end of the game if a winner could be determined.
+    std::optional<Player> winner = std::nullopt;
 
-    /// Skips the given number of lines in the output of the child process.
-    void skip_output_lines(int const number_of_lines);
-    /// Assumes that there is no unread output.
+    /// Reads a line from the output of the child process.
+    /// This also checks whether the game has ended during that line and updates `this.finished` and `this.winner`
+    /// accordingly.
+    std::string read_output_line();
+    /// Discards any output of the child process that hasn't been read yet.
+    /// If a command is run after skip_output(), the next output line will be from that command.
+    void skip_output();
+    /// Runs a JavaScript command on the simulator in the child process using ">eval".
+    /// Assumes that the command's output is one line.
+    /// Assumes that the game has not ended.
+    /// @return the output of the command.
+    std::string eval(std::string const command);
+    /// Assumes that the game has not ended.
+    /// @return for the given player, the indices of the Pokémon that haven't fainted.
+    ///         Indices are in ascending order.
+    std::vector<int> get_remaining_pokemon(Player const player);
+    /// Assumes that the game has not ended.
     /// @return the request state for the given player.
     RequestState get_request_state(Player const player);
-    /// Assumes that there is no unread output.
+    /// Assumes that the game has not ended.
     /// @return a vector indicating for each pokemon whether it has fainted.
     std::vector<bool> get_pokemon_fainted(Player const player);
 };

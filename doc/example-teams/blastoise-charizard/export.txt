@@ -1,0 +1,15 @@
+Blastoise
+Ability: Rain Dish
+Level: 90
+EVs: 252 HP / 4 Atk / 252 SpA
+Quiet Nature
+- Dragon Pulse
+- Surf
+
+Charizard
+Ability: Solar Power
+Level: 90
+EVs: 252 Atk / 4 SpA / 148 Spe
+Hasty Nature
+- Wing Attack
+- Dragon Claw
