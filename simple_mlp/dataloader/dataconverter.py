@@ -28,6 +28,8 @@ class DataConverter():
             7 : 70      # headbutt
         }
 
+        self._feature_sizes = {}
+
     def convert(self, data):
         num_turns = len(data['game'])
         converted_data = []
@@ -53,6 +55,8 @@ class DataConverter():
             "enemy_hp": self.get_hp(other_side["pokemon"]),
             "last_move": self.get_last_move()
         }
+        for key, value in converted_data.items():
+            self._feature_sizes.update({key : len(value)})
         return converted_data
 
     def get_active_moves(self, my_pokemon):
@@ -123,3 +127,6 @@ class DataConverter():
         for name, id in self.move_lookup.items():
             if id == moveid:
                 return name
+
+    def feature_size(self, feature):
+        return self._feature_sizes[feature]

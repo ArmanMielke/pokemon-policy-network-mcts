@@ -85,8 +85,14 @@ class Dataloader():
         if self.data == []:
             print("The data is not loaded yet please call load_data")
             return 0
-        X, _ = self.get_batch()
-        return X.shape[1]
+        # X, _ = self.get_batch()
+        size = 0
+        for _, feature in self.features:
+            if "turn" == feature:
+                size += 1
+                continue
+            size += self.data_converter.feature_size(feature)
+        return size
 
     def get_output_size(self):
         if self.data == []:
@@ -102,7 +108,7 @@ class Dataloader():
 
     def get_batch(self):
         # TODO automatic input size detection
-        X = np.ndarray((self.batch_size, 4 + 2*2 + 1))
+        X = np.ndarray((self.batch_size, self.get_input_size()))
         y = np.ndarray((self.batch_size, self.data_converter.move_size))
         for i in range(self.batch_size):
             # X[i] = np.concatenate((
