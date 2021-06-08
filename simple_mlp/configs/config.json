@@ -1,9 +1,10 @@
 {
-    "epochs": 1000,
+    "epochs": 10000,
     "neurons": 20,
     "learning_rate": 1e-3,
     "layers": 3,
     "batch_size": 32,
-    "train_data_path": "datasets/no_type_only_damage",
-    "val_data_path": "datasets/no_type_only_damage_1000_runs"
+    "train_data_path": "datasets/only_damage_two_pokemon/train",
+    "val_data_path": "datasets/only_damage_two_pokemon/val",
+    "features": ["p1/hp", "p2/hp", "p1/moves_damage", "p2/moves_damage", "/turn"]
 }

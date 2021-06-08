@@ -17,7 +17,9 @@ class Dataloader():
         self.selected_files = []
         self.current_batch = None
         self.current_label = None
-        print(f"selected features {self.features}")
+
+        self.reset()
+        self.load_data()
 
     def __iter__(self):
         self.turn = 0
@@ -100,16 +102,23 @@ class Dataloader():
 
     def get_batch(self):
         # TODO automatic input size detection
-        X = np.ndarray((self.batch_size, 2))
-        y = np.ndarray((self.batch_size, 5))
+        X = np.ndarray((self.batch_size, 4 + 2*2 + 1))
+        y = np.ndarray((self.batch_size, self.data_converter.move_size))
         for i in range(self.batch_size):
-            X[i] = np.concatenate((
-                self.data[i][self.turn]['p2']['hp'],        # 1 values
-                #[self.turn],                                # 1 value
-                self.data[i][self.turn]['p1']['hp']        # 1 value
-                #self.data[i][self.turn]['p1']['last_move'], # 5 values
-                #self.data[i][self.turn]['p2']['last_move']  # 5 values          
-            ))
+            # X[i] = np.concatenate((
+            #     self.data[i][self.turn]['p2']['hp'],        # 1 values
+            #     #[self.turn],                                # 1 value
+            #     self.data[i][self.turn]['p1']['hp']        # 1 value
+            #     #self.data[i][self.turn]['p1']['last_move'], # 5 values
+            #     #self.data[i][self.turn]['p2']['last_move']  # 5 values          
+            # ))
+            feature_list = []
+            for player, feature in self.features:
+                if "turn" == feature:
+                    feature_list.append( np.array([self.turn]) )
+                    continue
+                feature_list.append( self.data[i][self.turn][player][feature])
+            X[i] = np.concatenate(tuple(feature_list))
             y[i] = self.data[i][self.turn]['p1']['chosenMove']
         self.current_batch, self.current_label = X, y
         return X, y

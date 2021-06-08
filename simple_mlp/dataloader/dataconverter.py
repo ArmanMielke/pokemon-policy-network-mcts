@@ -2,18 +2,30 @@ import numpy as np
 
 class DataConverter():
     def __init__(self):
-        self.last_move = np.array([0,0,0,1,0])
-        self.current_move = np.array([0,0,0,1,0])
 
         self.move_lookup = {
-            "tackle" : 1,
-            "slash"  : 2,
-            "scratch": 3
+            "tackle" : 0,
+            "slash"  : 1,
+            "scratch": 2,
+            "pound"  : 3,
+            "extremespeed": 4,
+            "stomp" : 5,
+            "chipaway" : 6,
+            "headbutt" : 7
         }
 
+        self.move_size = 4 + 2 # +1 for switch, +1 for slack (if attack not found)
+        self.last_move = self.current_move = np.zeros(self.move_size)
+
         self.damage_lookup = {
-            2 : 70,
-            3 : 40
+            0 : 40,     # tackle
+            1 : 70,     # slash
+            2 : 40,     # scratch
+            3 : 40,     # pound
+            4 : 80,     # extremespeed
+            5 : 65,     # stomp
+            6 : 70,     # chipaway
+            7 : 70      # headbutt
         }
 
     def convert(self, data):
@@ -35,7 +47,7 @@ class DataConverter():
         other_side = sides[1] if sides[0]["id"] == playerid else sides[0]
         converted_data = {
             "moves": self.get_active_moves(my_side["pokemon"]),
-            #"moves_damage": self.get_active_moves_damage(my_side["pokemon"]),
+            "moves_damage": self.get_active_moves_damage(my_side["pokemon"]),
             "chosenMove": self.get_chosen_move(my_side),
             "hp": self.get_hp(my_side["pokemon"]),
             "enemy_hp": self.get_hp(other_side["pokemon"]),
@@ -44,20 +56,30 @@ class DataConverter():
         return converted_data
 
     def get_active_moves(self, my_pokemon):
+        moves = []
         for pokemon in my_pokemon:
             if pokemon["isActive"]:
-                moves = []
                 move_slots = pokemon["moveSlots"]
                 for move in move_slots:
                     moves.append(
                         self.move_lookup[move["id"]]
                     )
                 return np.array(moves)
+        
+        # TODO: if both pokemon are dead we need to find
+        # a better solution to handle this
+        move_slots = my_pokemon[0]["moveSlots"]
+        for move in move_slots:
+            moves.append(
+                self.move_lookup[move["id"]]
+            )
+        return np.array(moves)
 
     def get_active_moves_damage(self, my_pokemon):
         active_moves = self.get_active_moves(my_pokemon)
         
         damage = []
+        #print(active_moves)
         for move in active_moves:
             damage.append(self.damage_lookup[move])
         return np.array(damage)
@@ -66,19 +88,17 @@ class DataConverter():
         action = my_side["action"][0].split(" ")
         self.last_move = self.current_move
         if action[0] == "/switch":
-            self.current_move = np.array([0, 0, 0, 0, 1])
+            self.current_move = np.zeros(self.move_size)
+            self.current_move[-2] = 1
         else:
             move = action[-1]
             move_pos = self.get_move_position(move, my_side)
-        
-            if move_pos == 0:
-                self.current_move = np.array([1, 0, 0, 0, 0])
-            elif move_pos == 1:
-                self.current_move = np.array([0, 1, 0, 0, 0])
-            elif move_pos == 2:
-                self.current_move = np.array([0, 0, 1, 0, 0])
+
+            self.current_move = np.zeros(self.move_size)
+            if move_pos == None:
+                self.current_move[-1] = 1
             else:
-                self.current_move = np.array([0, 0, 0, 1, 0])
+                self.current_move[move_pos] = 1
         return self.current_move
 
     def get_move_position(self, move, my_side):

@@ -68,18 +68,9 @@ def validate(dataloader, model, loss_fn):
                 return np.mean(losses)
 
 # TODO: maybe merge training and validation dataloader into
-# one single loader, whichs returns the corresponding generators
-dataloader = Dataloader(config.train_data_path, config.batch_size,
-    # TODO: implement functionality to easily pick the features you
-    # want in your batch
-    ['p1/hp', 'p2/hp', 'p1/last_move', 'p2/last_move', 'turn']
-)
-dataloader.load_data()
-
-val_dataloader = Dataloader(config.validation_data_path, config.batch_size,
-    ['p1/hp', 'p2/hp', 'p1/last_move', 'p2/last_move', 'turn']
-)
-val_dataloader.load_data()
+# one single loader, whichs returns the corresponding generators 
+dataloader = Dataloader(config.train_data_path, config.batch_size,config.features)
+val_dataloader = Dataloader(config.validation_data_path, config.batch_size, config.features)
 
 model = SimpleMLP(
     dataloader.get_input_size(),

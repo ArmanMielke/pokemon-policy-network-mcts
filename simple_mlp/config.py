@@ -36,3 +36,7 @@ class SimpleMLPConfig():
     @property
     def epochs(self):
         return self._config["epochs"]
+
+    @property
+    def features(self):
+        return self._config["features"]

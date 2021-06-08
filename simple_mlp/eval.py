@@ -31,9 +31,7 @@ if __name__ == "__main__":
 
     config = SimpleMLPConfig(os.path.join(args.dir, 'config.json'))
 
-    val_dataloader = Dataloader(config.validation_data_path, config.batch_size,
-        ['p1/hp', 'p2/hp', 'p1/last_move', 'p2/last_move', 'turn']
-    )
+    val_dataloader = Dataloader(config.validation_data_path, config.batch_size, config.features)
     val_dataloader.load_data()
 
     model = SimpleMLP(
