@@ -4,6 +4,8 @@ import torch
 import os
 import numpy as np
 import json
+import pandas as pd
+import math
 
 
 def copy_config_to_output_dir(output_path, config):
@@ -19,6 +21,21 @@ def save_figure(epochs, train_loss, val_loss, path):
     axes.set_xlabel("epochs")
     axes.set_ylabel("loss")
     fig.savefig(os.path.join(path, "graph.png"))
+    plt.close()
+
+    fig = plt.figure()
+    axes = fig.add_axes([0.1, 0.1, 0.8, 0.8])
+    neighborhood = math.floor(0.1 * len(train_loss))
+    df = pd.DataFrame(train_loss)
+    df2 = pd.DataFrame(val_loss)
+    axes.plot(df[0], 'tab:blue',alpha=0.5)
+    axes.plot(df2[0],'tab:orange', alpha=0.5)
+    axes.plot(df[0].rolling(neighborhood).mean(), 'tab:blue', label='train loss')
+    axes.plot(df2[0].rolling(neighborhood).mean(), 'tab:orange', label='validation loss')
+    fig.legend()
+    axes.set_xlabel("epochs")
+    axes.set_ylabel("loss")
+    fig.savefig(os.path.join(path, "graph2.png"))
     plt.close()
 
 def save_model(model, script_model, path):
