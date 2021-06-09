@@ -30,6 +30,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 def train(dataloader, model, loss_fn, optimizer):
     losses = []
     last_loss = 0
+    model.train()
     # play batch_size many games
     # until the end
     for X, y, end in dataloader:
@@ -50,12 +51,14 @@ def train(dataloader, model, loss_fn, optimizer):
         optimizer.step()
 
         if end:
+            losses = np.array(losses)
             return np.mean(losses)
 
 
 def validate(dataloader, model, loss_fn):
     model.eval()
     losses = []
+    correct = []
     with torch.no_grad():
         for X, y, end in dataloader:
 
@@ -64,8 +67,11 @@ def validate(dataloader, model, loss_fn):
                 .long().to(DEVICE)
             preds = model(X)
             losses.append( loss_fn(preds, label).item() )
+            correct.append( (preds.argmax(1) == label).type(torch.float).sum().item() )
             if end:
-                return np.mean(losses)
+                losses = np.array(losses)
+                correct = np.array(correct)
+                return np.mean(losses), np.mean(correct)
 
 # TODO: maybe merge training and validation dataloader into
 # one single loader, whichs returns the corresponding generators 
@@ -87,7 +93,7 @@ script_model = torch.jit.trace(model, torch.rand(1,dataloader.get_input_size()))
 
 model.to(DEVICE)
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
+optimizer = torch.optim.RMSprop(model.parameters(), lr=config.learning_rate)
 
 RUN_DIR = os.path.join("runs", args.dir)
 
@@ -99,15 +105,16 @@ if __name__ == "__main__":
 
     for t in range(config.epochs):
         loss = train(dataloader, model, loss_fn, optimizer)
-        tloss = validate(val_dataloader, model, loss_fn)
+        vloss, correct = validate(val_dataloader, model, loss_fn)
         print(f"Epoch {t}\n-----------------")
         print(f"loss: {loss:>7f}")
-        print(f"val loss: {tloss:>7f}")
+        print(f"val loss: {vloss:>7f}")
         print(f"DEVICE {DEVICE}")
         writer.add_scalar('loss', loss, t)
-        writer.add_scalar('test_loss', tloss, t)
+        writer.add_scalar('val_loss', vloss, t)
+        writer.add_scalar('correct', correct, t)
         train_loss.append(loss)
-        test_loss.append(tloss)
+        test_loss.append(vloss)
 
         # for each epoch we want
         # a new set of games

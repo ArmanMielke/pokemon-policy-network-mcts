@@ -48,7 +48,7 @@ class DataConverter():
         my_side = sides[0] if sides[0]["id"] == playerid else sides[1]
         other_side = sides[1] if sides[0]["id"] == playerid else sides[0]
         converted_data = {
-            "moves": self.get_active_moves(my_side["pokemon"]),
+            "moves": self.get_active_moves_vector(my_side["pokemon"]),
             "moves_damage": self.get_active_moves_damage(my_side["pokemon"]),
             "chosenMove": self.get_chosen_move(my_side),
             "hp": self.get_hp(my_side["pokemon"]),
@@ -78,6 +78,16 @@ class DataConverter():
                 self.move_lookup[move["id"]]
             )
         return np.array(moves)
+
+    def get_active_moves_vector(self, my_pokemon):
+        moves = self.get_active_moves(my_pokemon)
+        move_vecs = []
+        for move in moves:
+            m = np.zeros(len(self.move_lookup))
+            m[move] = 1
+            move_vecs.append(m)
+        return np.concatenate(tuple(move_vecs))
+
 
     def get_active_moves_damage(self, my_pokemon):
         active_moves = self.get_active_moves(my_pokemon)

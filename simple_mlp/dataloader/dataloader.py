@@ -85,7 +85,6 @@ class Dataloader():
         if self.data == []:
             print("The data is not loaded yet please call load_data")
             return 0
-        # X, _ = self.get_batch()
         size = 0
         for _, feature in self.features:
             if "turn" == feature:
@@ -111,13 +110,6 @@ class Dataloader():
         X = np.ndarray((self.batch_size, self.get_input_size()))
         y = np.ndarray((self.batch_size, self.data_converter.move_size))
         for i in range(self.batch_size):
-            # X[i] = np.concatenate((
-            #     self.data[i][self.turn]['p2']['hp'],        # 1 values
-            #     #[self.turn],                                # 1 value
-            #     self.data[i][self.turn]['p1']['hp']        # 1 value
-            #     #self.data[i][self.turn]['p1']['last_move'], # 5 values
-            #     #self.data[i][self.turn]['p2']['last_move']  # 5 values          
-            # ))
             feature_list = []
             for player, feature in self.features:
                 if "turn" == feature:
