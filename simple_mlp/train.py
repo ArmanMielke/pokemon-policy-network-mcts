@@ -79,8 +79,8 @@ dataloader = Dataloader(config.train_data_path, config.batch_size,config.feature
 val_dataloader = Dataloader(config.validation_data_path, config.batch_size, config.features)
 
 model = SimpleMLP(
-    dataloader.get_input_size(),
-    dataloader.get_output_size(),
+    dataloader.input_size,
+    dataloader.output_size,
     config.config["layers"],
     config.config["neurons"]
 )
@@ -88,7 +88,7 @@ model = SimpleMLP(
 # trace the model to create a torch script instance
 # you need to provide a example input. This
 # can then be loaded with libtorch in C++
-script_model = torch.jit.trace(model, torch.rand(1,dataloader.get_input_size()))
+script_model = torch.jit.trace(model, torch.rand(1,dataloader.input_size))
 
 
 model.to(DEVICE)
