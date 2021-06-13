@@ -10,6 +10,8 @@ from dataloader.dataloader import Dataloader
 from network import SimpleMLP
 from utils import copy_config_to_output_dir, save_model, save_figure, save_loss
 from config import SimpleMLPConfig
+from earlystopping import EarlyStopping
+from lrscheduler import LRScheduler
 
 def generate_dir_name():    
     """Create a unique hash for the filename"""
@@ -90,10 +92,12 @@ model = SimpleMLP(
 # can then be loaded with libtorch in C++
 script_model = torch.jit.trace(model, torch.rand(1,dataloader.input_size))
 
-
 model.to(DEVICE)
 loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
+
+#earlyStopping = EarlyStopping(config.early_stopping_patience)
+lrscheduler = LRScheduler(optimizer, config.lr_scheduler_patience)
 
 RUN_DIR = os.path.join("runs", args.dir)
 
@@ -103,6 +107,7 @@ train_loss, test_loss = [], []
 
 if __name__ == "__main__":
 
+    epochsUsed = 0
     for t in range(config.epochs):
         loss = train(dataloader, model, loss_fn, optimizer, config.iterations)
         vloss, correct = validate(val_dataloader, model, loss_fn, config.iterations)
@@ -116,7 +121,13 @@ if __name__ == "__main__":
         train_loss.append(loss)
         test_loss.append(vloss)
 
+        lrscheduler(vloss)
+        #earlyStopping(vloss)
+        epochsUsed += 1
+        #if earlyStopping.early_stop:
+        #    break
+
     
-    save_figure(config.epochs, train_loss, test_loss, RUN_DIR)
+    save_figure(epochsUsed, train_loss, test_loss, RUN_DIR)
     save_model(model, script_model, RUN_DIR)
     save_loss(train_loss, test_loss, RUN_DIR)

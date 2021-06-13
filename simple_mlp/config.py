@@ -44,3 +44,11 @@ class SimpleMLPConfig():
     @property
     def iterations(self):
         return self._config['iterations']
+
+    @property
+    def early_stopping_patience(self):
+        return self._config['earlyStoppingPatience']
+
+    @property
+    def lr_scheduler_patience(self):
+        return self._config['lrSchedulerPatience']
