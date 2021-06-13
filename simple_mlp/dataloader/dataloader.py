@@ -47,18 +47,8 @@ class Dataloader():
             print(f"The number of files ({len(file_list)}) is smaller than \
                 the batch size ({self.batch_size})")
 
-        # randomly select self.batch_size many files
-        # for the current run of the game
-        # indices = np.random.choice(len(file_list), self.batch_size)
-        # data = []
-        # for i in range(self.batch_size):
-        #     file_path = file_list[indices[i]]
-        #     raw_data = self.load_json(file_path)
-        #     self.selected_files.append( file_path )
-        #     # convert the data from json to a vector representation
-        #     num_turns = len(raw_data['game'])
-        #     sampled_turn = random.randint(0,num_turns-1)
-        #     data.append( self.data_converter.convert_turn(raw_data['game'][sampled_turn]) )
+        # TODO: we need a better loading strategy because for larger
+        # datasets it is possibly not feasible to load the complete dataset
         data = []
         for file in file_list:
             raw_data = self.load_json(file)
@@ -86,7 +76,6 @@ class Dataloader():
                     self.data[i].append(last_entry)
 
     def get_input_size(self):
-        #self.load_data()
         size = 0
         for _, feature in self.features:
             if "turn" == feature:
@@ -96,7 +85,6 @@ class Dataloader():
         return size
 
     def get_output_size(self):
-        #self.load_data()
         # TODO change this because get_batch also needs
         # the input size
         _, y = self.get_batch()
@@ -108,8 +96,6 @@ class Dataloader():
     def get_batch(self):
         X = np.ndarray((self.batch_size, self.input_size))
         y = np.ndarray((self.batch_size, self.data_converter.move_size))
-
-        #self.load_data()
 
         i = 0
         samples = np.random.choice(self.data, self.batch_size, replace=False)
