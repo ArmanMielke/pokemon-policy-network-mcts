@@ -116,11 +116,6 @@ if __name__ == "__main__":
         train_loss.append(loss)
         test_loss.append(vloss)
 
-        # for each epoch we want
-        # a new set of games
-        #dataloader.reset()
-        #dataloader.load_data()
-
     
     save_figure(config.epochs, train_loss, test_loss, RUN_DIR)
     save_model(model, script_model, RUN_DIR)

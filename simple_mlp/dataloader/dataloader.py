@@ -21,9 +21,6 @@ class Dataloader():
         self.input_size = 0
         self.output_size = 0
 
-        #self.reset()
-        #self.load_data()
-
     def __iter__(self):
         self.turn = 0
         return self
@@ -64,11 +61,6 @@ class Dataloader():
 
         self.data = np.array(data)
 
-        # if a game has less turns than
-        # the game with the most turns, add the last turn
-        # to the smaller one
-        #self.augment_data()
-
     def reset(self):
         self.data = []
         self.selected_files = []
@@ -86,9 +78,6 @@ class Dataloader():
                     self.data[i].append(last_entry)
 
     def get_input_size(self):
-        #if self.data == []:
-        #    print("The data is not loaded yet please call load_data")
-        #    return 0
         if self.input_size == 0:
             self.load_data()
             size = 0
@@ -113,12 +102,10 @@ class Dataloader():
         return self.get_input_size(), self.get_output_size()
 
     def get_batch(self):
-        # TODO automatic input size detection
         X = np.ndarray((self.batch_size, self.get_input_size()))
         y = np.ndarray((self.batch_size, self.data_converter.move_size))
 
         self.load_data()
-        #samples = self.data.sample(self.batch_size)
 
         i = 0
         for sample in self.data:
