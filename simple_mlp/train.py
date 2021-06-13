@@ -96,8 +96,10 @@ model.to(DEVICE)
 loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
 
-#earlyStopping = EarlyStopping(config.early_stopping_patience)
-lrscheduler = LRScheduler(optimizer, config.lr_scheduler_patience)
+if config.use_early_stopping:
+    earlyStopping = EarlyStopping(config.early_stopping_patience)
+if config.use_lr_scheduler:
+    lrscheduler = LRScheduler(optimizer, config.lr_scheduler_patience, config.lr_scheduler_min_lr)
 
 RUN_DIR = os.path.join("runs", args.dir)
 
@@ -121,11 +123,14 @@ if __name__ == "__main__":
         train_loss.append(loss)
         test_loss.append(vloss)
 
-        lrscheduler(vloss)
-        #earlyStopping(vloss)
+        
         epochsUsed += 1
-        #if earlyStopping.early_stop:
-        #    break
+        if config.use_lr_scheduler:
+            lrscheduler(vloss)
+        if config.use_early_stopping:
+            earlyStopping(vloss)
+            if earlyStopping.early_stop:
+               break
 
     
     save_figure(epochsUsed, train_loss, test_loss, RUN_DIR)
