@@ -55,6 +55,11 @@ class SimpleMLPConfig():
             return self._config['early_stopping']['patience']
 
     @property
+    def early_stopping_begin(self):
+        if self.use_early_stopping:
+            return self._config['early_stopping']['begin']
+
+    @property
     def use_lr_scheduler(self):
         return 'lr_scheduler' in self._config.keys()
 

@@ -127,7 +127,7 @@ if __name__ == "__main__":
         epochsUsed += 1
         if config.use_lr_scheduler:
             lrscheduler(vloss)
-        if config.use_early_stopping:
+        if config.use_early_stopping and epochsUsed >= config.early_stopping_begin:
             earlyStopping(vloss)
             if earlyStopping.early_stop:
                break

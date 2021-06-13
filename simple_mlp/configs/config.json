@@ -1,6 +1,6 @@
 {
-    "epochs": 1000,
-    "iterations" : 100,
+    "epochs": 2000,
+    "iterations" : 150,
     "neurons": 20,
     "learning_rate": 1e-3,
     "layers": 20,
@@ -11,7 +11,9 @@
     "lr_scheduler" : {
         "patience" : 50,
         "min_lr" : 1e-6
+    },
+    "early_stopping" : {
+        "patience" : 50,
+        "begin": 1500
     }
-        
-
 }
