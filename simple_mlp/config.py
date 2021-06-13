@@ -40,3 +40,7 @@ class SimpleMLPConfig():
     @property
     def features(self):
         return self._config["features"]
+
+    @property
+    def iterations(self):
+        return self._config['iterations']

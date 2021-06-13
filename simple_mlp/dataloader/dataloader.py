@@ -4,6 +4,7 @@ import json
 import os
 
 import numpy as np
+import random
 
 class Dataloader():
     def __init__(self, data_path, batch_size, features):
@@ -17,22 +18,20 @@ class Dataloader():
         self.selected_files = []
         self.current_batch = None
         self.current_label = None
+        self.input_size = 0
+        self.output_size = 0
 
-        self.reset()
-        self.load_data()
+        #self.reset()
+        #self.load_data()
 
     def __iter__(self):
         self.turn = 0
         return self
 
     def __next__(self):
-        if self.turn < self.max_turns:
-            X, y = self.get_batch()
-            end = False if self.turn != (self.max_turns -1) else True
-            self.turn += 1
-            return X, y, end
-        else:
-            raise StopIteration
+        X, y = self.get_batch()
+        self.turn += 1
+        return X, y
 
     def load_json(self, path):
         with open(path, 'r') as f:
@@ -53,17 +52,22 @@ class Dataloader():
         # randomly select self.batch_size many files
         # for the current run of the game
         indices = np.random.choice(len(file_list), self.batch_size)
+        data = []
         for i in range(self.batch_size):
             file_path = file_list[indices[i]]
             raw_data = self.load_json(file_path)
             self.selected_files.append( file_path )
             # convert the data from json to a vector representation
-            self.data.append( self.data_converter.convert(raw_data) )
+            num_turns = len(raw_data['game'])
+            sampled_turn = random.randint(0,num_turns-1)
+            data.append( self.data_converter.convert_turn(raw_data['game'][sampled_turn]) )
+
+        self.data = np.array(data)
 
         # if a game has less turns than
         # the game with the most turns, add the last turn
         # to the smaller one
-        self.augment_data()
+        #self.augment_data()
 
     def reset(self):
         self.data = []
@@ -82,25 +86,28 @@ class Dataloader():
                     self.data[i].append(last_entry)
 
     def get_input_size(self):
-        if self.data == []:
-            print("The data is not loaded yet please call load_data")
-            return 0
-        size = 0
-        for _, feature in self.features:
-            if "turn" == feature:
-                size += 1
-                continue
-            size += self.data_converter.feature_size(feature)
-        return size
+        #if self.data == []:
+        #    print("The data is not loaded yet please call load_data")
+        #    return 0
+        if self.input_size == 0:
+            self.load_data()
+            size = 0
+            for _, feature in self.features:
+                if "turn" == feature:
+                    size += 1
+                    continue
+                size += self.data_converter.feature_size(feature)
+            self.input_size = size
+        return self.input_size
 
     def get_output_size(self):
-        if self.data == []:
-            print("The data is not loaded yet please call load_data")
-            return 0
-        # TODO change this because get_batch also needs
-        # the input size
-        _, y = self.get_batch()
-        return y.shape[1]
+        if self.output_size == 0:
+            self.load_data()
+            # TODO change this because get_batch also needs
+            # the input size
+            _, y = self.get_batch()
+            self.output_size = y.shape[1]
+        return self.output_size
 
     def shape(self):
         return self.get_input_size(), self.get_output_size()
@@ -109,15 +116,21 @@ class Dataloader():
         # TODO automatic input size detection
         X = np.ndarray((self.batch_size, self.get_input_size()))
         y = np.ndarray((self.batch_size, self.data_converter.move_size))
-        for i in range(self.batch_size):
+
+        self.load_data()
+        #samples = self.data.sample(self.batch_size)
+
+        i = 0
+        for sample in self.data:
             feature_list = []
             for player, feature in self.features:
                 if "turn" == feature:
                     feature_list.append( np.array([self.turn]) )
                     continue
-                feature_list.append( self.data[i][self.turn][player][feature])
+                feature_list.append( sample[player][feature])
             X[i] = np.concatenate(tuple(feature_list))
-            y[i] = self.data[i][self.turn]['p1']['chosenMove']
+            y[i] = sample['p1']['chosenMove']
+            i += 1
         self.current_batch, self.current_label = X, y
         return X, y
 

@@ -37,11 +37,14 @@ class DataConverter():
         # wrong moves
         for i in range(num_turns):
             turn = data['game'][i]
-            converted_data.append( {
+            converted_data.append( self.convert_turn(turn) )
+        return converted_data
+
+    def convert_turn(self, turn):
+        return {
                 "p1" : self.get_player_data(turn, "p1"),
                 "p2" : self.get_player_data(turn, "p2")
-            })
-        return converted_data
+        }
 
     def get_player_data(self, data, playerid):
         sides = data["sides"]

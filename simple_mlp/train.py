@@ -27,13 +27,14 @@ config = SimpleMLPConfig(args.config)
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-def train(dataloader, model, loss_fn, optimizer):
+def train(dataloader, model, loss_fn, optimizer, iterations):
     losses = []
     last_loss = 0
     model.train()
     # play batch_size many games
     # until the end
-    for X, y, end in dataloader:
+    for _ in range(iterations):
+        X, y = next(dataloader)
         X = torch.from_numpy(X).float().to(DEVICE)
         # CrossEntropyLoss does not like a one-hot vector but
         # a sigle integer indicating which class it belongs to
@@ -49,29 +50,28 @@ def train(dataloader, model, loss_fn, optimizer):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+    
+    losses = np.array(losses)
+    return np.mean(losses)
 
-        if end:
-            losses = np.array(losses)
-            return np.mean(losses)
 
-
-def validate(dataloader, model, loss_fn):
+def validate(dataloader, model, loss_fn, iterations):
     model.eval()
     losses = []
     correct = []
     with torch.no_grad():
-        for X, y, end in dataloader:
-
+        for _ in range(iterations):
+            X,y = next(dataloader)
             X = torch.from_numpy(X).float().to(DEVICE)
             label = torch.from_numpy(np.array([np.argmax(y[i]) for i in range(len(y))]))\
                 .long().to(DEVICE)
             preds = model(X)
             losses.append( loss_fn(preds, label).item() )
             correct.append( (preds.argmax(1) == label).type(torch.float).sum().item() )
-            if end:
-                losses = np.array(losses)
-                correct = np.array(correct)
-                return np.mean(losses), np.mean(correct)
+
+        losses = np.array(losses)
+        correct = np.array(correct)
+        return np.mean(losses), np.mean(correct)
 
 # TODO: maybe merge training and validation dataloader into
 # one single loader, whichs returns the corresponding generators 
@@ -93,7 +93,7 @@ script_model = torch.jit.trace(model, torch.rand(1,dataloader.get_input_size()))
 
 model.to(DEVICE)
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.RMSprop(model.parameters(), lr=config.learning_rate)
+optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
 
 RUN_DIR = os.path.join("runs", args.dir)
 
@@ -104,8 +104,8 @@ train_loss, test_loss = [], []
 if __name__ == "__main__":
 
     for t in range(config.epochs):
-        loss = train(dataloader, model, loss_fn, optimizer)
-        vloss, correct = validate(val_dataloader, model, loss_fn)
+        loss = train(dataloader, model, loss_fn, optimizer, config.iterations)
+        vloss, correct = validate(val_dataloader, model, loss_fn, config.iterations)
         print(f"Epoch {t}\n-----------------")
         print(f"loss: {loss:>7f}")
         print(f"val loss: {vloss:>7f}")
@@ -118,8 +118,8 @@ if __name__ == "__main__":
 
         # for each epoch we want
         # a new set of games
-        dataloader.reset()
-        dataloader.load_data()
+        #dataloader.reset()
+        #dataloader.load_data()
 
     
     save_figure(config.epochs, train_loss, test_loss, RUN_DIR)
