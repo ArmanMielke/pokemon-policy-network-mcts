@@ -353,7 +353,8 @@ exports.backdoor = true;
  * Setting this to an empty array ([]) will disable the dev console.
  */
 exports.consoleips = ['127.0.0.1', '172.25.0.101', '172.25.0.102', '172.25.0.103', 
-'172.25.0.104', '172.25.0.105', '172.25.0.106'];
+'172.25.0.104', '172.25.0.105', '172.25.0.106', '172.25.0.107', '172.25.0.108',
+'172.25.0.109', '172.25.0.110'];
 
 /**
  * Whether to watch the config file for changes. If this is enabled,

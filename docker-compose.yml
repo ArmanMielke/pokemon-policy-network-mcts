@@ -243,6 +243,115 @@ services:
         ipv4_address: 172.25.0.106
 
 
+  # -------------------
+  # agent pair 8 (three somehow doesnt work)
+  # -------------------
+  pmariglia_accept_8:
+    depends_on:
+      - showdown
+    build:
+      context: pmariglia
+      dockerfile: Dockerfile
+    expose:
+      - 8081
+    container_name: pmariglia-accept-8
+    volumes:
+      - $PWD/pmariglia/envs/accept8:/showdown/.env
+      - $PWD/datasets/8:/showdown/dataset
+      - $PWD/teams:/showdown/teams/teams
+    networks:
+      - back
+  pmariglia_challenge_8:
+    depends_on:
+      - pmariglia_accept_8
+    build:
+      context: pmariglia
+      dockerfile: Dockerfile
+    expose:
+      - 8081
+    container_name: pmariglia-challenge-8
+    volumes:
+      - $PWD/pmariglia/envs/challenge8:/showdown/.env
+      - $PWD/datasets/8:/showdown/dataset---
+        pmariglia_accept_8
+      - $PWD/teams:/showdown/teams/teams
+    networks:
+      back:
+        ipv4_address: 172.25.0.107
+
+
+  # -------------------
+  # agent pair 9 (three somehow doesnt work)
+  # -------------------
+  pmariglia_accept_9:
+    depends_on:
+      - showdown
+    build:
+      context: pmariglia
+      dockerfile: Dockerfile
+    expose:
+      - 8081
+    container_name: pmariglia-accept-9
+    volumes:
+      - $PWD/pmariglia/envs/accept9:/showdown/.env
+      - $PWD/datasets/9:/showdown/dataset
+      - $PWD/teams:/showdown/teams/teams
+    networks:
+      - back
+  pmariglia_challenge_9:
+    depends_on:
+      - pmariglia_accept_9
+    build:
+      context: pmariglia
+      dockerfile: Dockerfile
+    expose:
+      - 8081
+    container_name: pmariglia-challenge-9
+    volumes:
+      - $PWD/pmariglia/envs/challenge9:/showdown/.env
+      - $PWD/datasets/9:/showdown/dataset
+      - $PWD/teams:/showdown/teams/teams
+    networks:
+      back:
+        ipv4_address: 172.25.0.108
+
+
+  # -------------------
+  # agent pair 10 (three somehow doesnt work)
+  # -------------------
+  pmariglia_accept_10:
+    depends_on:
+      - showdown
+    build:
+      context: pmariglia
+      dockerfile: Dockerfile
+    expose:
+      - 8081
+    container_name: pmariglia-accept-10
+    volumes:
+      - $PWD/pmariglia/envs/accept:/showdown/.env
+      - $PWD/datasets/10:/showdown/dataset
+      - $PWD/teams:/showdown/teams/teams
+    networks:
+      - back
+  pmariglia_challenge_10:
+    depends_on:
+      - pmariglia_accept_10
+    build:
+      context: pmariglia
+      dockerfile: Dockerfile
+    expose:
+      - 8081
+    container_name: pmariglia-challenge-10
+    volumes:
+      - $PWD/pmariglia/envs/challenge:/showdown/.env
+      - $PWD/datasets/10:/showdown/dataset
+      - $PWD/teams:/showdown/teams/teams
+    networks:
+      back:
+        ipv4_address: 172.25.0.109
+
+
 networks:
   back:
     driver: bridge
