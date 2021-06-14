@@ -90,7 +90,7 @@ model = SimpleMLP(
 # trace the model to create a torch script instance
 # you need to provide a example input. This
 # can then be loaded with libtorch in C++
-script_model = torch.jit.trace(model, torch.rand(1,dataloader.input_size))
+#script_model = torch.jit.trace(model, torch.rand(1,dataloader.input_size))
 
 model.to(DEVICE)
 loss_fn = torch.nn.CrossEntropyLoss()
@@ -134,5 +134,5 @@ if __name__ == "__main__":
 
     
     save_figure(epochsUsed, train_loss, test_loss, RUN_DIR)
-    save_model(model, script_model, RUN_DIR)
+    #save_model(model, script_model, RUN_DIR)
     save_loss(train_loss, test_loss, RUN_DIR)
