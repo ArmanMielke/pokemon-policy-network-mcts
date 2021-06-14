@@ -143,3 +143,54 @@ class DataConverter():
 
     def feature_size(self, feature):
         return self._feature_sizes[feature]
+
+if __name__ == '__main__':
+    import argparse
+    import hashlib
+    import os
+    import json
+    import time
+    import pickle
+
+    def load_json(path):
+        with open(path, 'r') as f:
+            return json.load(f)
+
+    def create_filename(string, file_extension):
+        hash = hashlib.sha1()
+        hash.update((str(time.time()) + string).encode('utf-8'))
+        return str(hash.hexdigest()) + file_extension
+
+    def save_pickle(path, content):
+        with open(path, 'wb') as f:
+            pickle.dump(content, f)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dir', type=str, help='the data directory')
+    parser.add_argument('--dest', type=str, help='where to store the converted data', default='')
+    args = parser.parse_args()
+
+    dest_path = ''
+    if args.dest == '':
+        dest_path = os.path.join(args.dir, 'converted')
+    else:
+        dest_path = args.dest
+
+    if not os.path.exists(dest_path):
+        os.makedirs(dest_path)
+
+    dataconverter = DataConverter()
+    turn = 0
+
+    file_list = [
+        os.path.join(args.dir, f) 
+        for f in os.listdir(args.dir) 
+        if os.path.isfile(os.path.join(args.dir,f))
+    ]
+
+    for file in file_list:
+        raw_data = load_json(file)
+        num_turns = len(raw_data['game'])
+        for i in range(num_turns):
+            path = os.path.join(dest_path, create_filename(str(turn), '.pkl'))
+            save_pickle(path, dataconverter.convert_turn(raw_data['game'][i]))

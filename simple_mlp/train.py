@@ -77,8 +77,8 @@ def validate(dataloader, model, loss_fn, iterations):
 
 # TODO: maybe merge training and validation dataloader into
 # one single loader, whichs returns the corresponding generators 
-dataloader = Dataloader(config.train_data_path, config.batch_size,config.features)
-val_dataloader = Dataloader(config.validation_data_path, config.batch_size, config.features)
+dataloader = Dataloader(config.train_data_path, config.batch_size,config.features, config.load_full_datset)
+val_dataloader = Dataloader(config.validation_data_path, config.batch_size, config.features, config.load_full_datset)
 
 model = SimpleMLP(
     dataloader.input_size,
