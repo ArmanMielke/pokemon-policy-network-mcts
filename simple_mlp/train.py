@@ -97,7 +97,8 @@ def main():
 
     model.to(DEVICE)
     loss_fn = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
+    # TODO un-hard code weight decay
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate, weight_decay=1e-5)
 
     if config.use_early_stopping:
         early_stopping = EarlyStopping(config.early_stopping_patience)
