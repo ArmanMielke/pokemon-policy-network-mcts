@@ -19,7 +19,7 @@ services:
   #  1. copy an existing agent block
   #  2. change the service names (increase number)
   #  3. change container_name (increase number)
-  #  4. change volume ./datasets/x:/showdown/dataset in both 
+  #  4. change volume ./datasets/x:/showdown/dataset in both
   #     agents (just for safety because the challenger needs to access this directory,
   #     and I don't know how good this will work if multiple challengers work in the same directory)
   #  5. change depends_on of challenger to the corresponding partner

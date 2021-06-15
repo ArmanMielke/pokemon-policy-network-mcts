@@ -81,9 +81,9 @@ class Dataloader():
             feature_list = []
             for player, feature in self.features:
                 if "turn" == feature:
-                    feature_list.append( np.array([self.turn]) )
+                    feature_list.append(np.array([self.turn]))
                     continue
-                feature_list.append( sample[player][feature])
+                feature_list.append(sample[player][feature])
             X[i] = np.concatenate(tuple(feature_list))
             y[i] = sample['p1']['chosenMove']
             i += 1
