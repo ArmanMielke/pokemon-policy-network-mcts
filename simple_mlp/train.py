@@ -26,7 +26,6 @@ def generate_dir_name():
 
 def train(data_loader, model, loss_fn, optimizer, iterations):
     losses = []
-    last_loss = 0
     model.train()
     # play batch_size many games
     # until the end
@@ -39,7 +38,6 @@ def train(data_loader, model, loss_fn, optimizer, iterations):
             .long().to(DEVICE)
         preds = model(X)
         loss = loss_fn(preds, label)
-        last_loss = loss
         losses.append(loss.item())
         optimizer.zero_grad()
         loss.backward()
@@ -52,7 +50,7 @@ def train(data_loader, model, loss_fn, optimizer, iterations):
 def validate(data_loader, model, loss_fn, iterations):
     model.eval()
     losses = []
-    correct = []
+    accuracy = []
     with torch.no_grad():
         for _ in range(iterations):
             X, y = next(data_loader)
@@ -61,11 +59,11 @@ def validate(data_loader, model, loss_fn, iterations):
                 .long().to(DEVICE)
             preds = model(X)
             losses.append(loss_fn(preds, label).item())
-            correct.append((preds.argmax(1) == label).type(torch.float).sum().item())
+            accuracy.append((preds.argmax(1) == label).type(torch.float).mean().item())
 
         losses = np.array(losses)
-        correct = np.array(correct)
-        return np.mean(losses), np.mean(correct)
+        accuracy = np.array(accuracy)
+        return np.mean(losses), np.mean(accuracy)
 
 
 def main():
@@ -111,14 +109,14 @@ def main():
     epochs_used = 0
     for t in range(config.epochs):
         train_loss = train(train_loader, model, loss_fn, optimizer, config.iterations)
-        val_loss, correct = validate(val_loader, model, loss_fn, config.iterations)
+        val_loss, val_accuracy = validate(val_loader, model, loss_fn, config.iterations)
         print(f"Epoch {t}\n-----------------")
         print(f"loss: {train_loss:>7f}")
-        print(f"val loss: {val_loss:>7f}")
+        print(f"val loss: {val_loss:>7f} (accuracy: {val_accuracy:>7f})")
         print(f"DEVICE {DEVICE}")
         writer.add_scalar('loss', train_loss, t)
         writer.add_scalar('val_loss', val_loss, t)
-        writer.add_scalar('correct', correct, t)
+        writer.add_scalar('val_accuracy', val_accuracy, t)
         train_losses.append(train_loss)
         val_losses.append(val_loss)
 
