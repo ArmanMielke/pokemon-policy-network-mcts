@@ -1,10 +1,12 @@
-import torch
-import numpy as np
-import os
-from tensorboardX import SummaryWriter
 import argparse
 import hashlib
+import os
 import time
+from typing import Tuple
+
+import torch
+import numpy as np
+from tensorboardX import SummaryWriter
 
 from dataloader.dataloader import Dataloader
 from network import SimpleMLP
@@ -17,14 +19,15 @@ from lrscheduler import LRScheduler
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def generate_dir_name():
+def generate_dir_name() -> str:
     """Create a unique hash for the filename"""
     hash = hashlib.sha1()
     hash.update(str(time.time()).encode('utf-8'))
     return str(hash.hexdigest())
 
 
-def train(data_loader, model, loss_fn, optimizer, iterations):
+def train(data_loader, model, loss_fn, optimizer, iterations: int) -> float:
+    """Returns the training loss"""
     losses = []
     model.train()
     # play batch_size many games
@@ -33,7 +36,7 @@ def train(data_loader, model, loss_fn, optimizer, iterations):
         X, y = next(data_loader)
         X = torch.from_numpy(X).float().to(DEVICE)
         # CrossEntropyLoss does not like a one-hot vector but
-        # a sigle integer indicating which class it belongs to
+        # a single integer indicating which class it belongs to
         label = torch.from_numpy(np.array([np.argmax(y[i]) for i in range(len(y))])) \
             .long().to(DEVICE)
         preds = model(X)
@@ -47,7 +50,8 @@ def train(data_loader, model, loss_fn, optimizer, iterations):
     return np.mean(losses)
 
 
-def validate(data_loader, model, loss_fn, iterations):
+def validate(data_loader, model, loss_fn, iterations: int) -> Tuple[float, float]:
+    """Returns validation loss and accuracy"""
     model.eval()
     losses = []
     accuracy = []
