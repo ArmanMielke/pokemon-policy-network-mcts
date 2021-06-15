@@ -44,9 +44,6 @@ def train(dataloader, model, loss_fn, optimizer, iterations):
                 .long().to(DEVICE)
         preds = model(X)
         loss = loss_fn(preds, label)
-        diff = abs(loss - last_loss)
-        if diff > 5:
-            dataloader.trace_back(preds)
         last_loss = loss
         losses.append(loss.item())
         optimizer.zero_grad()
