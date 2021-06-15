@@ -4,9 +4,9 @@ import json
 import os
 
 import numpy as np
-import random
 
-class Dataloader():
+
+class Dataloader:
     def __init__(self, data_path, batch_size, features):
         self.data_path = data_path
         self.batch_size = batch_size
@@ -41,7 +41,7 @@ class Dataloader():
         file_list = [
             os.path.join(self.data_path, f) 
             for f in os.listdir(self.data_path) 
-            if os.path.isfile(os.path.join(self.data_path,f))
+            if os.path.isfile(os.path.join(self.data_path, f))
         ]
         if len(file_list) < self.batch_size:
             print(f"The number of files ({len(file_list)}) is smaller than \
@@ -55,7 +55,7 @@ class Dataloader():
             self.selected_files.append(file)
             num_turns = len(raw_data['game'])
             for i in range(num_turns):
-                data.append( self.data_converter.convert_turn(raw_data['game'][i]) )
+                data.append(self.data_converter.convert_turn(raw_data['game'][i]))
 
         self.data = np.array(data)
 
@@ -103,22 +103,11 @@ class Dataloader():
             feature_list = []
             for player, feature in self.features:
                 if "turn" == feature:
-                    feature_list.append( np.array([self.turn]) )
+                    feature_list.append(np.array([self.turn]))
                     continue
-                feature_list.append( sample[player][feature])
+                feature_list.append(sample[player][feature])
             X[i] = np.concatenate(tuple(feature_list))
             y[i] = sample['p1']['chosenMove']
             i += 1
         self.current_batch, self.current_label = X, y
         return X, y
-
-    def trace_back(self, prediction):
-        with open('tmp/trace.txt', 'a') as f:
-            f.write("-----------------------\n")
-            f.write(f"turn: {self.turn}\n")
-            for file in self.selected_files:
-                f.write(f"{file}\n")
-
-            f.write("Prediction          |      Ground Truth\n")
-            for i in range(len(self.current_label)):
-                f.write(f"{prediction[i]}          |      {self.current_label[i]}\n")
