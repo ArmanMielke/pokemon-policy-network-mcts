@@ -13,7 +13,7 @@ def copy_config_to_output_dir(output_path, config):
         f.write(json.dumps(config, indent=4, separators=(',', ': ')))
 
 def save_figure(epochs, train_loss, val_loss, path):
-    fig = plt.figure()
+    fig = plt.figure(figsize=(10, 10))
     axes = fig.add_axes([0.1, 0.1, 0.8, 0.8])
     axes.plot(np.arange(0, epochs), train_loss, label='train loss')
     axes.plot(np.arange(0, epochs), val_loss, label='validation loss')
