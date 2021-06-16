@@ -44,6 +44,7 @@ services:
     expose:
       - 8081
     container_name: pmariglia-accept-1
+    restart: always
     volumes:
       - ./pmariglia/envs/accept1:/showdown/.env
       - ./datasets/1:/showdown/dataset
@@ -59,6 +60,7 @@ services:
     expose:
       - 8081
     container_name: pmariglia-challenge-1
+    restart: always
     volumes:
       - ./pmariglia/envs/challenge1:/showdown/.env
       - ./datasets/1:/showdown/dataset
@@ -79,6 +81,7 @@ services:
     expose:
       - 8081
     container_name: pmariglia-accept-2
+    restart: always
     volumes:
       - ./pmariglia/envs/accept2:/showdown/.env
       - ./datasets/2:/showdown/dataset
@@ -94,6 +97,7 @@ services:
     expose:
       - 8081
     container_name: pmariglia-challenge-2
+    restart: always
     volumes:
       - ./pmariglia/envs/challenge2:/showdown/.env
       - ./datasets/2:/showdown/dataset
@@ -114,6 +118,7 @@ services:
     expose:
       - 8081
     container_name: pmariglia-accept-4
+    restart: always
     volumes:
       - ./pmariglia/envs/accept4:/showdown/.env
       - ./datasets/4:/showdown/dataset
@@ -129,6 +134,7 @@ services:
     expose:
       - 8081
     container_name: pmariglia-challenge-4
+    restart: always
     volumes:
       - ./pmariglia/envs/challenge4:/showdown/.env
       - ./datasets/4:/showdown/dataset
@@ -149,6 +155,7 @@ services:
     expose:
       - 8081
     container_name: pmariglia-accept-5
+    restart: always
     volumes:
       - ./pmariglia/envs/accept5:/showdown/.env
       - ./datasets/5:/showdown/dataset
@@ -164,6 +171,7 @@ services:
     expose:
       - 8081
     container_name: pmariglia-challenge-5
+    restart: always
     volumes:
       - ./pmariglia/envs/challenge5:/showdown/.env
       - ./datasets/5:/showdown/dataset
