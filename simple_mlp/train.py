@@ -45,7 +45,7 @@ def train(data_loader, model, loss_fn, optimizer, iterations: int) -> float:
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-    
+
     losses = np.array(losses)
     return np.mean(losses)
 
@@ -98,7 +98,7 @@ def main():
     model.to(DEVICE)
     loss_fn = torch.nn.CrossEntropyLoss()
     # TODO un-hard code weight decay
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate, weight_decay=1e-5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate, weight_decay=1e-4)
 
     if config.use_early_stopping:
         early_stopping = EarlyStopping(config.early_stopping_patience)
