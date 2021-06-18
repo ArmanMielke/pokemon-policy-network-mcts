@@ -8,8 +8,9 @@ import torch
 import numpy as np
 from tensorboardX import SummaryWriter
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
-from dataloader.dataloader import PokemonDataset
+from dataloader.dataset import PokemonDataset
 from network import SimpleMLP
 from utils import copy_config_to_output_dir, save_model, save_figure, save_loss
 from config import SimpleMLPConfig
@@ -32,6 +33,8 @@ def train(data_loader, model, loss_fn, optimizer) -> float:
     losses = []
     model.train()
     
+    progress_bar = tqdm(total=len(data_loader))
+
     for X, y in data_loader:
         X = X.float().to(DEVICE)
         # CrossEntropyLoss does not like a one-hot vector but
@@ -43,8 +46,11 @@ def train(data_loader, model, loss_fn, optimizer) -> float:
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        progress_bar.set_description("Training ...")
+        progress_bar.update(1)
     
     losses = np.array(losses)
+    progress_bar.close()
     return np.mean(losses)
 
 
@@ -53,6 +59,7 @@ def validate(data_loader, model, loss_fn) -> Tuple[float, float]:
     model.eval()
     losses = []
     accuracy = []
+    progress_bar = tqdm(total=len(data_loader))
     with torch.no_grad():
         for X, y in data_loader:
             X = X.float().to(DEVICE)
@@ -60,9 +67,13 @@ def validate(data_loader, model, loss_fn) -> Tuple[float, float]:
             preds = model(X)
             losses.append(loss_fn(preds, label).item())
             accuracy.append((preds.argmax(1) == label).type(torch.float).mean().item())
+            progress_bar.set_description("Validating ...")
+            progress_bar.update(1)
+
 
         losses = np.array(losses)
         accuracy = np.array(accuracy)
+        progress_bar.close()
         return np.mean(losses), np.mean(accuracy)
 
 
