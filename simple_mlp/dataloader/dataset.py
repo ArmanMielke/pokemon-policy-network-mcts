@@ -31,15 +31,20 @@ class PokemonDataset(Dataset):
         sample = self._load_pickle(path)
         X = self._get_input_features(sample)
         y = sample['p1']['chosen_move']
-        if self.transform:
-            X = self.transform(X)
 
         return X, y
+
+    def get_stat_start_position(self) -> int:
+        pass
 
     def _get_input_features(self, sample) -> np.ndarray:
         feature_list = []
         for player, feature in self.features:
-            feature_list.append(sample[player][feature])
+            data = sample[player][feature]
+            if self.transform != None:
+                data = self.transform(data, feature)
+            feature_list.append(data)
+            
         return np.concatenate(tuple(feature_list))
 
     def _convert_data(self):
