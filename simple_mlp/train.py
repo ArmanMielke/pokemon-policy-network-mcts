@@ -7,8 +7,9 @@ from typing import Tuple
 import torch
 import numpy as np
 from tensorboardX import SummaryWriter
+from torch.utils.data import DataLoader
 
-from dataloader.dataloader import Dataloader
+from dataloader.dataloader import PokemonDataset
 from network import SimpleMLP
 from utils import copy_config_to_output_dir, save_model, save_figure, save_loss
 from config import SimpleMLPConfig
@@ -26,19 +27,16 @@ def generate_dir_name() -> str:
     return str(hash.hexdigest())
 
 
-def train(data_loader, model, loss_fn, optimizer, iterations: int) -> float:
+def train(data_loader, model, loss_fn, optimizer) -> float:
     """Returns the training loss"""
     losses = []
     model.train()
-    # play batch_size many games
-    # until the end
-    for _ in range(iterations):
-        X, y = next(data_loader)
-        X = torch.from_numpy(X).float().to(DEVICE)
+    
+    for X, y in data_loader:
+        X = X.float().to(DEVICE)
         # CrossEntropyLoss does not like a one-hot vector but
         # a single integer indicating which class it belongs to
-        label = torch.from_numpy(np.array([np.argmax(y[i]) for i in range(len(y))])) \
-            .long().to(DEVICE)
+        label = y.argmax(dim=1).long().to(DEVICE)
         preds = model(X)
         loss = loss_fn(preds, label)
         losses.append(loss.item())
@@ -50,17 +48,15 @@ def train(data_loader, model, loss_fn, optimizer, iterations: int) -> float:
     return np.mean(losses)
 
 
-def validate(data_loader, model, loss_fn, iterations: int) -> Tuple[float, float]:
+def validate(data_loader, model, loss_fn) -> Tuple[float, float]:
     """Returns validation loss and accuracy"""
     model.eval()
     losses = []
     accuracy = []
     with torch.no_grad():
-        for _ in range(iterations):
-            X, y = next(data_loader)
-            X = torch.from_numpy(X).float().to(DEVICE)
-            label = torch.from_numpy(np.array([np.argmax(y[i]) for i in range(len(y))])) \
-                .long().to(DEVICE)
+        for X, y in data_loader:
+            X = X.float().to(DEVICE)
+            label = y.argmax(dim=1).long().to(DEVICE)
             preds = model(X)
             losses.append(loss_fn(preds, label).item())
             accuracy.append((preds.argmax(1) == label).type(torch.float).mean().item())
@@ -79,13 +75,17 @@ def main():
 
     config = SimpleMLPConfig(args.config)
 
-    # TODO: maybe merge training and validation data loader into one, which returns the corresponding generators
-    train_loader = Dataloader(config.train_data_path, config.batch_size, config.features)
-    val_loader = Dataloader(config.validation_data_path, config.batch_size, config.features)
+    train_dataset = PokemonDataset(config.train_data_path, config.features)
+    val_dataset = PokemonDataset(config.validation_data_path, config.features)
+    train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True)
+
+    X,y = train_dataset[0]
+    input_size, output_size = len(X), len(y)
 
     model = SimpleMLP(
-        train_loader.input_size,
-        train_loader.output_size,
+        input_size,
+        output_size,
         config.config["layers"],
         config.config["neurons"],
     )
@@ -93,7 +93,7 @@ def main():
     # trace the model to create a torch script instance
     # you need to provide a example input. This
     # can then be loaded with libtorch in C++
-    script_model = torch.jit.trace(model, torch.rand(1, train_loader.input_size))
+    script_model = torch.jit.trace(model, torch.rand(1, input_size))
 
     model.to(DEVICE)
     loss_fn = torch.nn.CrossEntropyLoss()
@@ -113,8 +113,8 @@ def main():
 
     epochs_used = 0
     for t in range(config.epochs):
-        train_loss = train(train_loader, model, loss_fn, optimizer, config.iterations)
-        val_loss, val_accuracy = validate(val_loader, model, loss_fn, config.iterations)
+        train_loss = train(train_loader, model, loss_fn, optimizer)
+        val_loss, val_accuracy = validate(val_loader, model, loss_fn)
         print(f"Epoch {t}\n-----------------")
         print(f"loss: {train_loss:>7f}")
         print(f"val loss: {val_loss:>7f} (accuracy: {val_accuracy:>7f})")

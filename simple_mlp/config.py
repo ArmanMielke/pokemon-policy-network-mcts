@@ -42,10 +42,6 @@ class SimpleMLPConfig():
         return self._config["features"]
 
     @property
-    def iterations(self):
-        return self._config['iterations']
-
-    @property
     def use_early_stopping(self):
         return "early_stopping" in self._config.keys()
 
