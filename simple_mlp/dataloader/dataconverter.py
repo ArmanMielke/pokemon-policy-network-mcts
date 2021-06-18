@@ -117,7 +117,7 @@ class DataConverter():
         hps = []
         for p in pokemon:
             hps.append(self.get_hp(p))
-        return np.array(hps)
+        return np.concatenate(tuple(hps))
 
     def get_pokemon_stats(self, pokemon) -> np.ndarray:
         """
