@@ -30,7 +30,7 @@ class PokemonDataset(Dataset):
         path = os.path.join(self.converted_path, self.file_list[index])
         sample = self._load_pickle(path)
         X = self._get_input_features(sample)
-        y = sample['p1']['chosenMove']
+        y = sample['p1']['chosen_move']
         if self.transform:
             X = self.transform(X)
 

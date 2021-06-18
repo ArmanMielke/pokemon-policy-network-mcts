@@ -6,7 +6,7 @@
     "batch_size": 32,
     "train_data_path": "datasets/two_normal_only_damage_90_10_split/train",
     "val_data_path": "datasets/two_normal_only_damage_90_10_split/val",
-    "features": ["p1/hp", "p2/hp", "p1/moves_damage", "p2/moves_damage", "p1/moves", "p2/moves"],
+    "features": ["p1/hp_active", "p2/hp_active", "p1/moves_damage", "p2/moves_damage", "p1/active_moves", "p2/active_moves"],
     "lr_scheduler" : {
         "patience" : 50,
         "min_lr" : 1e-6

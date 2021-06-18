@@ -1,196 +1,160 @@
+import os
 import numpy as np
+from typing import Dict, Tuple
+import json
+from pathlib import Path
 
 class DataConverter():
     def __init__(self):
 
-        self.move_lookup = {
-            "tackle" : 0,
-            "slash"  : 1,
-            "scratch": 2,
-            "pound"  : 3,
-            "extremespeed": 4,
-            "stomp" : 5,
-            "chipaway" : 6,
-            "headbutt" : 7
-        }
+        # The values of all existing moves, items, abilities, etc.
+        dirname = Path(__file__).parent.absolute()
+        self.moves = self.load_json(os.path.join(dirname,'data', 'moves.json'))
+        self.abilities = self.load_json(os.path.join(dirname,'data', 'abilities.json'))
+        self.items = self.load_json(os.path.join(dirname,'data', 'items.json'))
+        self.pokemon = self.load_json(os.path.join(dirname,'data', 'pokedex.json'))
 
-        self.move_size = 4 + 2 # +1 for switch, +1 for slack (if attack not found)
-        self.last_move = self.current_move = np.zeros(self.move_size)
 
-        self.damage_lookup = {
-            0 : 40,     # tackle
-            1 : 70,     # slash
-            2 : 40,     # scratch
-            3 : 40,     # pound
-            4 : 80,     # extremespeed
-            5 : 65,     # stomp
-            6 : 70,     # chipaway
-            7 : 70      # headbutt
-        }
-
-        self._feature_sizes = {}
-
-    def convert(self, data):
+    def convert_game(self, data):
         num_turns = len(data['game'])
         converted_data = []
-        # remove the first 2 turns because there are 
-        # wrong moves
         for i in range(num_turns):
-            turn = data['game'][i]
-            converted_data.append( self.convert_turn(turn) )
+            converted_data.append( self.convert_turn(data['game'][i]))
         return converted_data
 
     def convert_turn(self, turn):
         return {
-                "p1" : self.get_player_data(turn, "p1"),
-                "p2" : self.get_player_data(turn, "p2")
+            'p1' : self.get_player_data(turn, 'p1'),
+            'p2' : self.get_player_data(turn, 'p2')
         }
 
     def get_player_data(self, data, playerid):
         sides = data["sides"]
         my_side = sides[0] if sides[0]["id"] == playerid else sides[1]
         other_side = sides[1] if sides[0]["id"] == playerid else sides[0]
-        converted_data = {
-            "moves": self.get_active_moves_vector(my_side["pokemon"]),
-            "moves_damage": self.get_active_moves_damage(my_side["pokemon"]),
-            "chosenMove": self.get_chosen_move(my_side),
-            "hp": self.get_hp(my_side["pokemon"]),
-            "enemy_hp": self.get_hp(other_side["pokemon"]),
-            "last_move": self.get_last_move()
+        my_pokemon = my_side['pokemon']
+        my_active_pokemon = self.get_active_pokemon(my_pokemon)
+
+        active_moves, active_moves_ids = self.get_moves(my_active_pokemon) # the moves of the active pokemon (as showdown ids)
+        moves_damage = self.get_moves_damage(active_moves)          # the base damage for each move
+        chosen_move = self.get_chosen_move(my_side)                 # the move pmariglia chose
+        hp_active = self.get_hp(my_active_pokemon)                  # hp only of the active pokemon
+        hp_all = self.get_hp_all(my_pokemon)                        # hp of the whole team
+        stats_active = self.get_pokemon_stats(my_active_pokemon)    # atk, def, spa, spd, spe, hp of the active pokemon
+        stats_all = self.get_team_pokemon_stats(my_pokemon)         # stats of all pokemon in the team
+
+        return {
+            "active_moves" : active_moves_ids, "chosen_move" : chosen_move,
+            "moves_damage" : moves_damage, "hp_active" : hp_active, "hp_all" : hp_all, 
+            "stats_active" : stats_active, "stats_all" : stats_all
         }
-        for key, value in converted_data.items():
-            self._feature_sizes.update({key : len(value)})
-        return converted_data
 
-    def get_active_moves(self, my_pokemon):
+
+    def get_active_pokemon(self, pokemon) -> Dict:
+        """
+        Return all values for the active pokemon
+        """
+        for p in pokemon:
+            if p['isActive']:
+                return p
+        
+        # TODO: if no pokemon is active anymore
+        # choose the an abitrary pokemon. needs to be fixed
+        return pokemon[0]
+
+    def get_moves(self, pokemon) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Return the move ids (based on the id by showdown) and move names in a numpy array
+        for the given pokemon
+        """
+        move_num = []
         moves = []
-        for pokemon in my_pokemon:
-            if pokemon["isActive"]:
-                move_slots = pokemon["moveSlots"]
-                for move in move_slots:
-                    moves.append(
-                        self.move_lookup[move["id"]]
-                    )
-                return np.array(moves)
-        
-        # TODO: if both pokemon are dead we need to find
-        # a better solution to handle this
-        move_slots = my_pokemon[0]["moveSlots"]
+        move_slots = pokemon['moveSlots']
         for move in move_slots:
-            moves.append(
-                self.move_lookup[move["id"]]
-            )
-        return np.array(moves)
+            move_name = move['id']
+            moves.append(move_name)
+            move_num.append(self.moves[move_name]['num'])
+        return np.array(moves), np.array(move_num)
 
-    def get_active_moves_vector(self, my_pokemon):
-        moves = self.get_active_moves(my_pokemon)
-        move_vecs = []
-        for move in moves:
-            m = np.zeros(len(self.move_lookup))
-            m[move] = 1
-            move_vecs.append(m)
-        return np.concatenate(tuple(move_vecs))
-
-
-    def get_active_moves_damage(self, my_pokemon):
-        active_moves = self.get_active_moves(my_pokemon)
-        
-        damage = []
-        #print(active_moves)
-        for move in active_moves:
-            damage.append(self.damage_lookup[move])
-        return np.array(damage)
-
-    def get_chosen_move(self, my_side):
-        action = my_side["action"][0].split(" ")
-        self.last_move = self.current_move
+    def get_chosen_move(self, side) -> np.ndarray:
+        """
+        Get the chosen move by pmariglia for the given side
+        """
+        action = side['action'][0].split(" ")
+        chosen_move = np.zeros(6) # 4 for the attacks and 1 for the switch action +1 slack (if move not found)
         if action[0] == "/switch":
-            self.current_move = np.zeros(self.move_size)
-            self.current_move[-2] = 1
+            chosen_move[-2] = 1
         else:
             move = action[-1]
-            move_pos = self.get_move_position(move, my_side)
-
-            self.current_move = np.zeros(self.move_size)
+            move_pos = self.get_move_position(move, side)
             if move_pos == None:
-                self.current_move[-1] = 1
+                chosen_move[-1] = 1
             else:
-                self.current_move[move_pos] = 1
-        return self.current_move
+                chosen_move[move_pos] = 1
+        return chosen_move
 
-    def get_move_position(self, move, my_side):
-        for pokemon in my_side["pokemon"]:
+    def get_move_position(self, move, side) -> int:
+        """
+        Get the position of a move in the move slots
+        """
+        for pokemon in side["pokemon"]:
             if pokemon["isActive"]:
                 move_slots = pokemon["moveSlots"]
                 for i in range(len(move_slots)):
                     if move_slots[i]["id"] == move:
                         return i
 
-    def get_hp(self, enemy_side):
+    def get_hp(self, pokemon) -> np.ndarray:
+        """
+        Get the HP for one pokemon
+        """
+        return np.array([pokemon['hp']])
+
+    def get_hp_all(self, pokemon) -> np.ndarray:
+        """
+        Get the hp for all pokemon in a team
+        """
         hps = []
-        for pokemon in enemy_side:
-            hps.append( pokemon["hp"] )
+        for p in pokemon:
+            hps.append(self.get_hp(p))
         return np.array(hps)
 
-    def get_last_move(self):
-        return self.last_move
+    def get_pokemon_stats(self, pokemon) -> np.ndarray:
+        """
+        Return attack, defense, etc. for one pokemon
+        """
+        stats = pokemon['baseStoredStats']
+        return np.array([
+            stats['atk'], stats['def'], stats['spa'],
+            stats['spd'], stats['spe'], stats['hp']
+        ])
 
-    def get_move_name(self, move):
-        moveid = np.argmax(move)
-        for name, id in self.move_lookup.items():
-            if id == moveid:
-                return name
+    def get_team_pokemon_stats(self, team) -> np.ndarray:
+        """
+        Return attack, defense, etc. for all pokemon in a team
+        """
+        stats = []
+        for pokemon in team:
+            stats.append( self.get_pokemon_stats(pokemon) )
+        return np.concatenate(tuple(stats))
 
-    def feature_size(self, feature):
-        return self._feature_sizes[feature]
+    def get_moves_damage(self, moves) -> np.ndarray:
+        """
+        Return the base damage for the given moves
+        """
+        damage = np.zeros(len(moves))
+        for i, move in enumerate(moves):
+            damage[i] = self.moves[move]['basePower']
+        return damage
 
-if __name__ == '__main__':
-    import argparse
-    import hashlib
-    import os
-    import json
-    import time
-    import pickle
+    def one_hot_encode(self, category, num_categories) -> np.ndarray:
+        """
+        Create a one hot representation of a category
+        """
+        vector = np.zeros(num_categories)
+        vector[category] = 1
+        return vector
 
-    def load_json(path):
+    def load_json(self, path):
         with open(path, 'r') as f:
             return json.load(f)
-
-    def create_filename(string, file_extension):
-        hash = hashlib.sha1()
-        hash.update((str(time.time()) + string).encode('utf-8'))
-        return str(hash.hexdigest()) + file_extension
-
-    def save_pickle(path, content):
-        with open(path, 'wb') as f:
-            pickle.dump(content, f)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--dir', type=str, help='the data directory')
-    parser.add_argument('--dest', type=str, help='where to store the converted data', default='')
-    args = parser.parse_args()
-
-    dest_path = ''
-    if args.dest == '':
-        dest_path = os.path.join(args.dir, 'converted')
-    else:
-        dest_path = args.dest
-
-    if not os.path.exists(dest_path):
-        os.makedirs(dest_path)
-
-    dataconverter = DataConverter()
-    turn = 0
-
-    file_list = [
-        os.path.join(args.dir, f) 
-        for f in os.listdir(args.dir) 
-        if os.path.isfile(os.path.join(args.dir,f))
-    ]
-
-    for file in file_list:
-        raw_data = load_json(file)
-        num_turns = len(raw_data['game'])
-        for i in range(num_turns):
-            path = os.path.join(dest_path, create_filename(str(turn), '.pkl'))
-            save_pickle(path, dataconverter.convert_turn(raw_data['game'][i]))
