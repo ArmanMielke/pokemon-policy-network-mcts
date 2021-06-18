@@ -7,6 +7,7 @@ services:
     ports:
       - 8081:8081
     container_name: showdown-server
+    restart: always
     volumes:
       - ./showdown/config.js:/pokemon-showdown/config/config.js
       - ./showdown/usergroups.csv:/pokemon-showdown/config/usergroups.csv
@@ -46,9 +47,9 @@ services:
     container_name: pmariglia-accept-1
     restart: always
     volumes:
-      - $PWD/pmariglia/envs/accept1:/showdown/.env
-      - $PWD/datasets/1:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/accept1:/showdown/.env
+      - ./datasets/1:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       - back
   pmariglia_challenge_1:
@@ -62,9 +63,9 @@ services:
     container_name: pmariglia-challenge-1
     restart: always
     volumes:
-      - $PWD/pmariglia/envs/challenge1:/showdown/.env
-      - $PWD/datasets/1:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/challenge1:/showdown/.env
+      - ./datasets/1:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       back:
         ipv4_address: 172.25.0.101
@@ -83,9 +84,9 @@ services:
     container_name: pmariglia-accept-2
     restart: always
     volumes:
-      - $PWD/pmariglia/envs/accept2:/showdown/.env
-      - $PWD/datasets/2:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/accept2:/showdown/.env
+      - ./datasets/2:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       - back
   pmariglia_challenge_2:
@@ -99,9 +100,9 @@ services:
     container_name: pmariglia-challenge-2
     restart: always
     volumes:
-      - $PWD/pmariglia/envs/challenge2:/showdown/.env
-      - $PWD/datasets/2:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/challenge2:/showdown/.env
+      - ./datasets/2:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       back:
         ipv4_address: 172.25.0.102
@@ -120,9 +121,9 @@ services:
     container_name: pmariglia-accept-4
     restart: always
     volumes:
-      - $PWD/pmariglia/envs/accept4:/showdown/.env
-      - $PWD/datasets/4:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/accept4:/showdown/.env
+      - ./datasets/4:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       - back
   pmariglia_challenge_4:
@@ -136,9 +137,9 @@ services:
     container_name: pmariglia-challenge-4
     restart: always
     volumes:
-      - $PWD/pmariglia/envs/challenge4:/showdown/.env
-      - $PWD/datasets/4:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/challenge4:/showdown/.env
+      - ./datasets/4:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       back:
         ipv4_address: 172.25.0.104
@@ -157,9 +158,9 @@ services:
     container_name: pmariglia-accept-5
     restart: always
     volumes:
-      - $PWD/pmariglia/envs/accept5:/showdown/.env
-      - $PWD/datasets/5:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/accept5:/showdown/.env
+      - ./datasets/5:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       - back
   pmariglia_challenge_5:
@@ -173,9 +174,9 @@ services:
     container_name: pmariglia-challenge-5
     restart: always
     volumes:
-      - $PWD/pmariglia/envs/challenge5:/showdown/.env
-      - $PWD/datasets/5:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/challenge5:/showdown/.env
+      - ./datasets/5:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       back:
         ipv4_address: 172.25.0.103
@@ -192,10 +193,11 @@ services:
     expose:
       - 8081
     container_name: pmariglia-accept-6
+    restart: always
     volumes:
-      - $PWD/pmariglia/envs/accept6:/showdown/.env
-      - $PWD/datasets/6:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/accept6:/showdown/.env
+      - ./datasets/6:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       - back
   pmariglia_challenge_6:
@@ -207,10 +209,11 @@ services:
     expose:
       - 8081
     container_name: pmariglia-challenge-6
+    restart: always
     volumes:
-      - $PWD/pmariglia/envs/challenge6:/showdown/.env
-      - $PWD/datasets/6:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/challenge6:/showdown/.env
+      - ./datasets/6:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       back:
         ipv4_address: 172.25.0.105
@@ -227,10 +230,11 @@ services:
     expose:
       - 8081
     container_name: pmariglia-accept-7
+    restart: always
     volumes:
-      - $PWD/pmariglia/envs/accept7:/showdown/.env
-      - $PWD/datasets/7:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/accept7:/showdown/.env
+      - ./datasets/7:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       - back
   pmariglia_challenge_7:
@@ -242,10 +246,11 @@ services:
     expose:
       - 8081
     container_name: pmariglia-challenge-7
+    restart: always
     volumes:
-      - $PWD/pmariglia/envs/challenge7:/showdown/.env
-      - $PWD/datasets/7:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/challenge7:/showdown/.env
+      - ./datasets/7:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       back:
         ipv4_address: 172.25.0.106
@@ -263,10 +268,11 @@ services:
     expose:
       - 8081
     container_name: pmariglia-accept-8
+    restart: always
     volumes:
-      - $PWD/pmariglia/envs/accept8:/showdown/.env
-      - $PWD/datasets/8:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/accept8:/showdown/.env
+      - ./datasets/8:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       - back
   pmariglia_challenge_8:
@@ -278,11 +284,12 @@ services:
     expose:
       - 8081
     container_name: pmariglia-challenge-8
+    restart: always
     volumes:
-      - $PWD/pmariglia/envs/challenge8:/showdown/.env
-      - $PWD/datasets/8:/showdown/dataset---
+      - ./pmariglia/envs/challenge8:/showdown/.env
+      - ./datasets/8:/showdown/dataset
         pmariglia_accept_8
-      - $PWD/teams:/showdown/teams/teams
+      - ./teams:/showdown/teams/teams
     networks:
       back:
         ipv4_address: 172.25.0.107
@@ -300,10 +307,11 @@ services:
     expose:
       - 8081
     container_name: pmariglia-accept-9
+    restart: always
     volumes:
-      - $PWD/pmariglia/envs/accept9:/showdown/.env
-      - $PWD/datasets/9:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/accept9:/showdown/.env
+      - ./datasets/9:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       - back
   pmariglia_challenge_9:
@@ -315,10 +323,11 @@ services:
     expose:
       - 8081
     container_name: pmariglia-challenge-9
+    restart: always
     volumes:
-      - $PWD/pmariglia/envs/challenge9:/showdown/.env
-      - $PWD/datasets/9:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/challenge9:/showdown/.env
+      - ./datasets/9:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       back:
         ipv4_address: 172.25.0.108
@@ -336,10 +345,11 @@ services:
     expose:
       - 8081
     container_name: pmariglia-accept-10
+    restart: always
     volumes:
-      - $PWD/pmariglia/envs/accept:/showdown/.env
-      - $PWD/datasets/10:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/accept:/showdown/.env
+      - ./datasets/10:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       - back
   pmariglia_challenge_10:
@@ -351,10 +361,11 @@ services:
     expose:
       - 8081
     container_name: pmariglia-challenge-10
+    restart: always
     volumes:
-      - $PWD/pmariglia/envs/challenge:/showdown/.env
-      - $PWD/datasets/10:/showdown/dataset
-      - $PWD/teams:/showdown/teams/teams
+      - ./pmariglia/envs/challenge:/showdown/.env
+      - ./datasets/10:/showdown/dataset
+      - ./teams:/showdown/teams/teams
     networks:
       back:
         ipv4_address: 172.25.0.109
