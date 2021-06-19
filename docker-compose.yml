@@ -48,7 +48,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/accept1:/showdown/.env
-      - ./datasets/1:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       - back
@@ -64,7 +64,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/challenge1:/showdown/.env
-      - ./datasets/1:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       back:
@@ -85,7 +85,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/accept2:/showdown/.env
-      - ./datasets/2:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       - back
@@ -101,7 +101,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/challenge2:/showdown/.env
-      - ./datasets/2:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       back:
@@ -122,7 +122,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/accept4:/showdown/.env
-      - ./datasets/4:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       - back
@@ -138,7 +138,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/challenge4:/showdown/.env
-      - ./datasets/4:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       back:
@@ -159,7 +159,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/accept5:/showdown/.env
-      - ./datasets/5:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       - back
@@ -175,7 +175,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/challenge5:/showdown/.env
-      - ./datasets/5:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       back:
@@ -196,7 +196,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/accept6:/showdown/.env
-      - ./datasets/6:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       - back
@@ -212,7 +212,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/challenge6:/showdown/.env
-      - ./datasets/6:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       back:
@@ -233,7 +233,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/accept7:/showdown/.env
-      - ./datasets/7:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       - back
@@ -249,7 +249,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/challenge7:/showdown/.env
-      - ./datasets/7:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       back:
@@ -271,7 +271,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/accept8:/showdown/.env
-      - ./datasets/8:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       - back
@@ -287,7 +287,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/challenge8:/showdown/.env
-      - ./datasets/8:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       back:
@@ -309,7 +309,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/accept9:/showdown/.env
-      - ./datasets/9:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       - back
@@ -325,7 +325,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/challenge9:/showdown/.env
-      - ./datasets/9:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       back:
@@ -347,7 +347,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/accept:/showdown/.env
-      - ./datasets/10:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       - back
@@ -363,7 +363,7 @@ services:
     restart: always
     volumes:
       - ./pmariglia/envs/challenge:/showdown/.env
-      - ./datasets/10:/showdown/dataset
+      - ./datasets/collector:/showdown/dataset
       - ./teams:/showdown/teams/teams
     networks:
       back:
