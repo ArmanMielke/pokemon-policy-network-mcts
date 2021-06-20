@@ -16,8 +16,8 @@ class DataConverter():
         self.types = self.load_json(os.path.join(dirname, 'data', 'types.json'))
 
         self.MAX_TEAM_SIZE = 6
-
-
+        self.MAX_MOVE_SIZE = 4
+        
     def convert_game(self, data):
         num_turns = len(data['game'])
         converted_data = []
@@ -47,12 +47,15 @@ class DataConverter():
         stats_all = self.get_team_pokemon_stats(my_pokemon)         # stats of all pokemon in the team
         type_active = self.get_pokemon_type(my_active_pokemon)      # type of active pokemon
         type_all = self.get_pokemon_type_all(my_pokemon)            # types of all pokemon
+        move_type_active = self.get_pokemon_move_types(my_active_pokemon)   # the move types of my active
+        move_types_all = self.get_team_pokemon_move_types(my_pokemon) # move types of the complete team
+
 
         return {
             "active_moves" : active_moves_ids, "chosen_move" : chosen_move,
             "moves_damage" : moves_damage, "hp_active" : hp_active, "hp_all" : hp_all, 
             "stats_active" : stats_active, "stats_all" : stats_all, "type_active" : type_active,
-            "type_all" : type_all
+            "type_all" : type_all, "move_type_active" : move_type_active, "move_type_all" : move_types_all
         }
 
 
@@ -159,18 +162,46 @@ class DataConverter():
         """
         types = pokemon['types']
         if len(types) > 1:
-            type_1, type_2 = self.types[types[0]], self.types[types[1]]
-            first, second = max(type_1, type_2), min(type_1, type_2)
-            return np.array([int(f"{first}{second}")])
+            return np.array([self.handle_multi_type(types)])
         else:
             return np.array([self.types[types[0]]])
+
+    def handle_multi_type(self, types) -> int:
+        """
+        Concatenate both types to get a new type.
+        Rule: append the smaller number to the bigger one
+        """
+        type_1, type_2 = self.types[types[0]], self.types[types[1]]
+        first, second = max(type_1, type_2), min(type_1, type_2)
+        return int(f"{first}{second}")
 
     def get_pokemon_type_all(self, team) -> np.ndarray:
         types = np.zeros(self.MAX_TEAM_SIZE)
         for i, pokemon in enumerate(team):
             t = self.get_pokemon_type(pokemon)
             types[i] = t
-        return types 
+        return types
+
+    def get_pokemon_move_types(self, pokemon) -> np.ndarray:
+        """
+        Returns the move types of given pokemon
+        """
+        move_slots = pokemon["moveSlots"]
+        types = np.zeros(self.MAX_MOVE_SIZE)
+        for i, move in enumerate(move_slots):
+            t = self.moves[move['id']]
+            types[i] = self.types[t['type']]
+        return types
+
+    def get_team_pokemon_move_types(self, team) -> np.ndarray:
+        types = np.zeros(self.MAX_MOVE_SIZE * self.MAX_TEAM_SIZE)
+        for i, pokemon in enumerate(team):
+            t = self.get_pokemon_move_types(pokemon)
+            types[i*self.MAX_MOVE_SIZE] = t[0] 
+            types[i*self.MAX_MOVE_SIZE + 1] = t[1] 
+            types[i*self.MAX_MOVE_SIZE + 2] = t[2] 
+            types[i*self.MAX_MOVE_SIZE + 3] = t[3]
+        return types
 
     def one_hot_encode(self, category, num_categories) -> np.ndarray:
         """
