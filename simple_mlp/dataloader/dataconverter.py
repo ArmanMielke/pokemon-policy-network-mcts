@@ -13,6 +13,7 @@ class DataConverter():
         self.abilities = self.load_json(os.path.join(dirname,'data', 'abilities.json'))
         self.items = self.load_json(os.path.join(dirname,'data', 'items.json'))
         self.pokemon = self.load_json(os.path.join(dirname,'data', 'pokedex.json'))
+        self.types = self.load_json(os.path.join(dirname, 'data', 'types.json'))
 
 
     def convert_game(self, data):
