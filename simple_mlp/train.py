@@ -121,7 +121,7 @@ def main():
 
     writer = SummaryWriter(run_dir)
     copy_config_to_output_dir(run_dir, config.config)
-    train_losses, val_losses = [], []
+    train_losses, val_losses, val_accuracies = [], [], []
 
     epochs_used = 0
     for t in range(config.epochs):
@@ -136,6 +136,7 @@ def main():
         writer.add_scalar('val_accuracy', val_accuracy, t)
         train_losses.append(train_loss)
         val_losses.append(val_loss)
+        val_accuracies.append(val_accuracy)
 
         epochs_used += 1
         if config.use_lr_scheduler:
@@ -147,7 +148,7 @@ def main():
 
     save_figure(epochs_used, train_losses, val_losses, run_dir)
     save_model(model, script_model, run_dir)
-    save_loss(train_losses, val_losses, run_dir)
+    save_loss(train_losses, val_losses, val_accuracies, run_dir)
 
 
 if __name__ == "__main__":

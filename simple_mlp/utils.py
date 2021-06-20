@@ -44,6 +44,6 @@ def save_model(model, script_model, path):
     print(f"saved model to {path}")
 
 
-def save_loss(train_loss, test_loss, path):
+def save_loss(train_loss, validation_loss, accuracy, path):
     with open(os.path.join(path, "data.pkl"), "wb") as f:
-        pickle.dump({"train_loss": train_loss, "test_loss": test_loss}, f)
+        pickle.dump({"train_loss": train_loss, "validation_loss": validation_loss, "accuracy": accuracy}, f)
