@@ -69,7 +69,11 @@ class PokemonDataset(Dataset):
 
         def _load_json(path):
             with open(path, 'r') as f:
-                return json.load(f)
+                try:
+                    return json.load(f)
+                except Exception:
+                    print(f"could not decode file {path}")
+                    return {}
 
         os.makedirs(self.converted_path)
 
