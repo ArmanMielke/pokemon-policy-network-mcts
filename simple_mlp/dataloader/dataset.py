@@ -62,6 +62,8 @@ class PokemonDataset(Dataset):
         import hashlib
         import time
         import json
+        from tqdm import tqdm
+
         def create_filename(string, file_extension):
             hash = hashlib.sha1()
             hash.update((str(time.time()) + string).encode('utf-8'))
@@ -87,14 +89,22 @@ class PokemonDataset(Dataset):
 
         # iterate over each game and each turn
         # and save the turns in pickle format
+        progress_bar = tqdm(total=len(raw_file_list))
         for file in raw_file_list:
             raw_data = _load_json(file)
+            # sometimes the files are empty
+            # we just ignore them
+            if not raw_data:
+                continue
             num_turns = len(raw_data['game'])
             for i in range(num_turns):
                 path = os.path.join(self.converted_path, 
                     create_filename(str(i), self.converted_file_ext))
                 self._save_pickle(path, 
                     dataconverter.convert_turn(raw_data['game'][i]))
+            progress_bar.set_description("converting ...")
+            progress_bar.update(1)
+        progress_bar.close()
 
 
     def _save_pickle(self, path, content):
