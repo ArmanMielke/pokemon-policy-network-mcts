@@ -15,6 +15,8 @@ class DataConverter():
         self.pokemon = self.load_json(os.path.join(dirname,'data', 'pokedex.json'))
         self.types = self.load_json(os.path.join(dirname, 'data', 'types.json'))
 
+        self.MAX_TEAM_SIZE = 6
+
 
     def convert_game(self, data):
         num_turns = len(data['game'])
@@ -43,11 +45,14 @@ class DataConverter():
         hp_all = self.get_hp_all(my_pokemon)                        # hp of the whole team
         stats_active = self.get_pokemon_stats(my_active_pokemon)    # atk, def, spa, spd, spe, hp of the active pokemon
         stats_all = self.get_team_pokemon_stats(my_pokemon)         # stats of all pokemon in the team
+        type_active = self.get_pokemon_type(my_active_pokemon)      # type of active pokemon
+        type_all = self.get_pokemon_type_all(my_pokemon)            # types of all pokemon
 
         return {
             "active_moves" : active_moves_ids, "chosen_move" : chosen_move,
             "moves_damage" : moves_damage, "hp_active" : hp_active, "hp_all" : hp_all, 
-            "stats_active" : stats_active, "stats_all" : stats_all
+            "stats_active" : stats_active, "stats_all" : stats_all, "type_active" : type_active,
+            "type_all" : type_all
         }
 
 
@@ -147,6 +152,25 @@ class DataConverter():
         for i, move in enumerate(moves):
             damage[i] = self.moves[move]['basePower']
         return damage
+
+    def get_pokemon_type(self, pokemon) -> np.ndarray:
+        """
+        Returns the type of the given pokemon
+        """
+        types = pokemon['types']
+        if len(types) > 1:
+            type_1, type_2 = self.types[types[0]], self.types[types[1]]
+            first, second = max(type_1, type_2), min(type_1, type_2)
+            return np.array([int(f"{first}{second}")])
+        else:
+            return np.array([self.types[types[0]]])
+
+    def get_pokemon_type_all(self, team) -> np.ndarray:
+        types = np.zeros(self.MAX_TEAM_SIZE)
+        for i, pokemon in enumerate(team):
+            t = self.get_pokemon_type(pokemon)
+            types[i] = t
+        return types 
 
     def one_hot_encode(self, category, num_categories) -> np.ndarray:
         """
