@@ -17,7 +17,7 @@ class DataConverter():
 
         self.MAX_TEAM_SIZE = 6
         self.MAX_MOVE_SIZE = 4
-        
+
     def convert_game(self, data):
         num_turns = len(data['game'])
         converted_data = []
@@ -76,14 +76,14 @@ class DataConverter():
         Return the move ids (based on the id by showdown) and move names in a numpy array
         for the given pokemon
         """
-        move_num = []
+        move_num = np.zeros(self.MAX_MOVE_SIZE)
         moves = []
         move_slots = pokemon['moveSlots']
-        for move in move_slots:
+        for i, move in enumerate(move_slots):
             move_name = move['id']
             moves.append(move_name)
-            move_num.append(self.moves[move_name]['num'])
-        return np.array(moves), np.array(move_num)
+            move_num[i] = self.moves[move_name]['num']
+        return np.array(moves), move_num
 
     def get_chosen_move(self, side) -> np.ndarray:
         """
@@ -119,14 +119,14 @@ class DataConverter():
         """
         return np.array([pokemon['hp']])
 
-    def get_hp_all(self, pokemon) -> np.ndarray:
+    def get_hp_all(self, team) -> np.ndarray:
         """
         Get the hp for all pokemon in a team
         """
-        hps = []
-        for p in pokemon:
-            hps.append(self.get_hp(p))
-        return np.concatenate(tuple(hps))
+        hps = np.zeros(self.MAX_TEAM_SIZE)
+        for i, pokemon in enumerate(team):
+            hps[i] = self.get_hp(pokemon)
+        return hps
 
     def get_pokemon_stats(self, pokemon) -> np.ndarray:
         """
@@ -142,16 +142,24 @@ class DataConverter():
         """
         Return attack, defense, etc. for all pokemon in a team
         """
-        stats = []
-        for pokemon in team:
-            stats.append( self.get_pokemon_stats(pokemon) )
-        return np.concatenate(tuple(stats))
+        statsize = 6
+        stats = np.zeros(statsize * self.MAX_TEAM_SIZE)
+        for i, pokemon in enumerate(team):
+            # stats.append( self.get_pokemon_stats(pokemon) )
+            s = self.get_pokemon_stats(pokemon)
+            stats[i*self.MAX_TEAM_SIZE] = s[0]
+            stats[i*self.MAX_TEAM_SIZE + 1] = s[1]
+            stats[i*self.MAX_TEAM_SIZE + 2] = s[2]
+            stats[i*self.MAX_TEAM_SIZE + 3] = s[3]
+            stats[i*self.MAX_TEAM_SIZE + 4] = s[4]
+            stats[i*self.MAX_TEAM_SIZE + 5] = s[5]
+        return stats
 
     def get_moves_damage(self, moves) -> np.ndarray:
         """
         Return the base damage for the given moves
         """
-        damage = np.zeros(len(moves))
+        damage = np.zeros(self.MAX_MOVE_SIZE)
         for i, move in enumerate(moves):
             damage[i] = self.moves[move]['basePower']
         return damage
