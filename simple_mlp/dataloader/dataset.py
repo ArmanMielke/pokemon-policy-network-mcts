@@ -77,6 +77,15 @@ class PokemonDataset(Dataset):
                     print(f"could not decode file {path}")
                     return {}
 
+        def load_data(file):
+            file_extension = file.split('.')[-1]
+            if file_extension == "json":
+                return _load_json(file)
+            elif file_extension == "pkl":
+                return self._load_pickle(file)
+            else:
+                print(f"The file extension {file_extension} is not supported")
+
         os.makedirs(self.converted_path)
 
         dataconverter = DataConverter()
@@ -91,7 +100,8 @@ class PokemonDataset(Dataset):
         # and save the turns in pickle format
         progress_bar = tqdm(total=len(raw_file_list))
         for file in raw_file_list:
-            raw_data = _load_json(file)
+
+            raw_data = load_data(file)#_load_json(file)
             # sometimes the files are empty
             # we just ignore them
             if not raw_data:
