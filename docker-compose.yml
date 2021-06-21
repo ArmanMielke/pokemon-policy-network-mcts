@@ -1,378 +1,58 @@
 version: "3"
 services:
-  showdown:
-    build:
-      context: showdown
-      dockerfile: Dockerfile
-    ports:
-      - 8081:8081
-    container_name: showdown-server
-    restart: always
-    volumes:
-      - ./showdown/config.js:/pokemon-showdown/config/config.js
-      - ./showdown/usergroups.csv:/pokemon-showdown/config/usergroups.csv
-    networks:
-      - back
+ showdown: 
+   build:
+    context: showdown 
+    dockerfile: Dockerfile
+   ports:
+   - 8081:8081
+   container_name: showdown-server
+   restart: always 
+   volumes:
+   - ./showdown/config.js:/pokemon-showdown/config/config.js
+   - ./showdown/usergroups.csv:/pokemon-showdown/config/usergroups.csv
+   networks:
+   - back
 
-  #-------------------
-  # How to add more agent pairs
-  #
-  #  1. copy an existing agent block
-  #  2. change the service names (increase number)
-  #  3. change container_name (increase number)
-  #  4. change volume ./datasets/x:/showdown/dataset in both
-  #     agents (just for safety because the challenger needs to access this directory,
-  #     and I don't know how good this will work if multiple challengers work in the same directory)
-  #  5. change depends_on of challenger to the corresponding partner
-  #  6. change ipv4_address (increase last diget)
-  #  7. add the ip of step 6 into showdown/config.js -> exports.consoleips
-  #  8. copy pmariglia/envs/accept and pmariglia/envs/challenge and change
-  #     username, password and challenge_user accordingly (a username can only have 18 chars or less)
-  #  9. change the env files in the docker-compose to the new env files for the pair
-  # 10. add the new challenge user to showdown/usergroups.csv
-  # 11. register the new challenge user to showdown
-  #-------------------
-
-  #-------------------
-  # agent pair 1
-  #-------------------
-  pmariglia_accept_1:
-    depends_on:
-      - showdown
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-accept-1
-    restart: always
-    volumes:
-      - ./pmariglia/envs/accept1:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      - back
-  pmariglia_challenge_1:
-    depends_on:
-      - pmariglia_accept_1
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-challenge-1
-    restart: always
-    volumes:
-      - ./pmariglia/envs/challenge1:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      back:
-        ipv4_address: 172.25.0.101
-
-  #-------------------
-  # agent pair 2
-  #-------------------
-  pmariglia_accept_2:
-    depends_on:
-      - showdown
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-accept-2
-    restart: always
-    volumes:
-      - ./pmariglia/envs/accept2:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      - back
-  pmariglia_challenge_2:
-    depends_on:
-      - pmariglia_accept_2
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-challenge-2
-    restart: always
-    volumes:
-      - ./pmariglia/envs/challenge2:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      back:
-        ipv4_address: 172.25.0.102
-
-  #-------------------
-  # agent pair 4
-  #-------------------
-  pmariglia_accept_4:
-    depends_on:
-      - showdown
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-accept-4
-    restart: always
-    volumes:
-      - ./pmariglia/envs/accept4:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      - back
-  pmariglia_challenge_4:
-    depends_on:
-      - pmariglia_accept_4
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-challenge-4
-    restart: always
-    volumes:
-      - ./pmariglia/envs/challenge4:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      back:
-        ipv4_address: 172.25.0.104
-
-  # -------------------
-  # agent pair 5 (three somehow doesnt work)
-  # -------------------
-  pmariglia_accept_5:
-    depends_on:
-      - showdown
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-accept-5
-    restart: always
-    volumes:
-      - ./pmariglia/envs/accept5:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      - back
-  pmariglia_challenge_5:
-    depends_on:
-      - pmariglia_accept_5
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-challenge-5
-    restart: always
-    volumes:
-      - ./pmariglia/envs/challenge5:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      back:
-        ipv4_address: 172.25.0.103
-
-  # -------------------
-  # agent pair 6 (three somehow doesnt work)
-  # -------------------
-  pmariglia_accept_6:
-    depends_on:
-      - showdown
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-accept-6
-    restart: always
-    volumes:
-      - ./pmariglia/envs/accept6:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      - back
-  pmariglia_challenge_6:
-    depends_on:
-      - pmariglia_accept_6
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-challenge-6
-    restart: always
-    volumes:
-      - ./pmariglia/envs/challenge6:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      back:
-        ipv4_address: 172.25.0.105
-
-  # -------------------
-  # agent pair 7 (three somehow doesnt work)
-  # -------------------
-  pmariglia_accept_7:
-    depends_on:
-      - showdown
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-accept-7
-    restart: always
-    volumes:
-      - ./pmariglia/envs/accept7:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      - back
-  pmariglia_challenge_7:
-    depends_on:
-      - pmariglia_accept_7
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-challenge-7
-    restart: always
-    volumes:
-      - ./pmariglia/envs/challenge7:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      back:
-        ipv4_address: 172.25.0.106
-
-
-  # -------------------
-  # agent pair 8 (three somehow doesnt work)
-  # -------------------
-  pmariglia_accept_8:
-    depends_on:
-      - showdown
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-accept-8
-    restart: always
-    volumes:
-      - ./pmariglia/envs/accept8:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      - back
-  pmariglia_challenge_8:
-    depends_on:
-      - pmariglia_accept_8
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-challenge-8
-    restart: always
-    volumes:
-      - ./pmariglia/envs/challenge8:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      back:
-        ipv4_address: 172.25.0.107
-
-
-  # -------------------
-  # agent pair 9 (three somehow doesnt work)
-  # -------------------
-  pmariglia_accept_9:
-    depends_on:
-      - showdown
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-accept-9
-    restart: always
-    volumes:
-      - ./pmariglia/envs/accept9:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      - back
-  pmariglia_challenge_9:
-    depends_on:
-      - pmariglia_accept_9
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-challenge-9
-    restart: always
-    volumes:
-      - ./pmariglia/envs/challenge9:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      back:
-        ipv4_address: 172.25.0.108
-
-
-  # -------------------
-  # agent pair 10 (three somehow doesnt work)
-  # -------------------
-  pmariglia_accept_10:
-    depends_on:
-      - showdown
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-accept-10
-    restart: always
-    volumes:
-      - ./pmariglia/envs/accept:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      - back
-  pmariglia_challenge_10:
-    depends_on:
-      - pmariglia_accept_10
-    build:
-      context: pmariglia
-      dockerfile: Dockerfile
-    expose:
-      - 8081
-    container_name: pmariglia-challenge-10
-    restart: always
-    volumes:
-      - ./pmariglia/envs/challenge:/showdown/.env
-      - ./datasets/collector:/showdown/dataset
-      - ./teams:/showdown/teams/teams
-    networks:
-      back:
-        ipv4_address: 172.25.0.109
+ pmariglia_accept_1:
+   depends_on:
+   - showdown
+   build:
+    context: pmariglia
+    dockerfile: Dockerfile
+   expose:
+   - 8081
+   container_name: pmariglia-accept-1
+   restart: always
+   volumes:
+   - ./pmariglia/envs/accept1:/showdown/.env
+   - ./datasets/collector:/showdown/dataset
+   - ./teams:/showdown/teams/teams
+   networks:
+   - back
+ pmariglia_challenge_1:
+   depends_on:
+   - pmariglia_accept_1
+   - showdown
+   build:
+    context: pmariglia
+    dockerfile: Dockerfile
+   expose:
+   - 8081
+   container_name: pmariglia-challenge-1
+   restart: always
+   volumes:
+   - ./pmariglia/envs/challenge1:/showdown/.env
+   - ./datasets/collector:/showdown/dataset
+   - ./teams:/showdown/teams/teams
+   networks:
+    back:
+     ipv4_address: 172.25.0.101
 
 
 networks:
   back:
-    driver: bridge
-    ipam:
-      config:
-      - subnet: 172.25.0.0/24
+   driver: bridge
+   ipam:
+    config:
+    - subnet: 172.25.0.0/24
