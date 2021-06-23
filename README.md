@@ -20,3 +20,19 @@ docker-compose up --build
 ```
 starts the showdown server and two agents 
 challenging each other.
+
+## Dataloader
+
+### Current supported features
+
+* `active_moves` : The move ids of the players active pokemon
+* `chosen_move`  : The chosen move by pmariglia
+* `moves_damage` : The base damage for each move
+* `hp_active`    : The health points of players active pokemon
+* `hp_all` : The health points of players whole team
+* `stats_active` : The attack, defense, etc. for players active pokemon
+* `stats_all` : The attack, defense, etc. for players whole team
+* `type_active` : The pokemon type of the active pokemon
+* `type_all` : The types of all pokemon in the team
+* `move_type_active` : The move types of the active pokemon
+* `move_type_all` : The move types of all moves in the team
