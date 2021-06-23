@@ -46,6 +46,7 @@ class DataConverter():
         stats_active = self.get_pokemon_stats(my_active_pokemon)    # atk, def, spa, spd, spe, hp of the active pokemon
         stats_all = self.get_team_pokemon_stats(my_pokemon)         # stats of all pokemon in the team
         type_active = self.get_pokemon_type(my_active_pokemon)      # type of active pokemon
+        type_active_vector = self.get_pokemon_type_vector(my_active_pokemon)
         type_all = self.get_pokemon_type_all(my_pokemon)            # types of all pokemon
         move_type_active = self.get_pokemon_move_types(my_active_pokemon)   # the move types of my active
         move_types_all = self.get_team_pokemon_move_types(my_pokemon) # move types of the complete team
@@ -55,7 +56,8 @@ class DataConverter():
             "active_moves" : active_moves_ids, "chosen_move" : chosen_move,
             "moves_damage" : moves_damage, "hp_active" : hp_active, "hp_all" : hp_all, 
             "stats_active" : stats_active, "stats_all" : stats_all, "type_active" : type_active,
-            "type_all" : type_all, "move_type_active" : move_type_active, "move_type_all" : move_types_all
+            "type_all" : type_all, "move_type_active" : move_type_active, "move_type_all" : move_types_all,
+            "type_active_vector" : type_active_vector
         }
 
 
@@ -173,6 +175,14 @@ class DataConverter():
             return np.array([self.handle_multi_type(types)])
         else:
             return np.array([self.types[types[0]]])
+
+    def get_pokemon_type_vector(self, pokemon) -> np.ndarray:
+        types = pokemon['types']
+        result = np.zeros(len(self.types))
+        for t in types:
+            index = self.types[t] - 1
+            result[index] = 1
+        return result
 
     def handle_multi_type(self, types) -> int:
         """
