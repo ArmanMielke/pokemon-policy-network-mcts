@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import Dataset
 
 class PokemonDataset(Dataset):
-    def __init__(self, root_dir, features, transform=None):
+    def __init__(self, root_dir, features, transform=[]):
         self.root_dir = root_dir
         self.transform = transform
         self.features = [f.split("/") for f in features]
@@ -41,8 +41,8 @@ class PokemonDataset(Dataset):
         feature_list = []
         for player, feature in self.features:
             data = sample[player][feature]
-            if self.transform != None:
-                data = self.transform(data, feature)
+            for transform in self.transform:
+                data = transform(data, feature)
             feature_list.append(data)
             
         return np.concatenate(tuple(feature_list))

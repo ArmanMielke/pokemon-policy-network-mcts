@@ -16,7 +16,7 @@ from utils import copy_config_to_output_dir, save_model, save_figure, save_loss
 from config import SimpleMLPConfig
 from earlystopping import EarlyStopping
 from lrscheduler import LRScheduler
-from transforms import StatTransform
+from transforms import StatTransform, HealthTransform, FeatureTransform
 
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -87,8 +87,9 @@ def main():
 
     config = SimpleMLPConfig(args.config)
 
-    train_dataset = PokemonDataset(config.train_data_path, config.features, StatTransform())
-    val_dataset = PokemonDataset(config.validation_data_path, config.features)
+    transforms = [FeatureTransform("stats_active", 20), FeatureTransform("hp_active", 100)]
+    train_dataset = PokemonDataset(config.train_data_path, config.features, transforms)
+    val_dataset = PokemonDataset(config.validation_data_path, config.features, transforms)
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True)
 
