@@ -29,7 +29,7 @@ class HealthTransform():
 class FeatureTransform():
     def __init__(self, feature, value):
         self.feature_of_interest = feature
-        self.value = value_range
+        self.value = value
 
     def __call__(self, sample, feature):
         if feature != self.feature_of_interest:
