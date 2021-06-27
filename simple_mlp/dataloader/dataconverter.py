@@ -47,6 +47,7 @@ class DataConverter():
         stats_all = self.get_team_pokemon_stats(my_pokemon)         # stats of all pokemon in the team
         type_active = self.get_pokemon_type(my_active_pokemon)      # type of active pokemon
         type_active_vector = self.get_pokemon_type_vector(my_active_pokemon)
+        type_all_vector = self.get_pokemon_type_all_vector(my_pokemon)
         type_all = self.get_pokemon_type_all(my_pokemon)            # types of all pokemon
         move_type_active = self.get_pokemon_move_types(my_active_pokemon)   # the move types of my active
         move_types_all = self.get_team_pokemon_move_types(my_pokemon) # move types of the complete team
@@ -56,9 +57,11 @@ class DataConverter():
         return {
             "active_moves" : active_moves_ids, "chosen_move" : chosen_move,
             "moves_damage" : moves_damage, "hp_active" : hp_active, "hp_all" : hp_all, 
-            "stats_active" : stats_active, "stats_all" : stats_all, "type_active" : type_active,
-            "type_all" : type_all, "move_type_active" : move_type_active, "move_type_all" : move_types_all,
-            "type_active_vector" : type_active_vector, "move_category" : move_category
+            "stats_active" : stats_active, "stats_all" : stats_all, 
+            "type_active" : type_active,"type_all" : type_all, 
+            "type_active_vector" : type_active_vector, "type_all_vector" : type_all_vector,
+            "move_type_active" : move_type_active, "move_type_all" : move_types_all,
+            "move_category" : move_category
         }
 
     def get_move_category_active(self, moves) -> np.ndarray:
@@ -225,6 +228,16 @@ class DataConverter():
             t = self.get_pokemon_type(pokemon)
             types[i] = t
         return types
+
+    def get_pokemon_type_all_vector(self, team) -> np.ndarray:
+        """
+        Get the types of all pokemon in the team
+        as a indicator vector.
+        """
+        types = []
+        for i, pokemon in enumerate(team):
+            types.append(self.get_pokemon_type_vector(pokemon))
+        return np.concatenate(tuple(types))
 
     def get_hidden_power_string(self, pokemon) -> str:
         pokemon_set_moves = pokemon["set"]["moves"]
