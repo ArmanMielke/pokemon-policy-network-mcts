@@ -83,6 +83,17 @@ class DataConverter():
         move_slots = pokemon['moveSlots']
         for i, move in enumerate(move_slots):
             move_name = move['id']
+
+            # the real id for hidden power 
+            # depends on the hidden type
+            if move_name == "hiddenpower":
+                pokemon_set_moves = pokemon["set"]["moves"]
+                for i, m in enumerate(pokemon_set_moves):
+                    m_tmp = m.replace(" ", "").lower()
+                    if "hiddenpower" in m_tmp:
+                        move_name = m_tmp
+                        break
+
             moves.append(move_name)
             move_num[i] = self.moves[move_name]['num']
         return np.array(moves), move_num
@@ -99,6 +110,7 @@ class DataConverter():
             move = action[-1]
             move_pos = self.get_move_position(move, side)
             if move_pos == None:
+                print(f"found unknown move {move}")
                 chosen_move[-1] = 1
             else:
                 chosen_move[move_pos] = 1
@@ -108,6 +120,10 @@ class DataConverter():
         """
         Get the position of a move in the move slots
         """
+        # in the move slots only "hiddepower"
+        # is used as a id, not "hiddenpowerfire", "hiddenpowerwater", etc.
+        if "hiddenpower" in move:
+            move = "hiddenpower"
         for pokemon in side["pokemon"]:
             if pokemon["isActive"]:
                 move_slots = pokemon["moveSlots"]
