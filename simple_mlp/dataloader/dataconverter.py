@@ -50,6 +50,7 @@ class DataConverter():
         type_all = self.get_pokemon_type_all(my_pokemon)            # types of all pokemon
         move_type_active = self.get_pokemon_move_types(my_active_pokemon)   # the move types of my active
         move_types_all = self.get_team_pokemon_move_types(my_pokemon) # move types of the complete team
+        move_category = self.get_move_category_active(active_moves)
 
 
         return {
@@ -57,9 +58,18 @@ class DataConverter():
             "moves_damage" : moves_damage, "hp_active" : hp_active, "hp_all" : hp_all, 
             "stats_active" : stats_active, "stats_all" : stats_all, "type_active" : type_active,
             "type_all" : type_all, "move_type_active" : move_type_active, "move_type_all" : move_types_all,
-            "type_active_vector" : type_active_vector
+            "type_active_vector" : type_active_vector, "move_category" : move_category
         }
 
+    def get_move_category_active(self, moves) -> np.ndarray:
+        result = np.zeros(self.MAX_MOVE_SIZE)
+        for i, move in enumerate(moves):
+            cat = self.moves[move]["category"].lower()
+            if cat == "special":
+                result[i] = 1
+            elif cat == "physical":
+                result[i] = 2
+        return result
 
     def get_active_pokemon(self, pokemon) -> Dict:
         """
@@ -216,6 +226,13 @@ class DataConverter():
             types[i] = t
         return types
 
+    def get_hidden_power_string(self, pokemon) -> str:
+        pokemon_set_moves = pokemon["set"]["moves"]
+        for i, m in enumerate(pokemon_set_moves):
+            m_tmp = m.replace(" ", "").lower()
+            if "hiddenpower" in m_tmp:
+                return m_tmp
+
     def get_pokemon_move_types(self, pokemon) -> np.ndarray:
         """
         Returns the move types of given pokemon
@@ -223,7 +240,10 @@ class DataConverter():
         move_slots = pokemon["moveSlots"]
         types = np.zeros(self.MAX_MOVE_SIZE)
         for i, move in enumerate(move_slots):
-            t = self.moves[move['id']]
+            move_id = move['id']
+            if "hiddenpower" in move_id:
+                move_id = self.get_hidden_power_string(pokemon)
+            t = self.moves[move_id]
             types[i] = self.types[t['type']]
         return types
 
