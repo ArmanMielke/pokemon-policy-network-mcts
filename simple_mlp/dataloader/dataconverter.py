@@ -113,15 +113,15 @@ class DataConverter():
         Get the chosen move by pmariglia for the given side
         """
         action = side['action'][0].split(" ")
-        chosen_move = np.zeros(6) # 4 for the attacks and 1 for the switch action +1 slack (if move not found)
+        chosen_move = np.zeros(self.MAX_MOVE_SIZE + 1) # 4 for the attacks and 1 for the switch action
         if action[0] == "/switch":
-            chosen_move[-2] = 1
+            chosen_move[-1] = 1
         else:
             move = action[-1]
             move_pos = self.get_move_position(move, side)
             if move_pos == None:
                 print(f"found unknown move {move}")
-                chosen_move[-1] = 1
+                raise ValueError(f"Unknown move ({move}) in data.")
             else:
                 chosen_move[move_pos] = 1
         return chosen_move
