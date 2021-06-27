@@ -52,6 +52,8 @@ class DataConverter():
         move_type_active = self.get_pokemon_move_types(my_active_pokemon)   # the move types of my active
         move_types_all = self.get_team_pokemon_move_types(my_pokemon) # move types of the complete team
         move_category = self.get_move_category_active(active_moves)
+        move_type_active_vector = self.get_pokemon_move_type_vector(my_active_pokemon)
+        move_type_all_vector = self.get_team_pokemon_move_types(my_pokemon)
 
 
         return {
@@ -61,6 +63,7 @@ class DataConverter():
             "type_active" : type_active,"type_all" : type_all, 
             "type_active_vector" : type_active_vector, "type_all_vector" : type_all_vector,
             "move_type_active" : move_type_active, "move_type_all" : move_types_all,
+            "move_type_active_vector" : move_type_active_vector, "move_type_all_vector": move_type_all_vector,
             "move_category" : move_category
         }
 
@@ -269,6 +272,32 @@ class DataConverter():
             types[i*self.MAX_MOVE_SIZE + 2] = t[2] 
             types[i*self.MAX_MOVE_SIZE + 3] = t[3]
         return types
+
+    def get_pokemon_move_type_vector(self, pokemon) -> np.ndarray:
+        """
+        Get the move types of given pokemon as
+        an indicator vector
+        """
+        move_slots = pokemon["moveSlots"]
+        types = np.zeros(len(self.types))
+        for i, move in enumerate(move_slots):
+            move_id = move['id']
+            if "hiddenpower" in move_id:
+                move_id = self.get_hidden_power_string(pokemon)
+            t = self.moves[move_id]
+            index = self.types[t['type']] - 1
+            types[index] = 1
+        return types
+
+    def move_type_all_vector(self, team) -> np.ndarray:
+        """
+        Get the move types for all moves in the
+        team as an indicator vector
+        """
+        moves = []
+        for i, pokemon in enumerate(team):
+            moves.append(self.get_pokemon_move_type_vector(pokemon))
+        return np.concatenate(tuple(moves))
 
     def one_hot_encode(self, category, num_categories) -> np.ndarray:
         """

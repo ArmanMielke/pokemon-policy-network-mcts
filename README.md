@@ -33,6 +33,11 @@ challenging each other.
 * `stats_active` : The attack, defense, etc. for players active pokemon
 * `stats_all` : The attack, defense, etc. for players whole team
 * `type_active` : The pokemon type of the active pokemon
+* `type_active_vector` : The pokemon type of the active pokemon as an indicator vector
 * `type_all` : The types of all pokemon in the team
+* `type_all_vector` : The types of all pokemon in the team as an indicator vector
 * `move_type_active` : The move types of the active pokemon
+* `move_type_active_vector` : The move types of the active pokemon as an indicator vector
 * `move_type_all` : The move types of all moves in the team
+* `move_type_all_vector` : The move types of all pokemon in the team as an indicator vector
+* `move_category` : The category of the moves, physical or special
