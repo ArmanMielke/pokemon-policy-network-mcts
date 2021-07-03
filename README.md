@@ -41,3 +41,13 @@ challenging each other.
 * `move_type_all` : The move types of all moves in the team
 * `move_type_all_vector` : The move types of all pokemon in the team as an indicator vector
 * `move_category` : The category of the moves, physical or special
+* `pokemon`
+    * `is_active`
+    * `hp`
+    * `stats`
+    * `type`
+    * `moves`
+    * `moves_type`
+    * `moves_damage`
+    * `move_category`
+

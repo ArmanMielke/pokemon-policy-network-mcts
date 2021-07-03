@@ -56,6 +56,7 @@ class DataConverter():
         move_type_active_vector = self.get_pokemon_move_type_vector(my_active_pokemon)
         move_type_all_vector = self.get_team_pokemon_move_types(my_pokemon)
 
+        pokemon_entries = [self.get_pokemon_entries(pokemon) for pokemon in my_pokemon] 
 
         return {
             "active_moves" : active_moves_ids, "chosen_move" : chosen_move,
@@ -65,9 +66,28 @@ class DataConverter():
             "type_active_vector" : type_active_vector, "type_all_vector" : type_all_vector,
             "move_type_active" : move_type_active, "move_type_all" : move_types_all,
             "move_type_active_vector" : move_type_active_vector, "move_type_all_vector": move_type_all_vector,
-            "move_category" : move_category
+            "move_category" : move_category, "pokemon" : pokemon_entries
         }
 
+    def get_pokemon_entries(self, pokemon) -> np.ndarray:
+        # is active, moves, move elements, move category
+        # element, stats, hp
+        is_active = np.array([ 1 if pokemon['isActive'] else 0])
+        hp = self.get_hp(pokemon)
+        stats = self.get_pokemon_stats(pokemon)
+        type = self.get_pokemon_type_vector(pokemon)
+
+        moves, moves_ids = self.get_moves(pokemon) 
+        move_type = self.get_pokemon_move_type_vector(pokemon)
+        move_damage = self.get_moves_damage(moves)
+        move_category = self.get_move_category_active(moves)
+
+        return {"is_active" : is_active, "hp" : hp, "stats" : stats,
+            "type": type, "moves" : moves_ids, "moves_type" : move_type,
+            "move_damage" : move_damage, "move_category" : move_category}
+
+
+        
     def get_move_category_active(self, moves) -> np.ndarray:
         result = np.zeros(self.MAX_MOVE_SIZE)
         for i, move in enumerate(moves):
