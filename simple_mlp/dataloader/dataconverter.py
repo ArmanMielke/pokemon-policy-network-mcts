@@ -26,10 +26,11 @@ class DataConverter():
         return converted_data
 
     def convert_turn(self, turn):
-        return {
-            'p1' : self.get_player_data(turn, 'p1'),
-            'p2' : self.get_player_data(turn, 'p2')
-        }
+        p1_data = self.get_player_data(turn, 'p1')
+        p2_data = self.get_player_data(turn, 'p2')
+        p1_active = {'p1' : p1_data, 'p2': p2_data}
+        p2_active = {'p1' : p2_data, 'p2' : p1_data}
+        return p1_active, p2_active 
 
     def get_player_data(self, data, playerid):
         sides = data["sides"]
@@ -46,12 +47,12 @@ class DataConverter():
         stats_active = self.get_pokemon_stats(my_active_pokemon)    # atk, def, spa, spd, spe, hp of the active pokemon
         stats_all = self.get_team_pokemon_stats(my_pokemon)         # stats of all pokemon in the team
         type_active = self.get_pokemon_type(my_active_pokemon)      # type of active pokemon
-        type_active_vector = self.get_pokemon_type_vector(my_active_pokemon)
-        type_all_vector = self.get_pokemon_type_all_vector(my_pokemon)
+        type_active_vector = self.get_pokemon_type_vector(my_active_pokemon) # type of active pokemon as indicator vector
+        type_all_vector = self.get_pokemon_type_all_vector(my_pokemon) # type of all pokemon as indicator vector
         type_all = self.get_pokemon_type_all(my_pokemon)            # types of all pokemon
         move_type_active = self.get_pokemon_move_types(my_active_pokemon)   # the move types of my active
         move_types_all = self.get_team_pokemon_move_types(my_pokemon) # move types of the complete team
-        move_category = self.get_move_category_active(active_moves)
+        move_category = self.get_move_category_active(active_moves) # the move category, physical, special
         move_type_active_vector = self.get_pokemon_move_type_vector(my_active_pokemon)
         move_type_all_vector = self.get_team_pokemon_move_types(my_pokemon)
 

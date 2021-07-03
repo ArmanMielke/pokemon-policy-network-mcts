@@ -108,10 +108,13 @@ class PokemonDataset(Dataset):
                 continue
             num_turns = len(raw_data['game'])
             for i in range(num_turns):
-                path = os.path.join(self.converted_path, 
-                    create_filename(str(i), self.converted_file_ext))
-                self._save_pickle(path, 
-                    dataconverter.convert_turn(raw_data['game'][i]))
+                path_1 = os.path.join(self.converted_path, 
+                    create_filename(str(i)+"p1", self.converted_file_ext))
+                path_2 = os.path.join(self.converted_path,
+                    create_filename(str(i)+"p2", self.converted_file_ext))
+                p1_active, p2_active = dataconverter.convert_turn(raw_data['game'][i])
+                self._save_pickle(path_1, p1_active)
+                self._save_pickle(path_2, p2_active)
             progress_bar.set_description("converting ...")
             progress_bar.update(1)
         progress_bar.close()
