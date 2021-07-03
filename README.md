@@ -25,29 +25,25 @@ challenging each other.
 
 ### Current supported features
 
-* `active_moves` : The move ids of the players active pokemon
-* `chosen_move`  : The chosen move by pmariglia
-* `moves_damage` : The base damage for each move
-* `hp_active`    : The health points of players active pokemon
-* `hp_all` : The health points of players whole team
-* `stats_active` : The attack, defense, etc. for players active pokemon
-* `stats_all` : The attack, defense, etc. for players whole team
-* `type_active` : The pokemon type of the active pokemon
-* `type_active_vector` : The pokemon type of the active pokemon as an indicator vector
-* `type_all` : The types of all pokemon in the team
-* `type_all_vector` : The types of all pokemon in the team as an indicator vector
-* `move_type_active` : The move types of the active pokemon
-* `move_type_active_vector` : The move types of the active pokemon as an indicator vector
-* `move_type_all` : The move types of all moves in the team
-* `move_type_all_vector` : The move types of all pokemon in the team as an indicator vector
-* `move_category` : The category of the moves, physical or special
-* `pokemon`
-    * `is_active`
-    * `hp`
-    * `stats`
-    * `type`
-    * `moves`
-    * `moves_type`
-    * `moves_damage`
-    * `move_category`
-
+* `active_hp` : the hp of the active pokemon
+* `all_hp` : hp of all pokemon in a team
+* `active_move` : the move ids of active pokemon
+* `all_move` : all moves of the team
+* `active_move_damage` : move damages of active pokemon
+* `all_move_damage` : move damages of complete team
+* `active_move_type` : move element type of active pokemon
+* `all_move_type` : move element types of team
+* `active_move_category` : indicator if physical or special attack
+* `all_move_category` : physical/special indicator complete team
+* `active_stats` : attack, defense, etc. of active pokemon
+* `all_stats` : attack, defense, etc. of team
+* `chosen_move` : the move id chosen by pmariglia
+* `pokemon` : list of all pokemon in a team with following features
+ * `is_active`
+ * `hp`
+ * `stats`
+ * `type`
+ * `move`
+ * `move_type`
+ * `move_damage`
+ * `move_category`
