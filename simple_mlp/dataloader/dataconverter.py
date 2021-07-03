@@ -37,36 +37,48 @@ class DataConverter():
         my_side = sides[0] if sides[0]["id"] == playerid else sides[1]
         other_side = sides[1] if sides[0]["id"] == playerid else sides[0]
         my_pokemon = my_side['pokemon']
-        my_active_pokemon = self.get_active_pokemon(my_pokemon)
-
-        active_moves, active_moves_ids = self.get_moves(my_active_pokemon) # the moves of the active pokemon (as showdown ids)
-        moves_damage = self.get_moves_damage(active_moves)          # the base damage for each move
-        chosen_move = self.get_chosen_move(my_side)                 # the move pmariglia chose
-        hp_active = self.get_hp(my_active_pokemon)                  # hp only of the active pokemon
-        hp_all = self.get_hp_all(my_pokemon)                        # hp of the whole team
-        stats_active = self.get_pokemon_stats(my_active_pokemon)    # atk, def, spa, spd, spe, hp of the active pokemon
-        stats_all = self.get_team_pokemon_stats(my_pokemon)         # stats of all pokemon in the team
-        type_active = self.get_pokemon_type(my_active_pokemon)      # type of active pokemon
-        type_active_vector = self.get_pokemon_type_vector(my_active_pokemon) # type of active pokemon as indicator vector
-        type_all_vector = self.get_pokemon_type_all_vector(my_pokemon) # type of all pokemon as indicator vector
-        type_all = self.get_pokemon_type_all(my_pokemon)            # types of all pokemon
-        move_type_active = self.get_pokemon_move_types(my_active_pokemon)   # the move types of my active
-        move_types_all = self.get_team_pokemon_move_types(my_pokemon) # move types of the complete team
-        move_category = self.get_move_category_active(active_moves) # the move category, physical, special
-        move_type_active_vector = self.get_pokemon_move_type_vector(my_active_pokemon)
-        move_type_all_vector = self.get_team_pokemon_move_types(my_pokemon)
 
         pokemon_entries = [self.get_pokemon_entries(pokemon) for pokemon in my_pokemon] 
 
+        active_pokemon = [pokemon for pokemon in pokemon_entries if pokemon['is_active']][0]
+        chosen_move = self.get_chosen_move(my_side)                 # the move pmariglia chose
+        active_moves = active_pokemon["move"]
+        hp_active = active_pokemon['hp']
+        active_moves_damage = active_pokemon['move_damage']
+        active_move_types = active_pokemon['move_type']
+        active_moves_category = active_pokemon['move_category']
+        stats_active = active_pokemon['stats']
+        active_type = active_pokemon['type']
+
+        all_moves, all_hp, all_move_damage = [],[],[]
+        all_move_types, all_move_categories = [],[]
+        all_stats, all_types = [], []
+
+        for pokemon in pokemon_entries:
+            all_moves.append(pokemon['move']) 
+            all_hp.append(pokemon['hp'])
+            all_move_damage.append(pokemon['move_damage'])
+            all_move_types.append(pokemon['move_type'])
+            all_move_categories.append(pokemon['move_category'])
+            all_stats.append(pokemon['stats'])
+            all_types.append(pokemon['type'])
+        all_moves = np.concatenate(tuple(all_moves))
+        all_hp = np.concatenate(tuple(all_hp))
+        all_move_damage = np.concatenate(tuple(all_move_damage))
+        all_move_types = np.concatenate(tuple(all_move_types))
+        all_move_categories = np.concatenate(tuple(all_move_categories))
+        all_stats = np.concatenate(tuple(all_stats))
+        all_types = np.concatenate(tuple(all_types))
+
         return {
-            "active_moves" : active_moves_ids, "chosen_move" : chosen_move,
-            "moves_damage" : moves_damage, "hp_active" : hp_active, "hp_all" : hp_all, 
-            "stats_active" : stats_active, "stats_all" : stats_all, 
-            "type_active" : type_active,"type_all" : type_all, 
-            "type_active_vector" : type_active_vector, "type_all_vector" : type_all_vector,
-            "move_type_active" : move_type_active, "move_type_all" : move_types_all,
-            "move_type_active_vector" : move_type_active_vector, "move_type_all_vector": move_type_all_vector,
-            "move_category" : move_category, "pokemon" : pokemon_entries
+            "active_hp" : hp_active, "all_hp" : all_hp,
+            "active_move" : active_moves, "all_move" : all_moves, 
+            "active_move_damage" : active_moves_damage, "all_move_damage" : all_move_damage,
+            "active_move_type" : active_move_types, "all_move_type" : all_move_types,
+            "active_move_category" : active_moves_category, "all_move_category" : all_move_categories,
+            "active_stats" : stats_active, "all_stats" : all_stats,
+            "active_type" : active_type, "all_type" : all_types,
+            "chosen_move" : chosen_move, "pokemon" : pokemon_entries
         }
 
     def get_pokemon_entries(self, pokemon) -> np.ndarray:
@@ -83,7 +95,7 @@ class DataConverter():
         move_category = self.get_move_category_active(moves)
 
         return {"is_active" : is_active, "hp" : hp, "stats" : stats,
-            "type": type, "moves" : moves_ids, "moves_type" : move_type,
+            "type": type, "move" : moves_ids, "move_type" : move_type,
             "move_damage" : move_damage, "move_category" : move_category}
 
 
