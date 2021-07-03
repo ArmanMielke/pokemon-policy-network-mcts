@@ -92,7 +92,7 @@ class DataConverter():
         moves, moves_ids = self.get_moves(pokemon) 
         move_type = self.get_pokemon_move_type_vector(pokemon)
         move_damage = self.get_moves_damage(moves)
-        move_category = self.get_move_category_active(moves)
+        move_category = self.get_move_category(moves)
 
         return {"is_active" : is_active, "hp" : hp, "stats" : stats,
             "type": type, "move" : moves_ids, "move_type" : move_type,
@@ -100,7 +100,7 @@ class DataConverter():
 
 
         
-    def get_move_category_active(self, moves) -> np.ndarray:
+    def get_move_category(self, moves) -> np.ndarray:
         result = np.zeros(self.MAX_MOVE_SIZE)
         for i, move in enumerate(moves):
             cat = self.moves[move]["category"].lower()
@@ -186,15 +186,6 @@ class DataConverter():
         """
         return np.array([pokemon['hp']])
 
-    def get_hp_all(self, team) -> np.ndarray:
-        """
-        Get the hp for all pokemon in a team
-        """
-        hps = np.zeros(self.MAX_TEAM_SIZE)
-        for i, pokemon in enumerate(team):
-            hps[i] = self.get_hp(pokemon)
-        return hps
-
     def get_pokemon_stats(self, pokemon) -> np.ndarray:
         """
         Return attack, defense, etc. for one pokemon
@@ -204,23 +195,6 @@ class DataConverter():
             stats['atk'], stats['def'], stats['spa'],
             stats['spd'], stats['spe'], stats['hp']
         ])
-
-    def get_team_pokemon_stats(self, team) -> np.ndarray:
-        """
-        Return attack, defense, etc. for all pokemon in a team
-        """
-        statsize = 6
-        stats = np.zeros(statsize * self.MAX_TEAM_SIZE)
-        for i, pokemon in enumerate(team):
-            # stats.append( self.get_pokemon_stats(pokemon) )
-            s = self.get_pokemon_stats(pokemon)
-            stats[i*self.MAX_TEAM_SIZE] = s[0]
-            stats[i*self.MAX_TEAM_SIZE + 1] = s[1]
-            stats[i*self.MAX_TEAM_SIZE + 2] = s[2]
-            stats[i*self.MAX_TEAM_SIZE + 3] = s[3]
-            stats[i*self.MAX_TEAM_SIZE + 4] = s[4]
-            stats[i*self.MAX_TEAM_SIZE + 5] = s[5]
-        return stats
 
     def get_moves_damage(self, moves) -> np.ndarray:
         """
@@ -258,23 +232,6 @@ class DataConverter():
         first, second = max(type_1, type_2), min(type_1, type_2)
         return int(f"{first}{second}")
 
-    def get_pokemon_type_all(self, team) -> np.ndarray:
-        types = np.zeros(self.MAX_TEAM_SIZE)
-        for i, pokemon in enumerate(team):
-            t = self.get_pokemon_type(pokemon)
-            types[i] = t
-        return types
-
-    def get_pokemon_type_all_vector(self, team) -> np.ndarray:
-        """
-        Get the types of all pokemon in the team
-        as a indicator vector.
-        """
-        types = []
-        for i, pokemon in enumerate(team):
-            types.append(self.get_pokemon_type_vector(pokemon))
-        return np.concatenate(tuple(types))
-
     def get_hidden_power_string(self, pokemon) -> str:
         pokemon_set_moves = pokemon["set"]["moves"]
         for i, m in enumerate(pokemon_set_moves):
@@ -296,16 +253,6 @@ class DataConverter():
             types[i] = self.types[t['type']]
         return types
 
-    def get_team_pokemon_move_types(self, team) -> np.ndarray:
-        types = np.zeros(self.MAX_MOVE_SIZE * self.MAX_TEAM_SIZE)
-        for i, pokemon in enumerate(team):
-            t = self.get_pokemon_move_types(pokemon)
-            types[i*self.MAX_MOVE_SIZE] = t[0] 
-            types[i*self.MAX_MOVE_SIZE + 1] = t[1] 
-            types[i*self.MAX_MOVE_SIZE + 2] = t[2] 
-            types[i*self.MAX_MOVE_SIZE + 3] = t[3]
-        return types
-
     def get_pokemon_move_type_vector(self, pokemon) -> np.ndarray:
         """
         Get the move types of given pokemon as
@@ -321,16 +268,6 @@ class DataConverter():
             index = self.types[t['type']] - 1
             types[index] = 1
         return types
-
-    def move_type_all_vector(self, team) -> np.ndarray:
-        """
-        Get the move types for all moves in the
-        team as an indicator vector
-        """
-        moves = []
-        for i, pokemon in enumerate(team):
-            moves.append(self.get_pokemon_move_type_vector(pokemon))
-        return np.concatenate(tuple(moves))
 
     def one_hot_encode(self, category, num_categories) -> np.ndarray:
         """
