@@ -157,7 +157,7 @@ class PokemonDataset(Dataset):
                     self._save_pickle(path_1, p1_active)
                     self._save_pickle(path_2, p2_active)
                 except ValueError as my_exception:
-                    print(f"In file {file}, turn {i}: {my_exception}")
+                    print(f"SKIPPING TURN: In file {file}, turn {i}: {my_exception}")
                     
             progress_bar.set_description("converting ...")
             progress_bar.update(1)

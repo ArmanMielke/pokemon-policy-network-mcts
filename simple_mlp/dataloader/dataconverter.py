@@ -41,15 +41,14 @@ class DataConverter():
         other_side = sides[1] if sides[0]["id"] == playerid else sides[0]
         my_pokemon = my_side['pokemon']
 
-        chosen_move = self.get_chosen_move(my_side)                 # the move pmariglia chose
         pokemon_entries = [self.get_pokemon_entries(pokemon) for pokemon in my_pokemon] 
 
-        active_pokemon = [pokemon for pokemon in pokemon_entries if pokemon['is_active']]
-        if len(active_pokemon) == 0:
-            # active_pokemon = pokemon_entries[0]
-            raise ValueError(f"No active pokemon found")
-        else:
-            active_pokemon = active_pokemon[0]
+        # The active pokemon is always the first in the list
+        # this is automatically done by showdown
+        active_pokemon = pokemon_entries[0] 
+        active_pokemon['is_active'] = np.array([1])
+        chosen_move = self.get_chosen_move(my_side)                 # the move pmariglia chose
+
         active_moves = active_pokemon["move"]
         hp_active = active_pokemon['hp']
         active_moves_damage = active_pokemon['move_damage']
@@ -92,7 +91,7 @@ class DataConverter():
     def get_pokemon_entries(self, pokemon) -> np.ndarray:
         # is active, moves, move elements, move category
         # element, stats, hp
-        is_active = np.array([ 1 if pokemon['isActive'] else 0])
+        is_active = np.array([0])
         hp = self.get_hp(pokemon)
         stats = self.get_pokemon_stats(pokemon)
         type = self.get_pokemon_type_vector(pokemon)
@@ -105,8 +104,6 @@ class DataConverter():
         return {"is_active" : is_active, "hp" : hp, "stats" : stats,
             "type": type, "move" : moves_ids, "move_type" : move_type,
             "move_damage" : move_damage, "move_category" : move_category}
-
-
         
     def get_move_category(self, moves) -> np.ndarray:
         result = np.zeros(self.MAX_MOVE_SIZE)
@@ -183,13 +180,25 @@ class DataConverter():
         # is used as a id, not "hiddenpowerfire", "hiddenpowerwater", etc.
         if "hiddenpower" in move:
             move = "hiddenpower"
-        for pokemon in side["pokemon"]:
-            if pokemon["isActive"]:
-                move_slots = pokemon["moveSlots"]
-                for i in range(len(move_slots)):
-                    if move_slots[i]["id"] == move:
-                        return i
-                raise ValueError(f"The active pokemon {pokemon['species']} does not have the move {move}")
+        # for pokemon in side["pokemon"]:
+        #     if pokemon["isActive"]:
+        #         move_slots = pokemon["moveSlots"]
+        #         for i in range(len(move_slots)):
+        #             if move_slots[i]["id"] == move:
+        #                 return i
+        #         raise ValueError(f"The active pokemon {pokemon['species']} does not have the move {move}")
+        active_pokemon = side['pokemon'][0]
+        move_slots = active_pokemon['moveSlots']
+        position = -1
+        for i, m in enumerate(move_slots):
+            if m['id'] == move:
+                position = i
+
+        if position == -1:
+            raise ValueError(f"The active pokemon {active_pokemon['species']} does not have the move {move}")
+        
+        return position
+
 
     def get_hp(self, pokemon) -> np.ndarray:
         """
