@@ -89,7 +89,7 @@ def main():
 
     config = SimpleMLPConfig(args.config)
 
-    transforms = [FeatureTransform("stats_active", 50), FeatureTransform("hp_active", 400)]
+    transforms = [FeatureTransform(["p1","p2"], "stats", 50), FeatureTransform(["p1","p2"],"hp", 400)]
     train_dataset = PokemonDataset(config.train_data_path, config.features, transforms)
     val_dataset = PokemonDataset(config.validation_data_path, config.features, [])
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)

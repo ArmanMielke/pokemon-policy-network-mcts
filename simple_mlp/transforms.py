@@ -27,14 +27,15 @@ class HealthTransform():
             return new_sample
 
 class FeatureTransform():
-    def __init__(self, feature, value):
+    def __init__(self, player, feature, value):
         self.feature_of_interest = feature
+        self.player_of_interest = player
         self.value = value
 
-    def __call__(self, sample, feature):
-        if feature != self.feature_of_interest:
-            return sample
-        else:
+    def __call__(self, sample, player, feature): 
+        if player in self.player_of_interest and feature == self.feature_of_interest:
             modifier = np.random.choice(np.arange(start=-self.value, stop=self.value, step=1), len(sample))
             new_sample = sample + modifier
             return new_sample
+        else:
+            return sample
