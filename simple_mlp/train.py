@@ -38,7 +38,7 @@ def train(data_loader, model, loss_fn, optimizer) -> float:
     progress_bar = tqdm(total=len(data_loader))
 
     for X, y in data_loader:
-        input = X[:,0].float().to(DEVICE)
+        input = X.flatten(start_dim=1).float().to(DEVICE)
         # CrossEntropyLoss does not like a one-hot vector but
         # a single integer indicating which class it belongs to
         label = y.argmax(dim=1).long().to(DEVICE)
@@ -65,7 +65,7 @@ def validate(data_loader, model, loss_fn) -> Tuple[float, float]:
     progress_bar = tqdm(total=len(data_loader))
     with torch.no_grad():
         for X, y in data_loader:
-            input = X[:,0].float().to(DEVICE)
+            input = X.flatten(start_dim=-1).float().to(DEVICE)
             label = y.argmax(dim=1).long().to(DEVICE)
             preds = model(input)
             losses.append(loss_fn(preds, label).item())
@@ -96,7 +96,7 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True)
 
     X,y = train_dataset[0]
-    input_size, output_size = len(X[0]), len(y)
+    input_size, output_size = len(X.flatten()), len(y)
 
     model = SimpleMLP(
         input_size,

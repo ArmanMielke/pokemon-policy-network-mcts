@@ -68,7 +68,3 @@ class SimpleMLPConfig():
     def lr_scheduler_min_lr(self):
         if self.use_lr_scheduler:
             return self._config['lr_scheduler']['min_lr']
-
-    @property
-    def load_full_datset(self):
-        return bool(self._config['load_full_dataset'])
