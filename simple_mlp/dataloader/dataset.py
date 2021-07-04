@@ -32,9 +32,16 @@ class PokemonDataset(Dataset):
         X = self._get_input_features(sample)
         y = sample['p1']['chosen_move']
 
-        print(X)
+        result = None
+        if len(X) == 1:
+            player_two = None
+            player_one = X[0]
+            result = player_one
+        else:
+            player_one, player_two = X
+            result = np.concatenate((player_one, player_two), axis=-1)
 
-        return X, y
+        return result, y
 
     def get_stat_start_position(self) -> int:
         pass

@@ -32,18 +32,20 @@ def generate_dir_name() -> str:
 def train(data_loader, model, loss_fn, optimizer) -> float:
     """Returns the training loss"""
     losses = []
+    accuracy = []
     model.train()
     
     progress_bar = tqdm(total=len(data_loader))
 
     for X, y in data_loader:
-        X = X.float().to(DEVICE)
+        input = X[:,0].float().to(DEVICE)
         # CrossEntropyLoss does not like a one-hot vector but
         # a single integer indicating which class it belongs to
         label = y.argmax(dim=1).long().to(DEVICE)
-        preds = model(X)
+        preds = model(input)
         loss = loss_fn(preds, label)
         losses.append(loss.item())
+        accuracy.append((preds.argmax(1) == label).type(torch.float).mean().item())
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -52,7 +54,7 @@ def train(data_loader, model, loss_fn, optimizer) -> float:
     
     losses = np.array(losses)
     progress_bar.close()
-    return np.mean(losses)
+    return np.mean(losses), np.mean(accuracy)
 
 
 def validate(data_loader, model, loss_fn) -> Tuple[float, float]:
@@ -63,9 +65,9 @@ def validate(data_loader, model, loss_fn) -> Tuple[float, float]:
     progress_bar = tqdm(total=len(data_loader))
     with torch.no_grad():
         for X, y in data_loader:
-            X = X.float().to(DEVICE)
+            input = X[:,0].float().to(DEVICE)
             label = y.argmax(dim=1).long().to(DEVICE)
-            preds = model(X)
+            preds = model(input)
             losses.append(loss_fn(preds, label).item())
             accuracy.append((preds.argmax(1) == label).type(torch.float).mean().item())
             progress_bar.set_description("Validating ...")
@@ -87,14 +89,14 @@ def main():
 
     config = SimpleMLPConfig(args.config)
 
-    transforms = [FeatureTransform("stats_active", 20), FeatureTransform("hp_active", 100)]
+    transforms = [FeatureTransform("stats_active", 50), FeatureTransform("hp_active", 400)]
     train_dataset = PokemonDataset(config.train_data_path, config.features, transforms)
-    val_dataset = PokemonDataset(config.validation_data_path, config.features, transforms)
+    val_dataset = PokemonDataset(config.validation_data_path, config.features, [])
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True)
 
     X,y = train_dataset[0]
-    input_size, output_size = len(X), len(y)
+    input_size, output_size = len(X[0]), len(y)
 
     model = SimpleMLP(
         input_size,
@@ -123,13 +125,14 @@ def main():
     writer = SummaryWriter(run_dir)
     copy_config_to_output_dir(run_dir, config.config)
     train_losses, val_losses, val_accuracies = [], [], []
+    train_accuracies = []
 
     epochs_used = 0
     for t in range(config.epochs):
-        train_loss = train(train_loader, model, loss_fn, optimizer)
+        train_loss, train_accuracy = train(train_loader, model, loss_fn, optimizer)
         val_loss, val_accuracy = validate(val_loader, model, loss_fn)
         print(f"Epoch {t}\n-----------------")
-        print(f"loss: {train_loss:>7f}")
+        print(f"train loss: {train_loss:>7f} (accuracy: {train_accuracy:>7f})")
         print(f"val loss: {val_loss:>7f} (accuracy: {val_accuracy:>7f})")
         print(f"DEVICE {DEVICE}")
         writer.add_scalar('loss', train_loss, t)
@@ -138,6 +141,7 @@ def main():
         train_losses.append(train_loss)
         val_losses.append(val_loss)
         val_accuracies.append(val_accuracy)
+        train_accuracies.append(train_accuracy)
 
         epochs_used += 1
         if config.use_lr_scheduler:
@@ -147,7 +151,7 @@ def main():
             if early_stopping.early_stop:
                 break
 
-    save_figure(epochs_used, train_losses, val_losses,val_accuracies, run_dir)
+    save_figure(epochs_used, train_losses, val_losses,train_accuracies, val_accuracies, run_dir)
     save_model(model, script_model, run_dir)
     save_loss(train_losses, val_losses, val_accuracies, run_dir)
 
