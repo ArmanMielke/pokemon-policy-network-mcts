@@ -11,7 +11,7 @@ class PokemonDataset(Dataset):
     def __init__(self, root_dir, features, transform=[]):
         self.root_dir = root_dir
         self.transform = transform
-        self.features = [f.split("/") for f in features]
+        self.features = features #[f.split("/") for f in features]
         self.converted_path = os.path.join(self.root_dir, 'converted')
         self.converted_file_ext = '.pkl'
         self._convert_data()
@@ -32,20 +32,60 @@ class PokemonDataset(Dataset):
         X = self._get_input_features(sample)
         y = sample['p1']['chosen_move']
 
+        print(X)
+
         return X, y
 
     def get_stat_start_position(self) -> int:
         pass
 
     def _get_input_features(self, sample) -> np.ndarray:
-        feature_list = []
-        for player, feature in self.features:
-            data = sample[player][feature]
-            for transform in self.transform:
-                data = transform(data, feature)
-            feature_list.append(data)
-            
-        return np.concatenate(tuple(feature_list))
+        # feature_list = []
+        # for player, feature in self.features:
+        #     data = sample[player][feature]
+        #     for transform in self.transform:
+        #         data = transform(data, feature)
+        #     feature_list.append(data)
+        #     
+        # return np.concatenate(tuple(feature_list))
+#         print(self.features)
+#         player_features = []
+#         for player,values in self.features.items():
+# 
+#             for feature_type, feature in values.items(): 
+#                 if feature_type == "pokemon":
+#                     pokemon_features = self._get_pokemon_features(sample,player,feature)
+#                     player_features.append(player_features)
+#         return np.vstack(tuple(player_features)) 
+# 
+        player_features = []
+        for player, features in self.features.items():
+            team = sample[player]['pokemon']
+            pokemon_features = []
+            for pokemon in team:
+                f = []
+                for feature in features:
+                    f.append(pokemon[feature])
+                f = np.concatenate(tuple(f))
+                pokemon_features.append(f)
+            player_features.append(np.vstack(tuple(pokemon_features)))
+        return player_features
+
+                    
+
+
+    def _get_pokemon_features(self,sample,player,features):
+        pokemon = sample[player]["pokemon"]
+        pokemon_features = []
+        for pkmn in pokemon:
+            feature_list = []
+            for f in features:
+                data = pkmn[f]
+                feature_list.append(data)
+            pokemon_features.append(np.concatenate(tuple(feature_list)))
+        return np.vstack(tuple(pokemon_features))
+
+
 
     def _convert_data(self):
         """
@@ -112,9 +152,13 @@ class PokemonDataset(Dataset):
                     create_filename(str(i)+"p1", self.converted_file_ext))
                 path_2 = os.path.join(self.converted_path,
                     create_filename(str(i)+"p2", self.converted_file_ext))
-                p1_active, p2_active = dataconverter.convert_turn(raw_data['game'][i])
-                self._save_pickle(path_1, p1_active)
-                self._save_pickle(path_2, p2_active)
+                try:
+                    p1_active, p2_active = dataconverter.convert_turn(raw_data['game'][i])
+                    self._save_pickle(path_1, p1_active)
+                    self._save_pickle(path_2, p2_active)
+                except ValueError as my_exception:
+                    print(f"In file {file}, turn {i}: {my_exception}")
+                    
             progress_bar.set_description("converting ...")
             progress_bar.update(1)
         progress_bar.close()

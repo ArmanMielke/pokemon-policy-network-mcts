@@ -28,6 +28,9 @@ class DataConverter():
     def convert_turn(self, turn):
         p1_data = self.get_player_data(turn, 'p1')
         p2_data = self.get_player_data(turn, 'p2')
+
+        if p1_data == None or p2_data == None:
+            return None
         p1_active = {'p1' : p1_data, 'p2': p2_data}
         p2_active = {'p1' : p2_data, 'p2' : p1_data}
         return p1_active, p2_active 
@@ -38,10 +41,15 @@ class DataConverter():
         other_side = sides[1] if sides[0]["id"] == playerid else sides[0]
         my_pokemon = my_side['pokemon']
 
+        chosen_move = self.get_chosen_move(my_side)                 # the move pmariglia chose
         pokemon_entries = [self.get_pokemon_entries(pokemon) for pokemon in my_pokemon] 
 
-        active_pokemon = [pokemon for pokemon in pokemon_entries if pokemon['is_active']][0]
-        chosen_move = self.get_chosen_move(my_side)                 # the move pmariglia chose
+        active_pokemon = [pokemon for pokemon in pokemon_entries if pokemon['is_active']]
+        if len(active_pokemon) == 0:
+            # active_pokemon = pokemon_entries[0]
+            raise ValueError(f"No active pokemon found")
+        else:
+            active_pokemon = active_pokemon[0]
         active_moves = active_pokemon["move"]
         hp_active = active_pokemon['hp']
         active_moves_damage = active_pokemon['move_damage']
@@ -151,6 +159,8 @@ class DataConverter():
         """
         Get the chosen move by pmariglia for the given side
         """
+        if side['action'] == "None":
+            raise ValueError(f"no action chosen")
         action = side['action'][0].split(" ")
         chosen_move = np.zeros(self.MAX_MOVE_SIZE + 1) # 4 for the attacks and 1 for the switch action
         if action[0] == "/switch":
@@ -160,7 +170,7 @@ class DataConverter():
             move_pos = self.get_move_position(move, side)
             if move_pos == None:
                 print(f"found unknown move {move}")
-                raise ValueError(f"Unknown move ({move}) in data.")
+                raise ValueError(f"Unknown move ({move}) in data")
             else:
                 chosen_move[move_pos] = 1
         return chosen_move
@@ -179,6 +189,7 @@ class DataConverter():
                 for i in range(len(move_slots)):
                     if move_slots[i]["id"] == move:
                         return i
+                raise ValueError(f"The active pokemon {pokemon['species']} does not have the move {move}")
 
     def get_hp(self, pokemon) -> np.ndarray:
         """
