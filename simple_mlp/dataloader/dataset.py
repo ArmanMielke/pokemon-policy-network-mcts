@@ -29,33 +29,24 @@ class PokemonDataset(Dataset):
 
         path = os.path.join(self.converted_path, self.file_list[index])
         sample = self._load_pickle(path)
-        X = self._get_input_features(sample)
+        p1,p2 = self._get_input_features(sample)
         y = sample['p1']['chosen_move']
 
-        result = None
-        if len(X) == 1:
-            player_two = None
-            player_one = X[0]
-            result = player_one
-        else:
-            player_one, player_two = X
-            result = np.concatenate((player_one, player_two), axis=-1)
-
-        return result, y
+        return p1,p2, y
 
     def get_stat_start_position(self) -> int:
         pass
 
     def _get_input_features(self, sample) -> np.ndarray:
-        player_features = []
-        for player, features in self.features.items():
+        player_features = [[],[]]
+        for i, (player, features) in enumerate(self.features.items()):
             team = sample[player]['pokemon_np'][features]
             for t in self.transform:
                 team = t(team, player)
             team = np.array([
                 np.hstack(x) for x in team
             ])
-            player_features.append(team)
+            player_features[i] = team
         return player_features
                     
 

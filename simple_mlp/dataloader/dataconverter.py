@@ -41,20 +41,22 @@ class DataConverter():
         other_side = sides[1] if sides[0]["id"] == playerid else sides[0]
         my_pokemon = my_side['pokemon']
 
-        pokemon_entries = [self.get_pokemon_entries(pokemon) for pokemon in my_pokemon] 
-        pokemon_entries_2 = [self.get_pokemon_entries_2(pokemon) for pokemon in my_pokemon] 
+        pokemon_entries = [self.get_pokemon_entries(pokemon,i) for i,pokemon in enumerate(my_pokemon)] 
+        pokemon_entries_2 = [self.get_pokemon_entries_2(pokemon,i) for i,pokemon in enumerate(my_pokemon)] 
 
         
-        pokemon_structured_array = np.array(pokemon_entries_2,
-            dtype=[('is_active', '>f4', 1), ('hp', '>f4', 1), ('stats', '>f4', 6),
-            ('type', '>f4', len(self.types)), ('move', '>f4', self.MAX_MOVE_SIZE),
-            ('move_type', '>f4', self.MAX_MOVE_SIZE*len(self.types)), ('move_damage', '>f4', self.MAX_MOVE_SIZE),
-            ('move_category', '>f4', self.MAX_MOVE_SIZE)])
+        
         # The active pokemon is always the first in the list
         # this is automatically done by showdown
         active_pokemon = pokemon_entries[0] 
         active_pokemon['is_active'] = np.array([1])
         chosen_move = self.get_chosen_move(my_side)                 # the move pmariglia chose
+
+        pokemon_structured_array = np.array(pokemon_entries_2,
+            dtype=[('is_active', '>f4', 1), ('hp', '>f4', 1), ('stats', '>f4', 6),
+            ('type', '>f4', len(self.types)), ('move', '>f4', self.MAX_MOVE_SIZE),
+            ('move_type', '>f4', self.MAX_MOVE_SIZE*len(self.types)), ('move_damage', '>f4', self.MAX_MOVE_SIZE),
+            ('move_category', '>f4', self.MAX_MOVE_SIZE)])
 
         active_moves = active_pokemon["move"]
         hp_active = active_pokemon['hp']
@@ -96,10 +98,10 @@ class DataConverter():
             "chosen_move" : chosen_move, "pokemon" : pokemon_entries, "pokemon_np" : pokemon_structured_array
         }
 
-    def get_pokemon_entries(self, pokemon) -> np.ndarray:
+    def get_pokemon_entries(self, pokemon, position) -> np.ndarray:
         # is active, moves, move elements, move category
         # element, stats, hp
-        is_active = np.array([0])                
+        is_active = np.array([1]) if position == 0 else np.array([0])           
         hp = self.get_hp(pokemon)                       
         stats = self.get_pokemon_stats(pokemon)         
         type = self.get_pokemon_type_vector(pokemon)
@@ -113,10 +115,10 @@ class DataConverter():
             "type": type, "move" : moves_ids, "move_type" : move_type,
             "move_damage" : move_damage, "move_category" : move_category}
 
-    def get_pokemon_entries_2(self, pokemon) -> np.ndarray:
+    def get_pokemon_entries_2(self, pokemon, position) -> np.ndarray:
         # is active, moves, move elements, move category
         # element, stats, hp
-        is_active = np.array([0])                
+        is_active = np.array([1]) if position == 0 else np.array([0])               
         hp = self.get_hp(pokemon)                       
         stats = self.get_pokemon_stats(pokemon)         
         type = self.get_pokemon_type_vector(pokemon)

@@ -37,8 +37,10 @@ def train(data_loader, model, loss_fn, optimizer) -> float:
     
     progress_bar = tqdm(total=len(data_loader))
 
-    for X, y in data_loader:
-        input = X.flatten(start_dim=1).float().to(DEVICE)
+    for p1,p2, y in data_loader:
+        p1 = p1.flatten(start_dim=1)
+        p2 = p2.flatten(start_dim=1)
+        input = torch.cat((p1,p2), dim=1).float().to(DEVICE)#X.flatten(start_dim=1).float().to(DEVICE)
         # CrossEntropyLoss does not like a one-hot vector but
         # a single integer indicating which class it belongs to
         label = y.argmax(dim=1).long().to(DEVICE)
@@ -64,8 +66,10 @@ def validate(data_loader, model, loss_fn) -> Tuple[float, float]:
     accuracy = []
     progress_bar = tqdm(total=len(data_loader))
     with torch.no_grad():
-        for X, y in data_loader:
-            input = X.flatten(start_dim=1).float().to(DEVICE)
+        for p1,p2, y in data_loader:
+            p1 = p1.flatten(start_dim=1)
+            p2 = p2.flatten(start_dim=1)
+            input = torch.cat((p1,p2), dim=1).float().to(DEVICE)
             label = y.argmax(dim=1).long().to(DEVICE)
             preds = model(input)
             losses.append(loss_fn(preds, label).item())
@@ -95,8 +99,8 @@ def main():
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True)
 
-    X,y = train_dataset[0]
-    input_size, output_size = len(X.flatten()), len(y)
+    p1,p2,y = train_dataset[0]
+    input_size, output_size = len(p1.flatten())+len(p2.flatten()), len(y)
 
     model = SimpleMLP(
         input_size,
