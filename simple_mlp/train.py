@@ -65,7 +65,7 @@ def validate(data_loader, model, loss_fn) -> Tuple[float, float]:
     progress_bar = tqdm(total=len(data_loader))
     with torch.no_grad():
         for X, y in data_loader:
-            input = X.flatten(start_dim=-1).float().to(DEVICE)
+            input = X.flatten(start_dim=1).float().to(DEVICE)
             label = y.argmax(dim=1).long().to(DEVICE)
             preds = model(input)
             losses.append(loss_fn(preds, label).item())
