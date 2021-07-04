@@ -47,23 +47,16 @@ class PokemonDataset(Dataset):
         pass
 
     def _get_input_features(self, sample) -> np.ndarray:
-# 
         player_features = []
         for player, features in self.features.items():
-            team = sample[player]['pokemon']
-            pokemon_features = []
-            for pokemon in team:
-                f = []
-                for feature in features:
-                    p = pokemon[feature]
-                    for transform in self.transform:
-                        p = transform(p, player, feature)
-                    f.append(p)
-                f = np.concatenate(tuple(f))
-                pokemon_features.append(f)
-            player_features.append(np.vstack(tuple(pokemon_features)))
+            team = sample[player]['pokemon_np'][features]
+            for t in self.transform:
+                team = t(team, player)
+            team = np.array([
+                np.hstack(x) for x in team
+            ])
+            player_features.append(team)
         return player_features
-
                     
 
 
