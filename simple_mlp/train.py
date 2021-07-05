@@ -155,7 +155,7 @@ def main():
             if early_stopping.early_stop:
                 break
 
-    save_figure(epochs_used, train_losses, val_losses,train_accuracies, val_accuracies, run_dir)
+    save_figure(epochs_used, train_losses, val_losses, val_accuracies, run_dir)
     save_model(model, script_model, run_dir)
     save_loss(train_losses, val_losses, val_accuracies, run_dir)
 
