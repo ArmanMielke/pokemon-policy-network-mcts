@@ -1,18 +1,15 @@
 import argparse
-import hashlib
 import os
-import time
 from typing import Tuple
 
 import torch
 import numpy as np
-from tensorboardX import SummaryWriter
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from dataloader.dataset import PokemonDataset
 from network import SimpleMLP
-from utils import copy_config_to_output_dir, save_model, save_figure, save_loss
+from utils import *
 from config import SimpleMLPConfig
 from earlystopping import EarlyStopping
 from lrscheduler import LRScheduler
@@ -21,13 +18,21 @@ from transforms import StatTransform, HealthTransform, FeatureTransform
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
+def transform_data(p1, p2, y):
+    """
+    transforms the label and input data
+    into the correct format for the network.
+    This is not the same as transforms for data augmentation.
+    """
+    p1 = p1.flatten(start_dim=1)
+    p2 = p2.flatten(start_dim=1)
+    input = torch.cat((p1,p2), dim=1).float().to(DEVICE)
 
-def generate_dir_name() -> str:
-    """Create a unique hash for the filename"""
-    hash = hashlib.sha1()
-    hash.update(str(time.time()).encode('utf-8'))
-    return str(hash.hexdigest())
+    # CrossEntropyLoss does not like a one-hot vector but
+    # a single integer indicating which class it belongs to
+    label = y.argmax(dim=1).long().to(DEVICE)
 
+    return input, label
 
 def train(data_loader, model, loss_fn, optimizer) -> float:
     """Returns the training loss"""
@@ -38,12 +43,7 @@ def train(data_loader, model, loss_fn, optimizer) -> float:
     progress_bar = tqdm(total=len(data_loader))
 
     for p1,p2, y in data_loader:
-        p1 = p1.flatten(start_dim=1)
-        p2 = p2.flatten(start_dim=1)
-        input = torch.cat((p1,p2), dim=1).float().to(DEVICE)#X.flatten(start_dim=1).float().to(DEVICE)
-        # CrossEntropyLoss does not like a one-hot vector but
-        # a single integer indicating which class it belongs to
-        label = y.argmax(dim=1).long().to(DEVICE)
+        input, label = transform_data(p1, p2, y)
         preds = model(input)
         loss = loss_fn(preds, label)
         losses.append(loss.item())
@@ -67,10 +67,7 @@ def validate(data_loader, model, loss_fn) -> Tuple[float, float]:
     progress_bar = tqdm(total=len(data_loader))
     with torch.no_grad():
         for p1,p2, y in data_loader:
-            p1 = p1.flatten(start_dim=1)
-            p2 = p2.flatten(start_dim=1)
-            input = torch.cat((p1,p2), dim=1).float().to(DEVICE)
-            label = y.argmax(dim=1).long().to(DEVICE)
+            input, label = transform_data(p1, p2, y)
             preds = model(input)
             losses.append(loss_fn(preds, label).item())
             accuracy.append((preds.argmax(1) == label).type(torch.float).mean().item())
@@ -93,10 +90,7 @@ def test(data_loader, current_model, best_model) -> float:
     progress_bar = tqdm(total=len(data_loader))
     with torch.no_grad():
         for p1, p2, y in data_loader:
-            p1 = p1.flatten(start_dim=1)
-            p2 = p2.flatten(start_dim=1)
-            input = torch.cat((p1,p2), dim=1).float().to(DEVICE)
-            label = y.argmax(dim=1).long().to(DEVICE)
+            input, label = transform_data(p1, p2, y)
             current_preds = current_model(input)
             best_preds = best_model(input)
 
@@ -117,6 +111,7 @@ def main():
 
     config = SimpleMLPConfig(args.config)
 
+    # initialize the training and validation dataset
     transforms = [FeatureTransform(["p1","p2"], "stats", 50), FeatureTransform(["p1","p2"],"hp", 400)]
     train_dataset = PokemonDataset(config.train_data_path, config.features, transforms)
     val_dataset = PokemonDataset(config.validation_data_path, config.features, [])
@@ -149,8 +144,8 @@ def main():
         lr_scheduler = LRScheduler(optimizer, config.lr_scheduler_patience, config.lr_scheduler_min_lr)
 
     run_dir = os.path.join("runs", args.dir)
+    logger = setup_logger(run_dir)
 
-    writer = SummaryWriter(run_dir)
     copy_config_to_output_dir(run_dir, config.config)
     train_losses, val_losses, val_accuracies = [], [], []
     train_accuracies = []
@@ -158,24 +153,9 @@ def main():
     epochs_used = 0
     min_val_loss = float('inf')
     for t in range(config.epochs):
+
         train_loss, train_accuracy = train(train_loader, model, loss_fn, optimizer)
         val_loss, val_accuracy = validate(val_loader, model, loss_fn)
-        print(f"Epoch {t}\n-----------------")
-        print(f"train loss: {train_loss:>7f} (accuracy: {train_accuracy:>7f})")
-        print(f"val loss: {val_loss:>7f} (accuracy: {val_accuracy:>7f})")
-        print(f"DEVICE {DEVICE}")
-        writer.add_scalar('loss', train_loss, t)
-        writer.add_scalar('val_loss', val_loss, t)
-        writer.add_scalar('val_accuracy', val_accuracy, t)
-        train_losses.append(train_loss)
-        val_losses.append(val_loss)
-        val_accuracies.append(val_accuracy)
-        train_accuracies.append(train_accuracy)
-
-        if val_loss < min_val_loss:
-            save_model(model, os.path.join(run_dir, "best_model.pth"))
-            min_val_loss = val_loss
-
 
         epochs_used += 1
         if config.use_lr_scheduler:
@@ -185,6 +165,19 @@ def main():
             if early_stopping.early_stop:
                 break
 
+        log_stats(t, (train_loss, train_accuracy), (val_loss, val_accuracy))
+
+        # some book keeping
+        train_losses.append(train_loss)
+        val_losses.append(val_loss)
+        val_accuracies.append(val_accuracy)
+        train_accuracies.append(train_accuracy)
+
+        if val_loss < min_val_loss:
+            save_model(model, os.path.join(run_dir, "best_model.pth"))
+            min_val_loss = val_loss
+
+    # evaluate on the test set if one is given
     if config.test_data_path != "":
         test_dataset = PokemonDataset(config.test_data_path, config.features, [])
         test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=True)
@@ -193,9 +186,9 @@ def main():
         best_model.load_state_dict(torch.load(os.path.join(run_dir, "best_model.pth")))
 
         current_acc, best_acc = test(test_loader, model, best_model)
+        logger.info(f"Accuracy on test set: current/last model {current_acc:>7f}, best model {best_acc:>7f}")
 
-        print(f"Accuracy on test set: current/last model {current_acc:>7f}, best model {best_acc:>7f}")
-
+    # some final logging
     save_figure(epochs_used, train_losses, val_losses, val_accuracies, run_dir)
     save_model(model, os.path.join(run_dir, "last_model.pth"))
     save_loss(train_losses, val_losses, val_accuracies, run_dir)
