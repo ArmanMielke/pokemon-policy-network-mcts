@@ -46,9 +46,9 @@ def save_figure(epochs, train_loss, val_loss, accuracy, path):
     fig.savefig(os.path.join(path, "accuracy.png"))
     plt.close()
 
-def save_model(model, script_model, path):
-    torch.save(model.state_dict(), os.path.join(path, "model.pth"))
-    script_model.save(os.path.join(path, "model_script.pt"))
+def save_model(model, path):
+    torch.save(model.state_dict(), path)
+    # script_model.save(os.path.join(path, "model_script.pt"))
     print(f"saved model to {path}")
 
 

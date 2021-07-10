@@ -83,12 +83,13 @@ def validate(data_loader, model, loss_fn) -> Tuple[float, float]:
         progress_bar.close()
         return np.mean(losses), np.mean(accuracy)
 
-def test(data_loader, model) -> float:
+def test(data_loader, current_model, best_model) -> float:
     """ 
     Evaluates the model on the test set
     """
-    model.eval()
-    accuracy = []
+    current_model.eval()
+    best_model.eval()
+    accuracy_current, accuracy_best = [], []
     progress_bar = tqdm(total=len(data_loader))
     with torch.no_grad():
         for p1, p2, y in data_loader:
@@ -96,12 +97,15 @@ def test(data_loader, model) -> float:
             p2 = p2.flatten(start_dim=1)
             input = torch.cat((p1,p2), dim=1).float().to(DEVICE)
             label = y.argmax(dim=1).long().to(DEVICE)
-            preds = model(input)
-            accuracy.append((preds.argmax(1) == label).type(torch.float).mean().item())
+            current_preds = current_model(input)
+            best_preds = best_model(input)
+
+            accuracy_current.append((current_preds.argmax(1) == label).type(torch.float).mean().item())
+            accuracy_best.append((best_preds.argmax(1) == label).type(torch.float).mean().item())
             progress_bar.set_description("Testing ...")
             progress_bar.update(1)
     progress_bar.close()
-    return np.mean( np.array(accuracy) )
+    return np.mean( np.array(accuracy_current) ), np.mean( np.array(accuracy_best) )
 
 
 def main():
@@ -152,6 +156,7 @@ def main():
     train_accuracies = []
 
     epochs_used = 0
+    min_val_loss = float('inf')
     for t in range(config.epochs):
         train_loss, train_accuracy = train(train_loader, model, loss_fn, optimizer)
         val_loss, val_accuracy = validate(val_loader, model, loss_fn)
@@ -167,6 +172,11 @@ def main():
         val_accuracies.append(val_accuracy)
         train_accuracies.append(train_accuracy)
 
+        if val_loss < min_val_loss:
+            save_model(model, os.path.join(run_dir, "best_model.pth"))
+            min_val_loss = val_loss
+
+
         epochs_used += 1
         if config.use_lr_scheduler:
             lr_scheduler(val_loss)
@@ -178,11 +188,16 @@ def main():
     if config.test_data_path != "":
         test_dataset = PokemonDataset(config.test_data_path, config.features, [])
         test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=True)
-        test_acc = test(test_loader, model)
-        print(f"Accuracy on test set: {test_acc:>7f}")
+
+        best_model = SimpleMLP(input_size, output_size, config.config['layers'], config.config['neurons']).to(DEVICE)
+        best_model.load_state_dict(torch.load(os.path.join(run_dir, "best_model.pth")))
+
+        current_acc, best_acc = test(test_loader, model, best_model)
+
+        print(f"Accuracy on test set: current/last model {current_acc:>7f}, best model {best_acc:>7f}")
 
     save_figure(epochs_used, train_losses, val_losses, val_accuracies, run_dir)
-    save_model(model, script_model, run_dir)
+    save_model(model, os.path.join(run_dir, "last_model.pth"))
     save_loss(train_losses, val_losses, val_accuracies, run_dir)
 
 
