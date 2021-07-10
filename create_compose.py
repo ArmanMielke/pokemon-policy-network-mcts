@@ -65,7 +65,7 @@ def create_pair(server_service, service_name_challenge, service_name_accept, con
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--count", type=int, help="number of agent pairs")
+    parser.add_argument("--count", type=int, help="number of agent pairs", default=16)
     parser.add_argument("--port", type=str, default="8081")
     parser.add_argument("--baseip", type=str, default='172.25.0.0')
     parser.add_argument("--servername", type=str, default='showdown-server')

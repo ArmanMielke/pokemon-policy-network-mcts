@@ -13,12 +13,23 @@ is used. For now the teams are randomily selected at startup.
 
 ### With Docker and Docker compose
 
-You can use docker compose to automatically setup the
-data collection pipeline and start collecting data
+First we need to create the configuration files for the agents. In
+the project root directory run:
+```
+python3 pmariglia/envs/create_envs.py --teamdir physical_special --dest pmariglia/envs
+```
+(NOTE: you can change `--teamdir` to any of the folder names in the folder `teams`)
+
+Next we need to setup the docker-compose file. Run in the root dir of the project:
+```
+python3 create_compose.py
+```
+This will create a correctly configured `docker-compose.yml`. Finally the 
+collection process can be started with:
 ```
 docker-compose up --build
 ```
-starts the showdown server and two agents 
+This will build the showdown server and 32 agents 
 challenging each other.
 
 ## Dataloader
