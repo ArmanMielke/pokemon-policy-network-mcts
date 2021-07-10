@@ -72,3 +72,7 @@ class SimpleMLPConfig():
     @property
     def test_data_path(self):
         return self._config['test_data_path'] if "test_data_path" in self._config.keys() else ""
+
+    @property
+    def weight_decay(self):
+        return self._config['weight_decay'] if 'weight_decay' in self._config.keys() else 0
