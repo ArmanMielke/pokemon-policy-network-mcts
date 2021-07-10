@@ -12,3 +12,6 @@ __pycache__
 
 # VScode
 .vscode/
+
+# Custom
+runs/
