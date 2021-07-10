@@ -83,6 +83,26 @@ def validate(data_loader, model, loss_fn) -> Tuple[float, float]:
         progress_bar.close()
         return np.mean(losses), np.mean(accuracy)
 
+def test(data_loader, model) -> float:
+    """ 
+    Evaluates the model on the test set
+    """
+    model.eval()
+    accuracy = []
+    progress_bar = tqdm(total=len(data_loader))
+    with torch.no_grad():
+        for p1, p2, y in data_loader:
+            p1 = p1.flatten(start_dim=1)
+            p2 = p2.flatten(start_dim=1)
+            input = torch.cat((p1,p2), dim=1).float().to(DEVICE)
+            label = y.argmax(dim=1).long().to(DEVICE)
+            preds = model(input)
+            accuracy.append((preds.argmax(1) == label).type(torch.float).mean().item())
+            progress_bar.set_description("Testing ...")
+            progress_bar.update(1)
+    progress_bar.close()
+    return np.mean( np.array(accuracy) )
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -154,6 +174,12 @@ def main():
             early_stopping(val_loss)
             if early_stopping.early_stop:
                 break
+
+    if config.test_data_path != "":
+        test_dataset = PokemonDataset(config.test_data_path, config.features, [])
+        test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=True)
+        test_acc = test(test_loader, model)
+        print(f"Accuracy on test set: {test_acc:>7f}")
 
     save_figure(epochs_used, train_losses, val_losses, val_accuracies, run_dir)
     save_model(model, script_model, run_dir)

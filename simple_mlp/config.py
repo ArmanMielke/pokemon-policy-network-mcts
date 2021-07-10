@@ -68,3 +68,7 @@ class SimpleMLPConfig():
     def lr_scheduler_min_lr(self):
         if self.use_lr_scheduler:
             return self._config['lr_scheduler']['min_lr']
+
+    @property
+    def test_data_path(self):
+        return self._config['test_data_path'] if "test_data_path" in self._config.keys() else ""
