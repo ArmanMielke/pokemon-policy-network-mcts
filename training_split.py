@@ -27,9 +27,9 @@ if __name__ == "__main__":
     for f in training_files:
         source = os.path.join(args.data, f)
         target = os.path.join(train_dir, f)
-        shutil.copy(source, target)
+        shutil.move(source, target)
 
     for f in validation_files:
         source = os.path.join(args.data, f)
         target = os.path.join(val_dir, f)
-        shutil.copy(source, target)
+        shutil.move(source, target)
