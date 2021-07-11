@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from dataloader.dataset import PokemonDataset
-from network import SimpleMLP
+from network import PokemonAgent
 from utils import *
 from config import SimpleMLPConfig
 from earlystopping import EarlyStopping
@@ -24,15 +24,17 @@ def transform_data(p1, p2, y):
     into the correct format for the network.
     This is not the same as transforms for data augmentation.
     """
-    p1 = p1.flatten(start_dim=1)
-    p2 = p2.flatten(start_dim=1)
-    input = torch.cat((p1,p2), dim=1).float().to(DEVICE)
+    # p1 = p1.flatten(start_dim=1)
+    # p2 = p2.flatten(start_dim=1)
+    # input = torch.cat((p1,p2), dim=1).float().to(DEVICE)
+    p1 = p1.float().to(DEVICE)
+    p2 = p2.float().to(DEVICE)
 
     # CrossEntropyLoss does not like a one-hot vector but
     # a single integer indicating which class it belongs to
     label = y.argmax(dim=1).long().to(DEVICE)
 
-    return input, label
+    return p1,p2, label
 
 def train(data_loader, model, loss_fn, optimizer) -> float:
     """Returns the training loss"""
@@ -43,8 +45,8 @@ def train(data_loader, model, loss_fn, optimizer) -> float:
     progress_bar = tqdm(total=len(data_loader))
 
     for p1,p2, y in data_loader:
-        input, label = transform_data(p1, p2, y)
-        preds = model(input)
+        p1,p2, label = transform_data(p1, p2, y)
+        preds = model(p1,p2)
         loss = loss_fn(preds, label)
         losses.append(loss.item())
         accuracy.append((preds.argmax(1) == label).type(torch.float).mean().item())
@@ -67,8 +69,8 @@ def validate(data_loader, model, loss_fn) -> Tuple[float, float]:
     progress_bar = tqdm(total=len(data_loader))
     with torch.no_grad():
         for p1,p2, y in data_loader:
-            input, label = transform_data(p1, p2, y)
-            preds = model(input)
+            p1,p2, label = transform_data(p1, p2, y)
+            preds = model(p1,p2)
             losses.append(loss_fn(preds, label).item())
             accuracy.append((preds.argmax(1) == label).type(torch.float).mean().item())
             progress_bar.set_description("Validating ...")
@@ -90,9 +92,9 @@ def test(data_loader, current_model, best_model) -> float:
     progress_bar = tqdm(total=len(data_loader))
     with torch.no_grad():
         for p1, p2, y in data_loader:
-            input, label = transform_data(p1, p2, y)
-            current_preds = current_model(input)
-            best_preds = best_model(input)
+            p1,p2, label = transform_data(p1, p2, y)
+            current_preds = current_model(p1,p2)
+            best_preds = best_model(p1,p2)
 
             accuracy_current.append((current_preds.argmax(1) == label).type(torch.float).mean().item())
             accuracy_best.append((best_preds.argmax(1) == label).type(torch.float).mean().item())
@@ -119,24 +121,30 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True)
 
     p1,p2,y = train_dataset[0]
-    input_size, output_size = len(p1.flatten())+len(p2.flatten()), len(y)
 
-    model = SimpleMLP(
-        input_size,
-        output_size,
-        config.config["layers"],
-        config.config["neurons"],
+    num_pokemon = p1.shape[0]
+    pkmn_input_size = p1.shape[1]
+    pkmn_output_size = y.shape[0]
+    p2_size = len(p2.flatten()))
+    agent_input_size = num_pokemon * pkmn_output_size + p2_size
+    agent_output_size = y.shape[0]
+
+
+    model = PokemonAgent(
+        (pkmn_input_size, agent_input_size),
+        (pkmn_output_size, agent_output_size),
+        (config.config['pokemon_encoder']['layers'], config.config['pokemon_agent']['layers']),
+        (config.config['pokemon_encoder']['neurons'], config.config['pokemon_agent']['neurons'])
     )
 
     # trace the model to create a torch script instance
     # you need to provide a example input. This
     # can then be loaded with libtorch in C++
-    script_model = torch.jit.trace(model, torch.rand(1, input_size))
+    # script_model = torch.jit.trace(model, torch.rand(1, input_size))
 
     model.to(DEVICE)
     loss_fn = torch.nn.CrossEntropyLoss()
 
-    # TODO un-hard code weight decay
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay)
 
     if config.use_early_stopping:
@@ -183,7 +191,12 @@ def main():
         test_dataset = PokemonDataset(config.test_data_path, config.features, [])
         test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=True)
 
-        best_model = SimpleMLP(input_size, output_size, config.config['layers'], config.config['neurons']).to(DEVICE)
+        best_model = PokemonAgent(
+            (p1.shape[1], p1.shape[0]*p1.shape[1]+len(p2.flatten())),
+            (y.shape[0], y.shape[0]),
+            (3, 3),
+            (100, 10)
+        ).to(DEVICE)
         best_model.load_state_dict(torch.load(os.path.join(run_dir, "best_model.pth")))
 
         current_acc, best_acc = test(test_loader, model, best_model)
