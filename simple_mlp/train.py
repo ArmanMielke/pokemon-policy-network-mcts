@@ -125,7 +125,7 @@ def main():
     num_pokemon = p1.shape[0]
     pkmn_input_size = p1.shape[1]
     pkmn_output_size = y.shape[0]
-    p2_size = len(p2.flatten()))
+    p2_size = len(p2.flatten())
     agent_input_size = num_pokemon * pkmn_output_size + p2_size
     agent_output_size = y.shape[0]
 
