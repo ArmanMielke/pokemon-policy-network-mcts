@@ -121,7 +121,7 @@ class PokemonDataset(Dataset):
             raw_data = load_data(file)#_load_json(file)
             # sometimes the files are empty
             # we just ignore them
-            if not raw_data:
+            if len(raw_data['game']) == 0:
                 continue
             num_turns = len(raw_data['game'])
             for i in range(num_turns):
