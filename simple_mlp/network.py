@@ -13,8 +13,11 @@ class SimpleMLP(nn.Module):
         self.mlp_stack.extend([nn.Linear(neurons, neurons) for i in range(layers-2)])
         self.mlp_stack.append(nn.Linear(neurons, output_size))
 
-    def forward(self, x):
-        result = x
+    def forward(self, p1, p2):
+
+        p1 = p1.flatten(start_dim=1)
+        p2 = p2.flatten(start_dim=1)
+        result = torch.cat((p1,p2), dim=1).float()
         for i in range(self.layers-1):
             result = F.relu(self.mlp_stack[i](result))
         # We don't need a activation here because
@@ -37,7 +40,7 @@ class PokemonEncoder(nn.Module):
         for i in range(self.layers-1):
             result = F.relu(self.mlp_stack[i](result))
         
-        return F.relu(self.mlp_stack[-1](result)) 
+        return self.mlp_stack[-1](result)
 
 
 class PokemonAgent(nn.Module):
@@ -59,20 +62,29 @@ class PokemonAgent(nn.Module):
             self.pokemon_layer, self.pokemon_neurons
         )
 
-        self.mlp_stack = nn.ModuleList([nn.Linear(self.input_size, self.neurons)])
+        # self.mlp_stack = nn.ModuleList([nn.Linear(self.input_size, self.neurons)])
+        self.mlp_stack = nn.ModuleList([self.pokemon_encoder])
+        self.mlp_stack.append(nn.Linear(self.input_size, self.neurons))
         self.mlp_stack.extend([nn.Linear(self.neurons, self.neurons) for i in range(self.layers-2)])
         self.mlp_stack.append(nn.Linear(self.neurons, self.output_size))
 
     def forward(self, p1, p2):
+        # pkmn_preds = []
+        # for i in range(p1.shape[1]):
+        #     prediction = self.pokemon_encoder(p1[:,i])
+        #     pkmn_preds.append(prediction)
+        
+        # p2 = p2.flatten(start_dim=1)
+
+        p2 = p2.flatten(start_dim=1)
         pkmn_preds = []
         for i in range(p1.shape[1]):
-            prediction = self.pokemon_encoder(p1[:,i])
-            pkmn_preds.append(prediction)
-        
-        p2 = p2.flatten(start_dim=1)
+            pkmn_preds.append( F.relu(self.mlp_stack[0](p1[:,i])) )
+
         result = torch.cat((*pkmn_preds,p2), dim=1).float()
-        for i in range(self.layers-1):
+        for i in range(1, self.layers-1):
             result = F.relu(self.mlp_stack[i](result))
+            
 
         # We don't need a activation here because
         # Softmax is included in CrossEntropyLoss

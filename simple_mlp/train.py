@@ -130,19 +130,19 @@ def main():
     agent_output_size = y.shape[0]
 
 
-    # model = PokemonAgent(
-    #     (pkmn_input_size, agent_input_size),
-    #     (pkmn_output_size, agent_output_size),
-    #     (config.config['pokemon_encoder']['layers'], config.config['pokemon_agent']['layers']),
-    #     (config.config['pokemon_encoder']['neurons'], config.config['pokemon_agent']['neurons'])
-    # )
-
-    model = SimpleMLP(
-        pkmn_input_size*num_pokemon + p2_size,
-        agent_output_size,
-        config.config['pokemon_encoder']['layers'],
-        config.config['pokemon_encoder']['neurons']
+    model = PokemonAgent(
+        (pkmn_input_size, agent_input_size),
+        (pkmn_output_size, agent_output_size),
+        (config.config['pokemon_encoder']['layers'], config.config['pokemon_agent']['layers']),
+        (config.config['pokemon_encoder']['neurons'], config.config['pokemon_agent']['neurons'])
     )
+
+    # model = SimpleMLP(
+    #     pkmn_input_size*num_pokemon + p2_size,
+    #     agent_output_size,
+    #     config.config['pokemon_encoder']['layers'],
+    #     config.config['pokemon_encoder']['neurons']
+    # )
 
     # trace the model to create a torch script instance
     # you need to provide a example input. This
