@@ -192,10 +192,10 @@ def main():
         test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=True)
 
         best_model = PokemonAgent(
-            (p1.shape[1], p1.shape[0]*p1.shape[1]+len(p2.flatten())),
-            (y.shape[0], y.shape[0]),
-            (3, 3),
-            (100, 10)
+            (pkmn_input_size, agent_input_size),
+            (pkmn_output_size, agent_output_size),
+            (config.config['pokemon_encoder']['layers'], config.config['pokemon_agent']['layers']),
+            (config.config['pokemon_encoder']['neurons'], config.config['pokemon_agent']['neurons'])
         ).to(DEVICE)
         best_model.load_state_dict(torch.load(os.path.join(run_dir, "best_model.pth")))
 
