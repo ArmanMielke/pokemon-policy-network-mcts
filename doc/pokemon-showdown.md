@@ -76,3 +76,4 @@ When running the battle simulator on the command line, replace `/evalbattle` wit
 >p2 move bodypress
 >eval JSON.stringify(battle.toJSON())
 ```
+
