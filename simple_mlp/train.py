@@ -114,8 +114,8 @@ def main():
     config = SimpleMLPConfig(args.config)
 
     # initialize the training and validation dataset
-    transforms = [FeatureTransform(["p1","p2"], "stats", 50), FeatureTransform(["p1","p2"],"hp", 400)]
-    train_dataset = PokemonDataset(config.train_data_path, config.features, transforms)
+    transforms = [FeatureTransform(["p1","p2"], "stats", 10), FeatureTransform(["p1","p2"],"hp", 50)]
+    train_dataset = PokemonDataset(config.train_data_path, config.features, [])
     val_dataset = PokemonDataset(config.validation_data_path, config.features, [])
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True)
@@ -129,20 +129,20 @@ def main():
     agent_input_size = num_pokemon * pkmn_output_size + p2_size
     agent_output_size = y.shape[0]
 
-
-    model = PokemonAgent(
-        (pkmn_input_size, agent_input_size),
-        (pkmn_output_size, agent_output_size),
-        (config.config['pokemon_encoder']['layers'], config.config['pokemon_agent']['layers']),
-        (config.config['pokemon_encoder']['neurons'], config.config['pokemon_agent']['neurons'])
-    )
-
-    # model = SimpleMLP(
-    #     pkmn_input_size*num_pokemon + p2_size,
-    #     agent_output_size,
-    #     config.config['pokemon_encoder']['layers'],
-    #     config.config['pokemon_encoder']['neurons']
-    # )
+    if not config.config["use_simple_mlp"]:
+        model = PokemonAgent(
+            (pkmn_input_size, agent_input_size),
+            (pkmn_output_size, agent_output_size),
+            (config.config['pokemon_encoder']['layers'], config.config['pokemon_agent']['layers']),
+            (config.config['pokemon_encoder']['neurons'], config.config['pokemon_agent']['neurons'])
+        )
+    else:
+        model = SimpleMLP(
+            pkmn_input_size*num_pokemon + p2_size,
+            agent_output_size,
+            config.config['pokemon_encoder']['layers'],
+            config.config['pokemon_encoder']['neurons']
+        )
 
     # trace the model to create a torch script instance
     # you need to provide a example input. This
@@ -174,13 +174,6 @@ def main():
         val_loss, val_accuracy = validate(val_loader, model, loss_fn)
 
         epochs_used += 1
-        if config.use_lr_scheduler:
-            lr_scheduler(val_loss)
-        if config.use_early_stopping and epochs_used >= config.early_stopping_begin:
-            early_stopping(val_loss)
-            if early_stopping.early_stop:
-                break
-
         log_stats(t, (train_loss, train_accuracy), (val_loss, val_accuracy))
 
         # some book keeping
@@ -193,17 +186,32 @@ def main():
             save_model(model, os.path.join(run_dir, "best_model.pth"))
             min_val_loss = val_loss
 
+        if config.use_lr_scheduler:
+            lr_scheduler(val_loss)
+        if config.use_early_stopping and epochs_used >= config.early_stopping_begin:
+            early_stopping(val_loss)
+            if early_stopping.early_stop:
+                break
+
     # evaluate on the test set if one is given
     if config.test_data_path != "":
         test_dataset = PokemonDataset(config.test_data_path, config.features, [])
         test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=True)
 
-        best_model = PokemonAgent(
-            (pkmn_input_size, agent_input_size),
-            (pkmn_output_size, agent_output_size),
-            (config.config['pokemon_encoder']['layers'], config.config['pokemon_agent']['layers']),
-            (config.config['pokemon_encoder']['neurons'], config.config['pokemon_agent']['neurons'])
-        ).to(DEVICE)
+        if not config.config["use_simple_mlp"]:
+            best_model = PokemonAgent(
+                (pkmn_input_size, agent_input_size),
+                (pkmn_output_size, agent_output_size),
+                (config.config['pokemon_encoder']['layers'], config.config['pokemon_agent']['layers']),
+                (config.config['pokemon_encoder']['neurons'], config.config['pokemon_agent']['neurons'])
+            ).to(DEVICE)
+        else:
+            best_model = SimpleMLP(
+                pkmn_input_size*num_pokemon + p2_size,
+                agent_output_size,
+                config.config['pokemon_encoder']['layers'],
+                config.config['pokemon_encoder']['neurons']
+            ).to(DEVICE)
         best_model.load_state_dict(torch.load(os.path.join(run_dir, "best_model.pth")))
 
         current_acc, best_acc = test(test_loader, model, best_model)
