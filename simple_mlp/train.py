@@ -114,11 +114,13 @@ def main():
     config = SimpleMLPConfig(args.config)
 
     # initialize the training and validation dataset
-    transforms = [FeatureTransform(["p1","p2"], "stats", 10), FeatureTransform(["p1","p2"],"hp", 50)]
-    train_dataset = PokemonDataset(config.train_data_path, config.features, [])
-    val_dataset = PokemonDataset(config.validation_data_path, config.features, [])
-    train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True)
+    transforms = [FeatureTransform(["p1","p2"], "stats", 8), FeatureTransform(["p1","p2"],"hp", 20)]
+    train_dataset = PokemonDataset(config.train_data_path, config.features, transforms)
+    val_dataset = PokemonDataset(config.validation_data_path, config.features, transforms)
+    print(len(train_dataset))
+    print(len(val_dataset))
+    train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, drop_last=True)
+    val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, drop_last=True)
 
     p1,p2,y = train_dataset[0]
 
@@ -157,7 +159,7 @@ def main():
     if config.use_early_stopping:
         early_stopping = EarlyStopping(config.early_stopping_patience)
     if config.use_lr_scheduler:
-        lr_scheduler = LRScheduler(optimizer, config.lr_scheduler_patience, config.lr_scheduler_min_lr)
+        lr_scheduler = LRScheduler(optimizer, config.lr_scheduler_patience, config.lr_scheduler_min_lr, factor=0.5)
 
     run_dir = os.path.join("runs", args.dir)
     logger = setup_logger(run_dir)
@@ -184,6 +186,7 @@ def main():
 
         if val_loss < min_val_loss:
             save_model(model, os.path.join(run_dir, "best_model.pth"))
+            save_model(model, os.path.join(run_dir, f"best_model_{t}.pth"))
             min_val_loss = val_loss
 
         if config.use_lr_scheduler:
