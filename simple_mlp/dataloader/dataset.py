@@ -40,7 +40,7 @@ class PokemonDataset(Dataset):
     def _get_input_features(self, sample) -> np.ndarray:
         player_features = [[],[]]
         for i, (player, features) in enumerate(self.features.items()):
-            team = sample[player]['pokemon_np'][features]
+            team = sample[player]['pokemon'][features]
             for t in self.transform:
                 team = t(team, player)
             team = np.array([
