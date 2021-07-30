@@ -19,5 +19,6 @@
         "patience" : 15,
         "begin": 1
     },
-    "weight_decay": 1e-5
+    "weight_decay": 1e-5,
+    "label_type": 1  
 }

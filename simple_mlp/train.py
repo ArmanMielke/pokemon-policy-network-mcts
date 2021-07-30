@@ -45,6 +45,7 @@ def train(data_loader, model, loss_fn, optimizer) -> float:
     progress_bar = tqdm(total=len(data_loader))
 
     for p1,p2, y in data_loader:
+        print(y)
         p1,p2, label = transform_data(p1, p2, y)
         preds = model(p1,p2)
         loss = loss_fn(preds, label)
@@ -113,12 +114,14 @@ def main():
 
     config = SimpleMLPConfig(args.config)
 
+    # label_type = 0 for the old type of label (only one switch action for all pokemon)
+    # label_type = 1 every pokemon on the bench has a different switch action slot
+    label_type = config.config['label_type'] if 'label_type' in config.config.keys() else 1
+
     # initialize the training and validation dataset
     transforms = [FeatureTransform(["p1","p2"], "stats", 8), FeatureTransform(["p1","p2"],"hp", 20)]
-    train_dataset = PokemonDataset(config.train_data_path, config.features, transforms)
-    val_dataset = PokemonDataset(config.validation_data_path, config.features, transforms)
-    print(len(train_dataset))
-    print(len(val_dataset))
+    train_dataset = PokemonDataset(config.train_data_path, config.features, label_type,transforms)
+    val_dataset = PokemonDataset(config.validation_data_path, config.features, label_type,transforms)
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True, drop_last=True)
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=True, drop_last=True)
 

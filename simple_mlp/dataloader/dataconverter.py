@@ -46,6 +46,7 @@ class DataConverter():
         # The active pokemon is always the first in the list
         # this is automatically done by showdown
         chosen_move = self.get_chosen_move(my_side)                 # the move pmariglia chose
+        chosen_move_2 = self.get_chosen_move_2(my_side)
 
         pokemon_structured_array = np.array(pokemon_entries,
             dtype=[('is_active', np.float64, (1,)), ('hp', np.float64, (1,)), ('stats', np.float64, (6,)),
@@ -54,7 +55,8 @@ class DataConverter():
             ('move_category', np.float64, (self.MAX_MOVE_SIZE,))])
 
         return {
-            "chosen_move": chosen_move, "pokemon" : pokemon_structured_array
+                "chosen_move": chosen_move, "chosen_move_2": chosen_move_2,
+                "pokemon" : pokemon_structured_array
         }
 
     def get_pokemon_entries(self, pokemon, position) -> np.ndarray:
@@ -129,6 +131,29 @@ class DataConverter():
         chosen_move = np.zeros(self.MAX_MOVE_SIZE + 1) # 4 for the attacks and 1 for the switch action
         if action[0] == "/switch":
             chosen_move[-1] = 1
+        else:
+            move = action[-1]
+            move_pos = self.get_move_position(move, side)
+            if move_pos == None:
+                print(f"found unknown move {move}")
+                raise ValueError(f"Unknown move ({move}) in data")
+            else:
+                chosen_move[move_pos] = 1
+        return chosen_move
+
+    def get_chosen_move_2(self, side) -> np.ndarray:
+        """
+        Get the chosen move by pmariglia for the given side.
+        The switch action is split for every pokemon on the bench
+        """
+        if side['action'] == "None":
+            raise ValueError("no action chosen")
+        action = side['action'][0].split(" ")
+        chosen_move = np.zeros(self.MAX_MOVE_SIZE + self.MAX_TEAM_SIZE - 1)
+        if action[0] == "/switch":
+            # pmariglia uses 1 for active 2 for first on bench etc. 
+            idx = int(action[1]) - 2
+            chosen_move[self.MAX_MOVE_SIZE + idx] = 1
         else:
             move = action[-1]
             move_pos = self.get_move_position(move, side)
