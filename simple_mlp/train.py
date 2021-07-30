@@ -200,7 +200,7 @@ def main():
 
         if config.use_lr_scheduler:
             lr_scheduler(val_loss)
-        if config.use_early_sttesiopping and epochs_used >= config.early_stopping_begin:
+        if config.use_early_stopping and epochs_used >= config.early_stopping_begin:
             early_stopping(val_loss)
             if early_stopping.early_stop:
                 break
