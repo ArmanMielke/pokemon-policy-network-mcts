@@ -9,3 +9,9 @@ CMakeCache.txt
 
 # Python
 __pycache__
+
+# VScode
+.vscode/
+
+# Custom
+runs/

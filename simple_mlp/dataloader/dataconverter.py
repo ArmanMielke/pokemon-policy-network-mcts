@@ -28,6 +28,9 @@ class DataConverter():
     def convert_turn(self, turn):
         p1_data = self.get_player_data(turn, 'p1')
         p2_data = self.get_player_data(turn, 'p2')
+
+        if p1_data == None or p2_data == None:
+            return None
         p1_active = {'p1' : p1_data, 'p2': p2_data}
         p2_active = {'p1' : p2_data, 'p2' : p1_data}
         return p1_active, p2_active 
@@ -38,10 +41,23 @@ class DataConverter():
         other_side = sides[1] if sides[0]["id"] == playerid else sides[0]
         my_pokemon = my_side['pokemon']
 
-        pokemon_entries = [self.get_pokemon_entries(pokemon) for pokemon in my_pokemon] 
+        pokemon_entries = [self.get_pokemon_entries(pokemon,i) for i,pokemon in enumerate(my_pokemon)] 
+        pokemon_entries_2 = [self.get_pokemon_entries_2(pokemon,i) for i,pokemon in enumerate(my_pokemon)] 
 
-        active_pokemon = [pokemon for pokemon in pokemon_entries if pokemon['is_active']][0]
+        
+        
+        # The active pokemon is always the first in the list
+        # this is automatically done by showdown
+        active_pokemon = pokemon_entries[0] 
+        active_pokemon['is_active'] = np.array([1])
         chosen_move = self.get_chosen_move(my_side)                 # the move pmariglia chose
+
+        pokemon_structured_array = np.array(pokemon_entries_2,
+            dtype=[('is_active', '>f4', 1), ('hp', '>f4', 1), ('stats', '>f4', 6),
+            ('type', '>f4', len(self.types)), ('move', '>f4', self.MAX_MOVE_SIZE),
+            ('move_type', '>f4', self.MAX_MOVE_SIZE*len(self.types)), ('move_damage', '>f4', self.MAX_MOVE_SIZE),
+            ('move_category', '>f4', self.MAX_MOVE_SIZE)])
+
         active_moves = active_pokemon["move"]
         hp_active = active_pokemon['hp']
         active_moves_damage = active_pokemon['move_damage']
@@ -55,13 +71,14 @@ class DataConverter():
         all_stats, all_types = [], []
 
         for pokemon in pokemon_entries:
-            all_moves.append(pokemon['move']) 
-            all_hp.append(pokemon['hp'])
-            all_move_damage.append(pokemon['move_damage'])
-            all_move_types.append(pokemon['move_type'])
-            all_move_categories.append(pokemon['move_category'])
-            all_stats.append(pokemon['stats'])
-            all_types.append(pokemon['type'])
+            all_moves.append(pokemon['move'])                       # size MAX_MOVE_SIZE
+            all_hp.append(pokemon['hp'])                            # 1
+            all_move_damage.append(pokemon['move_damage'])          # size MAX_MOVE_SIZE
+            all_move_types.append(pokemon['move_type'])             # size MAX_MOVE_SIZE * element size
+            all_move_categories.append(pokemon['move_category'])    # size MAX_MOVE_SIZE
+            all_stats.append(pokemon['stats'])                      # size 6
+            all_types.append(pokemon['type'])                       # element size
+
         all_moves = np.concatenate(tuple(all_moves))
         all_hp = np.concatenate(tuple(all_hp))
         all_move_damage = np.concatenate(tuple(all_move_damage))
@@ -78,15 +95,15 @@ class DataConverter():
             "active_move_category" : active_moves_category, "all_move_category" : all_move_categories,
             "active_stats" : stats_active, "all_stats" : all_stats,
             "active_type" : active_type, "all_type" : all_types,
-            "chosen_move" : chosen_move, "pokemon" : pokemon_entries
+            "chosen_move" : chosen_move, "pokemon" : pokemon_entries, "pokemon_np" : pokemon_structured_array
         }
 
-    def get_pokemon_entries(self, pokemon) -> np.ndarray:
+    def get_pokemon_entries(self, pokemon, position) -> np.ndarray:
         # is active, moves, move elements, move category
         # element, stats, hp
-        is_active = np.array([ 1 if pokemon['isActive'] else 0])
-        hp = self.get_hp(pokemon)
-        stats = self.get_pokemon_stats(pokemon)
+        is_active = np.array([1]) if position == 0 else np.array([0])           
+        hp = self.get_hp(pokemon)                       
+        stats = self.get_pokemon_stats(pokemon)         
         type = self.get_pokemon_type_vector(pokemon)
 
         moves, moves_ids = self.get_moves(pokemon) 
@@ -98,7 +115,20 @@ class DataConverter():
             "type": type, "move" : moves_ids, "move_type" : move_type,
             "move_damage" : move_damage, "move_category" : move_category}
 
+    def get_pokemon_entries_2(self, pokemon, position) -> np.ndarray:
+        # is active, moves, move elements, move category
+        # element, stats, hp
+        is_active = np.array([1]) if position == 0 else np.array([0])               
+        hp = self.get_hp(pokemon)                       
+        stats = self.get_pokemon_stats(pokemon)         
+        type = self.get_pokemon_type_vector(pokemon)
 
+        moves, moves_ids = self.get_moves(pokemon) 
+        move_type = self.get_pokemon_move_type_vector(pokemon)
+        move_damage = self.get_moves_damage(moves)
+        move_category = self.get_move_category(moves)
+
+        return (is_active, hp, stats, type, moves_ids, move_type, move_damage, move_category)
         
     def get_move_category(self, moves) -> np.ndarray:
         result = np.zeros(self.MAX_MOVE_SIZE)
@@ -151,6 +181,8 @@ class DataConverter():
         """
         Get the chosen move by pmariglia for the given side
         """
+        if side['action'] == "None":
+            raise ValueError(f"no action chosen")
         action = side['action'][0].split(" ")
         chosen_move = np.zeros(self.MAX_MOVE_SIZE + 1) # 4 for the attacks and 1 for the switch action
         if action[0] == "/switch":
@@ -160,7 +192,7 @@ class DataConverter():
             move_pos = self.get_move_position(move, side)
             if move_pos == None:
                 print(f"found unknown move {move}")
-                raise ValueError(f"Unknown move ({move}) in data.")
+                raise ValueError(f"Unknown move ({move}) in data")
             else:
                 chosen_move[move_pos] = 1
         return chosen_move
@@ -173,12 +205,25 @@ class DataConverter():
         # is used as a id, not "hiddenpowerfire", "hiddenpowerwater", etc.
         if "hiddenpower" in move:
             move = "hiddenpower"
-        for pokemon in side["pokemon"]:
-            if pokemon["isActive"]:
-                move_slots = pokemon["moveSlots"]
-                for i in range(len(move_slots)):
-                    if move_slots[i]["id"] == move:
-                        return i
+        # for pokemon in side["pokemon"]:
+        #     if pokemon["isActive"]:
+        #         move_slots = pokemon["moveSlots"]
+        #         for i in range(len(move_slots)):
+        #             if move_slots[i]["id"] == move:
+        #                 return i
+        #         raise ValueError(f"The active pokemon {pokemon['species']} does not have the move {move}")
+        active_pokemon = side['pokemon'][0]
+        move_slots = active_pokemon['moveSlots']
+        position = -1
+        for i, m in enumerate(move_slots):
+            if m['id'] == move:
+                position = i
+
+        if position == -1:
+            raise ValueError(f"The active pokemon {active_pokemon['species']} does not have the move {move}")
+        
+        return position
+
 
     def get_hp(self, pokemon) -> np.ndarray:
         """
@@ -259,14 +304,14 @@ class DataConverter():
         an indicator vector
         """
         move_slots = pokemon["moveSlots"]
-        types = np.zeros(len(self.types))
+        types = np.zeros(len(self.types) * self.MAX_MOVE_SIZE)
         for i, move in enumerate(move_slots):
             move_id = move['id']
             if "hiddenpower" in move_id:
                 move_id = self.get_hidden_power_string(pokemon)
             t = self.moves[move_id]
             index = self.types[t['type']] - 1
-            types[index] = 1
+            types[i*self.MAX_MOVE_SIZE + index] = 1
         return types
 
     def one_hot_encode(self, category, num_categories) -> np.ndarray:

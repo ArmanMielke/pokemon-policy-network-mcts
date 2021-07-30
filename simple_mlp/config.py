@@ -70,5 +70,9 @@ class SimpleMLPConfig():
             return self._config['lr_scheduler']['min_lr']
 
     @property
-    def load_full_datset(self):
-        return bool(self._config['load_full_dataset'])
+    def test_data_path(self):
+        return self._config['test_data_path'] if "test_data_path" in self._config.keys() else ""
+
+    @property
+    def weight_decay(self):
+        return self._config['weight_decay'] if 'weight_decay' in self._config.keys() else 0

@@ -1,12 +1,15 @@
 import torch
-from dataloader.dataloader import Dataloader
-from network import SimpleMLP
+from dataloader.dataset import PokemonDataset
+from torch.utils.data import DataLoader
+from network import PokemonAgent, SimpleMLP
 from config import SimpleMLPConfig
 import argparse
 import numpy as np
 import os
 
 from captum.attr import IntegratedGradients
+
+from train import transform_data
 
 
 # while True:
@@ -24,39 +27,54 @@ def compute_integrated_gradients(model, input, target):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dir", type=str, help="the directory where the training data is located")
+    parser.add_argument("--modeldir", type=str, help="the directory where the training data is located")
+    parser.add_argument("--testdata", type=str, help="the directory where the test data is located")
     args = parser.parse_args()
 
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-    config = SimpleMLPConfig(os.path.join(args.dir, 'config.json'))
+    config = SimpleMLPConfig(os.path.join(args.modeldir, 'config.json'))
 
-    val_dataloader = Dataloader(config.validation_data_path, config.batch_size, config.features)
-    val_dataloader.load_data()
+    dataset = PokemonDataset(args.testdata, config.features, [])
+    dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True)
 
-    model = SimpleMLP(
-        val_dataloader.get_input_size(),
-        val_dataloader.get_output_size(),
-        config.config["layers"],
-        config.config["neurons"]
-    ).to(DEVICE)
+    p1,p2,y = dataset[0]
+    input_size, output_size = len(p1.flatten())+len(p2.flatten()), len(y)
 
-    model.load_state_dict(torch.load(os.path.join(args.dir,"model.pth")))
+    if config.config["use_simple_mlp"]:
+        model = SimpleMLP(
+            input_size,
+            output_size,
+            config.config["layers"],
+            config.config["neurons"]
+        ).to(DEVICE)
+    else:
+        num_pokemon = p1.shape[0]
+        pkmn_input_size = p1.shape[1]
+        pkmn_output_size = y.shape[0]
+        p2_size = len(p2.flatten())
+        agent_input_size = num_pokemon * pkmn_output_size + p2_size
+        agent_output_size = y.shape[0]
+
+        model = PokemonAgent(
+            (pkmn_input_size, agent_input_size),
+            (pkmn_output_size, agent_output_size),
+            (config.config['pokemon_encoder']['layers'], config.config['pokemon_agent']['layers']),
+            (config.config['pokemon_encoder']['neurons'], config.config['pokemon_agent']['neurons']),
+        ).to(DEVICE)
+
+    model.load_state_dict(torch.load(os.path.join(args.modeldir, "best_model.pth")))
     model.eval()
-    np.random.seed(123)
-    torch.manual_seed(123)
-    input, y, _ = next(val_dataloader)
-    input = torch.from_numpy(input).float().to(DEVICE)
 
-    attribution_t0 = compute_integrated_gradients(model, input, 0)
-    attribution_t1 = compute_integrated_gradients(model, input, 1)
-    attribution_t2 = compute_integrated_gradients(model, input, 2)
-    attribution_t3 = compute_integrated_gradients(model, input, 3)
-
-    print({
-        "t0" : [attribution_t0.mean(axis=0), attribution_t0.std(axis=0)],
-        "t1" : [attribution_t1.mean(axis=0), attribution_t1.std(axis=0)],
-        "t2" : [attribution_t2.mean(axis=0), attribution_t2.std(axis=0)],
-        "t3" : [attribution_t3.mean(axis=0), attribution_t3.std(axis=0)]
-    })
+    num_evaluation_iterations = 5
+    evaluation_acc = []
+    for i in range(num_evaluation_iterations):
+        with torch.no_grad():
+            iteration_acc = []
+            for p1, p2, y in dataloader:
+                p1, p2, label = transform_data(p1, p2, y)
+                preds = model(p1, p2)
+                iteration_acc.append((preds.argmax(1) == label).type(torch.float).mean().item())
+            evaluation_acc.append(np.mean(np.array(iteration_acc)))
     
+    print(f"Accuracy is: {np.mean(np.array(evaluation_acc))}")

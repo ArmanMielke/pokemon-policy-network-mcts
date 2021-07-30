@@ -65,11 +65,12 @@ def create_pair(server_service, service_name_challenge, service_name_accept, con
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--count", type=int, help="number of agent pairs")
-    parser.add_argument("--port", type=str)
+    parser.add_argument("--count", type=int, help="number of agent pairs", default=16)
+    parser.add_argument("--port", type=str, default="8081")
     parser.add_argument("--baseip", type=str, default='172.25.0.0')
     parser.add_argument("--servername", type=str, default='showdown-server')
     parser.add_argument("--serverservice", type=str, default="showdown")
+    parser.add_argument("--postfix", type=str, default="", help="this is sometimes needed to resolve naming conflicts")
     args = parser.parse_args()
     spacing = " "
 
@@ -95,10 +96,10 @@ if __name__ == "__main__":
 
 
         for i in range(args.count):
-            accepter_name = f"pmariglia-accept-{i+1}"
-            accepter_service = f"pmariglia_accept_{i+1}"
-            challenge_name = f"pmariglia-challenge-{i+1}"
-            challenge_service = f"pmariglia_challenge_{i+1}"
+            accepter_name = f"pmariglia-accept-{i+1}{args.postfix}"
+            accepter_service = f"pmariglia_accept_{i+1}{args.postfix}"
+            challenge_name = f"pmariglia-challenge-{i+1}{args.postfix}"
+            challenge_service = f"pmariglia_challenge_{i+1}{args.postfix}"
 
             volumes_challenge = [
                 f"./pmariglia/envs/challenge{i+1}:/showdown/.env",
