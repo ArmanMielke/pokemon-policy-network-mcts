@@ -8,8 +8,9 @@ NUM_ACTIONS = 4
 class SwitchEquivariantAgent(nn.Module):
     move_network: nn.Sequential
 
-    def __init__(self, p1_pokemon_size: int, p2_size: int):
+    def __init__(self, p1_pokemon_size: int, p2_size: int, label_type: int):
         super().__init__()
+        self.label_type = label_type
 
         self.move_network = nn.Sequential(
             nn.Linear(p1_pokemon_size + p2_size, 128),
@@ -45,5 +46,8 @@ class SwitchEquivariantAgent(nn.Module):
         switch_3_logit = self.switch_network(third_pokemon_and_opponent)
         # at the moment switching to any pokemon is seen as one action by the data set, so we combine the two logits
         switch_logit = torch.maximum(switch_2_logit, switch_3_logit)
-
-        return torch.cat([move_logits, switch_logit], dim=1)
+        
+        if self.label_type == 0:
+            return torch.cat([move_logits, switch_logit], dim=1)
+        else:
+            return torch.cat([move_logits, switch_2_logit, switch_3_logit], dim=1)
