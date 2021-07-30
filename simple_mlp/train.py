@@ -131,7 +131,7 @@ def main():
     agent_input_size = num_pokemon * pkmn_output_size + p2_size
     agent_output_size = y.shape[0]
 
-    if not config.config["use_simple_mlp"]:
+    if "use_simple_mlp" in config.config.keys() and not config.config["use_simple_mlp"]:
         model = PokemonAgent(
             (pkmn_input_size, agent_input_size),
             (pkmn_output_size, agent_output_size),
