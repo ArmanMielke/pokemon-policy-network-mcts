@@ -36,25 +36,11 @@ challenging each other.
 
 ### Current supported features
 
-* `active_hp` : the hp of the active pokemon
-* `all_hp` : hp of all pokemon in a team
-* `active_move` : the move ids of active pokemon
-* `all_move` : all moves of the team
-* `active_move_damage` : move damages of active pokemon
-* `all_move_damage` : move damages of complete team
-* `active_move_type` : move element type of active pokemon
-* `all_move_type` : move element types of team
-* `active_move_category` : indicator if physical or special attack
-* `all_move_category` : physical/special indicator complete team
-* `active_stats` : attack, defense, etc. of active pokemon
-* `all_stats` : attack, defense, etc. of team
-* `chosen_move` : the move id chosen by pmariglia
-* `pokemon` : list of all pokemon in a team with following features
- * `is_active`
- * `hp`
- * `stats`
- * `type`
- * `move`
- * `move_type`
- * `move_damage`
- * `move_category`
+ * `is_active`  Is the Pokemon the active Pokemon
+ * `hp` The health points of the Pokemon
+ * `stats` The attack, defense etc. of the Pokemon 
+ * `type` The element type (e.g. Water, Fire ...) of the Pokemon
+ * `move` The move ids of the Pokemon
+ * `move_type` The move elements of the Pokemon
+ * `move_damage` The move damages of the Pokemon
+ * `move_category` The move categories (physical or special) 
