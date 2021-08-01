@@ -226,7 +226,7 @@ def main():
                     pkmn_input_size,
                     p2_size,
                     label_type
-            )
+            ).to(DEVICE)
         else:
             best_model = SimpleMLP(
                 pkmn_input_size*num_pokemon + p2_size,
