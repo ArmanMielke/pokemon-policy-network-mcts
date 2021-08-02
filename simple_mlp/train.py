@@ -127,9 +127,8 @@ def main():
     label_type = config['label_type'] if 'label_type' in config.keys else 1
 
     # initialize the training and validation dataset
-    transforms = [eval("FeatureTransform")(["p1","p2"], "stats", 8), eval("FeatureTransform")(["p1","p2"],"hp", 20)]
-    train_dataset = PokemonDataset(config['train_data_path'], config['features'], label_type,transforms)
-    val_dataset = PokemonDataset(config['val_data_path'], config['features'], label_type,transforms)
+    train_dataset = PokemonDataset(config['train_data_path'], config['features'], label_type,config.transforms)
+    val_dataset = PokemonDataset(config['val_data_path'], config['features'], label_type,config.transforms)
     train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True, drop_last=True)
     val_loader = DataLoader(val_dataset, batch_size=config['batch_size'], shuffle=True, drop_last=True)
 
