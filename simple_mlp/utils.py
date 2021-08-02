@@ -21,11 +21,6 @@ def generate_dir_name() -> str:
     hash.update(str(time.time()).encode('utf-8'))
     return str(hash.hexdigest())
 
-
-def copy_config_to_output_dir(output_path, config):
-    with open(os.path.join(output_path, "config.json"), "w") as f:
-        f.write(json.dumps(config, indent=4, separators=(',', ': ')))
-
 def save_figure(epochs, train_loss, val_loss, accuracy, path):
     fig = plt.figure(figsize=(10, 10))
     axes = fig.add_axes([0.1, 0.1, 0.8, 0.8])
