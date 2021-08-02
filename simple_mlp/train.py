@@ -13,7 +13,7 @@ from utils import *
 from config import SimpleMLPConfig
 from earlystopping import EarlyStopping
 from lrscheduler import LRScheduler
-from transforms import StatTransform, HealthTransform, FeatureTransform
+from transforms import FeatureTransform
 from switch_equivariant_agent import SwitchEquivariantAgent 
 
 
