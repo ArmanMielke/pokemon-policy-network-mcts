@@ -15,7 +15,8 @@ class SimpleMLPConfig():
         with open(self.config_path, 'r') as f:
             self._config = json.load(f)
 
-        self._parse_transforms(self._config['transforms'])
+        if 'transforms' in self._config.keys():
+            self._parse_transforms(self._config['transforms'])
 
     def __getitem__(self, idx):
         return self._config[idx]
