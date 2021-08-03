@@ -33,8 +33,14 @@ class FeatureTransform():
 
     def __call__(self, sample, player): 
         if player in self.player_of_interest and self.feature_of_interest in sample.dtype.names:
-            modifier = np.random.choice(np.arange(start=-self.value, stop=self.value, step=1), sample[self.feature_of_interest].shape)
+            modifier = np.random.choice(
+                np.arange(start=-self.value, stop=self.value, step=1),
+                sample[self.feature_of_interest].shape
+            )
             sample[self.feature_of_interest] = sample[self.feature_of_interest] + modifier
+            if np.any(sample[self.feature_of_interest] < 0):
+                a = sample[self.feature_of_interest]
+                sample[self.feature_of_interest] = np.where(a < 0, 0, a)
             return sample
         else:
             return sample
