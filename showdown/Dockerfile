@@ -3,7 +3,7 @@ RUN apt update && apt upgrade -y
 RUN apt install -y git
 RUN git clone https://github.com/smogon/pokemon-showdown.git
 WORKDIR pokemon-showdown
-RUN git checkout ed8565a6dba3c88a35a854126855e1e9890fe404
+RUN git checkout d4cec9736f03d177fd5216abbcb9beee95600811
 COPY formats.ts config/formats.ts
 RUN ./build
 ENTRYPOINT ./pokemon-showdown 8081 --no-security
