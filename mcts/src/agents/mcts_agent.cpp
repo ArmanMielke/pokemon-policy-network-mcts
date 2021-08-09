@@ -10,6 +10,12 @@
 
 // TODO the MCTS agent assumes that it is player 1, i.e. the one who challenged the other player. doesn't work otherwise
 bool start_mcts_agent(ShowdownClient& client, std::string const battle_room_name) {
+    // team preview
+    // TODO implement properly
+    sleep(5);
+    client.send_message("/choose default", battle_room_name);
+    sleep(5);
+
     std::optional<bool> battle_won = std::nullopt;
 
     do {
