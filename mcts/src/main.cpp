@@ -9,6 +9,7 @@
 int const NUM_BATTLES = 100;
 std::string const LOG_FILE = "log.txt";
 
+std::string const user_to_challenge = std::getenv("USER_CHALLENGE");
 
 void log_result(bool const battle_won) {
     std::fstream file_stream;
@@ -19,11 +20,13 @@ void log_result(bool const battle_won) {
 
 
 int main() {
-    ShowdownClient client{"cpp-djcoaisjdcoai", std::optional<std::string>{"<password>"}};
+    ShowdownClient client{"dlinvcchallenge1", std::optional<std::string>{"JbNeAhqXqw35EEAR"}};
     client.set_team("<packed team>");
 
     for (int i = 0; i < NUM_BATTLES; i++) {
-        std::string battle_room_name = client.challenge_user("pmariglia-sidudhc", "gen8ou");
+        std::cout << user_to_challenge << std::endl;
+        std::string battle_room_name = client.challenge_user("dlinvcaccept1", "gen8randombattle");
+        std::cout << "Got Battle room: " << battle_room_name << std::endl;
         bool const battle_won = start_mcts_agent(client, battle_room_name);
         log_result(battle_won);
 
