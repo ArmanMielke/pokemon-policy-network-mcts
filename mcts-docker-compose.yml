@@ -41,11 +41,12 @@ services:
      - USER_CHALLENGE=dlinvcaccept1
      - SHOWDOWN_HOST=showdown-server
      - SHOWDOWN_PORT=8081
-     - GAME_FORMAT=gen8randombattle3
-     - SHOWDOWN_EXE=../showdown/pokemon-showdown
+     - GAME_FORMAT=gen8ou
+     - SHOWDOWN_EXE=/showdown/pokemon-showdown
    restart: always
    networks:
-     - back
+     back:
+      ipv4_address: 172.25.0.101
 
 networks:
   back:
