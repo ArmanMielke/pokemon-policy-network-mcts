@@ -1,3 +1,6 @@
 [submodule "pmariglia"]
 	path = pmariglia
 	url = https://github.com/derkaczda/showdown.git
+[submodule "showdown"]
+	path = showdown
+	url = git:derkaczda/pokemon-showdown.git
