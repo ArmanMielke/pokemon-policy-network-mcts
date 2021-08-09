@@ -1,0 +1,55 @@
+version: "3"
+services:
+ showdown: 
+   build:
+    context: showdown 
+    dockerfile: Dockerfile
+   ports:
+   - 8081:8081
+   container_name: showdown-server
+   restart: always 
+   networks:
+   - back
+
+ pmariglia_accept_1:
+   depends_on:
+     - showdown
+   build:
+     context: pmariglia
+     dockerfile: Dockerfile
+   expose:
+     - 8081
+   container_name: pmariglia-accept-1
+   restart: always
+   volumes:
+     - ./pmariglia/envs/accept1:/showdown/.env
+     - ./datasets/collector:/showdown/dataset
+     - ./teams:/showdown/teams/teams
+   networks:
+     - back
+
+ mcts:
+   depends_on:
+     - pmariglia_accept_1
+   build:
+     context: mcts
+     dockerfile: Dockerfile
+   expose:
+     - 8081
+   container_name: mcts
+   environment:
+     - USER_CHALLENGE=dlinvcaccept1
+     - SHOWDOWN_HOST=showdown-server
+     - SHOWDOWN_PORT=8081
+     - GAME_FORMAT=gen8randombattle3
+     - SHOWDOWN_EXE=../showdown/pokemon-showdown
+   restart: always
+   networks:
+     - back
+
+networks:
+  back:
+   driver: bridge
+   ipam:
+    config:
+    - subnet: 172.25.0.0/24

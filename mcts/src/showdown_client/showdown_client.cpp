@@ -13,8 +13,8 @@
 #include <nlohmann/json.hpp>
 
 
-std::string const SHOWDOWN_HOST = "localhost";
-std::string const SHOWDOWN_PORT = "8081";
+std::string const SHOWDOWN_HOST = std::getenv("SHOWDOWN_HOST");//"localhost";
+std::string const SHOWDOWN_PORT = std::getenv("SHOWDOWN_PORT");//"8081";
 std::string const SHOWDOWN_TARGET = "/showdown/websocket";
 
 // search and replace this with the contents of capture groups 1 and 2 to remove the seed
