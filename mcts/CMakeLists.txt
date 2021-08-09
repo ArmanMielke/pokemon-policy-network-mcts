@@ -33,4 +33,13 @@ add_executable(pokemon_mcts
     src/agents/mcts/node.h
     src/agents/mcts/uct_score.cpp
     src/agents/mcts/uct_score.h
+
+    src/policy_network.cpp
+    src/policy_network.h
 )
+
+
+# include PyTorch
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/libtorch")
+find_package(Torch REQUIRED)
+target_link_libraries(pokemon_mcts "${TORCH_LIBRARIES}")
