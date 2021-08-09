@@ -8,13 +8,14 @@ import torch
 from torch.utils.data import Dataset
 
 class PokemonDataset(Dataset):
-    def __init__(self, root_dir, features, transform=[]):
+    def __init__(self, root_dir, features, label_type=1, transform=[]):
         self.root_dir = root_dir
         self.transform = transform
         self.features = features #[f.split("/") for f in features]
         self.converted_path = os.path.join(self.root_dir, 'converted')
         self.converted_file_ext = '.pkl'
         self._convert_data()
+        self.label_type = label_type
         self.file_list = [
             f for f in os.listdir(self.converted_path)
             if os.path.isfile(os.path.join(self.converted_path, f))
@@ -30,7 +31,9 @@ class PokemonDataset(Dataset):
         path = os.path.join(self.converted_path, self.file_list[index])
         sample = self._load_pickle(path)
         p1,p2 = self._get_input_features(sample)
-        y = sample['p1']['chosen_move']
+        y = sample['p1']['chosen_move_2']
+        if self.label_type == 0:
+            y = sample['p1']['chosen_move']
 
         return p1,p2, y
 
@@ -40,7 +43,7 @@ class PokemonDataset(Dataset):
     def _get_input_features(self, sample) -> np.ndarray:
         player_features = [[],[]]
         for i, (player, features) in enumerate(self.features.items()):
-            team = sample[player]['pokemon_np'][features]
+            team = sample[player]['pokemon'][features]
             for t in self.transform:
                 team = t(team, player)
             team = np.array([

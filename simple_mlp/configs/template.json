@@ -11,6 +11,20 @@
        "p1": ["is_active", "hp", "stats", "type", "move", "move_type", "move_damage", "move_category"],
        "p2": ["is_active", "hp", "type"]
     },
+    "transforms": [
+        {
+            "name": "FeatureTransform",
+            "players": ["p1", "p2"],
+            "feature": "hp",
+            "value": 20
+        },
+        {
+            "name": "FeatureTransform",
+            "players": ["p1", "p2"],
+            "feature": "stats",
+            "value": 8
+        }
+    ],
     "lr_scheduler" : {
         "patience" : 5,
         "min_lr" : 1e-6
@@ -19,5 +33,6 @@
         "patience" : 15,
         "begin": 1
     },
-    "weight_decay": 1e-5
+    "weight_decay": 1e-5,
+    "label_type": 1  
 }
