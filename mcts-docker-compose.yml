@@ -11,7 +11,7 @@ services:
    networks:
    - back
 
- pmariglia_accept_1:
+ pmariglia_accept-1:
    depends_on:
      - showdown
    build:
@@ -28,25 +28,165 @@ services:
    networks:
      - back
 
- mcts:
+ mcts-1:
    depends_on:
-     - pmariglia_accept_1
+     - pmariglia_accept-1
    build:
      context: mcts
      dockerfile: Dockerfile
    expose:
      - 8081
-   container_name: mcts
+   container_name: mcts-1
    environment:
      - USER_CHALLENGE=dlinvcaccept1
      - SHOWDOWN_HOST=showdown-server
      - SHOWDOWN_PORT=8081
-     - GAME_FORMAT=gen8ou
+     - GAME_FORMAT=gen8customgame
      - SHOWDOWN_EXE=/showdown/pokemon-showdown
+     - TEAM_DIR=/mcts/teams/switch_three_pokemon_packed
+     - NUM_BATTLES=5
+     - USERNAME=dlinvcchallenge1
+     - PASSWORD=JbNeAhqXqw35EEAR
    restart: always
+   volumes:
+     - ./teams:/mcts/teams
+     - ./tmp/log.txt:/mcts/log.txt
+     - ./tmp/action1.txt:/mcts/action.txt
    networks:
      back:
       ipv4_address: 172.25.0.101
+
+
+ pmariglia_accept-2:
+  depends_on:
+  - showdown
+  build:
+    context: pmariglia
+    dockerfile: Dockerfile
+  expose:
+    - 8081
+  container_name: pmariglia-accept-2
+  restart: always
+  volumes:
+    - ./pmariglia/envs/accept2:/showdown/.env
+    - ./datasets/collector:/showdown/dataset
+    - ./teams:/showdown/teams/teams
+  networks:
+    - back 
+ mcts-2:
+  depends_on:
+  - pmariglia_accept-2
+  build:
+    context: mcts
+    dockerfile: Dockerfile
+  expose:
+    - 8081
+  container_name: mcts-2
+  environment:
+    - USER_CHALLENGE=dlinvcaccept2
+    - SHOWDOWN_HOST=showdown-server
+    - SHOWDOWN_PORT=8081
+    - GAME_FORMAT=gen8customgame
+    - SHOWDOWN_EXE=/showdown/pokemon-showdown
+    - TEAM_DIR=/mcts/teams/switch_three_pokemon_packed
+    - NUM_BATTLES=5
+    - USERNAME=dlinvcchallenge2
+    - PASSWORD=Fz8LmGdX2gN8By9N
+  restart: always
+  volumes:
+    - ./teams:/mcts/teams
+    - ./tmp/log.txt:/mcts/log.txt
+    - ./tmp/action2.txt:/mcts/action.txt
+  networks:
+    back:
+      ipv4_address: 172.25.0.102 
+ pmariglia_accept-3:
+  depends_on:
+    - showdown
+  build:
+    context: pmariglia
+    dockerfile: Dockerfile
+  expose:
+    - 8081
+  container_name: pmariglia-accept-3
+  restart: always
+  volumes:
+    - ./pmariglia/envs/accept3:/showdown/.env
+    - ./datasets/collector:/showdown/dataset
+    - ./teams:/showdown/teams/teams
+  networks:
+    - back 
+ mcts-3:
+  depends_on:
+    - pmariglia_accept-3
+  build:
+    context: mcts
+    dockerfile: Dockerfile
+  expose:
+    - 8081
+  container_name: mcts-3
+  environment:
+    - USER_CHALLENGE=dlinvcaccept3
+    - SHOWDOWN_HOST=showdown-server
+    - SHOWDOWN_PORT=8081
+    - GAME_FORMAT=gen8customgame
+    - SHOWDOWN_EXE=/showdown/pokemon-showdown
+    - TEAM_DIR=/mcts/teams/switch_three_pokemon_packed
+    - NUM_BATTLES=5
+    - USERNAME=dlinvcchallenge3
+    - PASSWORD=NbmjPcthUbzT4LGz
+  restart: always
+  volumes:
+    - ./teams:/mcts/teams
+    - ./tmp/log.txt:/mcts/log.txt
+    - ./tmp/action3.txt:/mcts/action.txt
+  networks:
+    back:
+      ipv4_address: 172.25.0.103 
+ pmariglia_accept-4:
+  depends_on:
+    - showdown
+  build:
+    context: pmariglia
+    dockerfile: Dockerfile
+  expose:
+    - 8081
+  container_name: pmariglia-accept-4
+  restart: always
+  volumes:
+    - ./pmariglia/envs/accept4:/showdown/.env
+    - ./datasets/collector:/showdown/dataset
+    - ./teams:/showdown/teams/teams
+  networks:
+    - back
+ 
+ mcts-4:
+  depends_on:
+    - pmariglia_accept-4
+  build:
+    context: mcts
+    dockerfile: Dockerfile
+  expose:
+    - 8081
+  container_name: mcts-4
+  environment:
+    - USER_CHALLENGE=dlinvcaccept4
+    - SHOWDOWN_HOST=showdown-server
+    - SHOWDOWN_PORT=8081
+    - GAME_FORMAT=gen8customgame
+    - SHOWDOWN_EXE=/showdown/pokemon-showdown
+    - TEAM_DIR=/mcts/teams/switch_three_pokemon_packed
+    - NUM_BATTLES=5
+    - USERNAME=dlinvcchallenge4
+    - PASSWORD=C2pWHquRtUwuVBMv
+  restart: always
+  volumes:
+    - ./teams:/mcts/teams
+    - ./tmp/log.txt:/mcts/log.txt
+    - ./tmp/action4.txt:/mcts/action.txt
+  networks:
+    back:
+      ipv4_address: 172.25.0.104 
 
 networks:
   back:

@@ -6,13 +6,18 @@
 #include <string>
 #include <thread>
 #include <chrono>
+#include <filesystem>
+#include <vector>
 
 
-int const NUM_BATTLES = 100;
 std::string const LOG_FILE = "log.txt";
 
-std::string const user_to_challenge = std::getenv("USER_CHALLENGE");
-std::string const game_format = std::getenv("GAME_FORMAT");
+int const NUM_BATTLES = std::atoi(std::getenv("NUM_BATTLES"));
+std::string const USER_TO_CHALLENGE = std::getenv("USER_CHALLENGE");
+std::string const GAME_FORMAT = std::getenv("GAME_FORMAT");
+std::string const TEAM_DIR = std::getenv("TEAM_DIR");
+std::string const USERNAME = std::getenv("USERNAME");
+std::string const PASSWORD = std::getenv("PASSWORD");
 
 void log_result(bool const battle_won) {
     std::fstream file_stream;
@@ -21,16 +26,34 @@ void log_result(bool const battle_won) {
     file_stream.close();
 }
 
+std::string get_team(std::string const team_dir) {
+    std::vector<std::string> files;
+    for (const auto& file : std::filesystem::directory_iterator(team_dir)) {
+        files.push_back(file.path());
+    }
+
+    // sample a random file index
+    int const file_index = std::rand() % files.size();
+    
+    std::string line;
+    std::fstream file;
+    file.open(files[file_index], std::ios::in);
+    if (file.is_open()) {
+        std::getline(file, line);
+    }
+    return line;
+}
 
 int main() {
     std::chrono::seconds timespan(30);
     std::this_thread::sleep_for(timespan);
-    ShowdownClient client{"dlinvcchallenge1", std::optional<std::string>{"JbNeAhqXqw35EEAR"}};
-    //client.set_team("Arcanine|||RunAway|VineWhip,Surf|Adamant|252,164,,,,92|||||]Barraskewda|||RunAway|BranchPoke,Incinerate|Sassy|252,8,116,,132,||,,,,,0|||]Rillaboom|||RunAway|GrassPledge,Surf|Timid|172,,,252,,84||,0,,,,|||||,,");
-    client.set_team("Rotom-Heat||HeavyDutyBoots|Levitate|VoltSwitch,Overheat,Thunderbolt,NastyPlot|Timid|,,,252,4,252||,0,,,,|||]Corviknight||Leftovers|Pressure|Roost,Uturn,Defog,BraveBird|Impish|252,,76,,180,|||||]Clefable||Leftovers|MagicGuard|ThunderWave,Moonblast,Wish,Protect|Calm|252,,160,,96,|||||]Seismitoad||Leftovers|WaterAbsorb|Earthquake,StealthRock,Toxic,Scald|Relaxed|252,4,252,,,|||||]Hydreigon||ChoiceScarf|Levitate|DracoMeteor,DarkPulse,FlashCannon,FireBlast|Timid|,,,252,4,252|||||]Gyarados||Leftovers|Moxie|DragonDance,Earthquake,Waterfall,PowerWhip|Adamant|,252,,,4,252|||||");
+    ShowdownClient client{USERNAME, std::optional<std::string>{PASSWORD}};
+    std::string const team_string = get_team(TEAM_DIR);
+    client.set_team(team_string);
 
     for (int i = 0; i < NUM_BATTLES; i++) {
-        std::string battle_room_name = client.challenge_user(user_to_challenge, game_format);
+        std::cout << "test" << std::endl;
+        std::string battle_room_name = client.challenge_user(USER_TO_CHALLENGE, GAME_FORMAT);
         bool const battle_won = start_mcts_agent(client, battle_room_name);
         log_result(battle_won);
 
