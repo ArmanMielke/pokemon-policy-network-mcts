@@ -1,15 +1,16 @@
-#include "policy_network.h"
+#include "switch_equivariant_agent.h"
 
 #include <iostream>
-
-#include <torch/torch.h>
 
 using namespace torch;
 using namespace torch::indexing;
 
 
-PolicyNetwork::PolicyNetwork(int const p1_pokemon_size, int const p2_pokemon_size, int const num_pokemon)
-    : move_network(register_module("move_network", torch::nn::Sequential(
+SwitchEquivariantAgentImpl::SwitchEquivariantAgentImpl(
+    int const p1_pokemon_size,
+    int const p2_pokemon_size,
+    int const num_pokemon
+) : move_network(register_module("move_network", torch::nn::Sequential(
         torch::nn::Linear(p1_pokemon_size + num_pokemon * p2_pokemon_size, 128),
         torch::nn::ReLU(true),
         torch::nn::Linear(128, 128),
@@ -28,16 +29,15 @@ PolicyNetwork::PolicyNetwork(int const p1_pokemon_size, int const p2_pokemon_siz
         torch::nn::Linear(128, 1)
     ))) {}
 
-torch::Tensor PolicyNetwork::forward(Tensor const p1, Tensor const p2) {
+torch::Tensor SwitchEquivariantAgentImpl::forward(Tensor const p1, Tensor const p2) {
     Tensor const p2_flat = p2.flatten(1);
 
     // attacking moves
     Tensor const p1_active_pokemon = p1.index({Slice(), 0, Slice()});  // p1[:, 0, :]
     Tensor const active_pokemon_and_opponent = torch::cat({p1_active_pokemon, p2_flat}, 1);
-    Tensor const move_logits = this->move_network->forward(active_pokemon_and_opponent);
-    // in the python code, the logits are padded with zeros for the missing actions
-    // for MCTS it's more practical to not do this
-    // move_logits = torch::cat({move_logits, torch::zeros(move_logits.sizes())}, 1);
+    Tensor move_logits = this->move_network->forward(active_pokemon_and_opponent);
+    // pad the logits with zeros for the missing actions
+    move_logits = torch::cat({move_logits, torch::zeros(move_logits.sizes())}, 1);
 
     // switch actions for the second pokemon
     Tensor const p1_second_pokemon = p1.index({Slice(), 1, Slice()});  // p1[:, 1, :]
