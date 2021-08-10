@@ -1,9 +1,11 @@
 import os
 import json
+from transforms import *
 
 class SimpleMLPConfig():
     def __init__(self, path):
         self.config_path = path
+        self.transforms = []
         self.load_config()
 
     def load_config(self):
@@ -13,66 +15,26 @@ class SimpleMLPConfig():
         with open(self.config_path, 'r') as f:
             self._config = json.load(f)
 
-    @property
-    def config(self):
-        return self._config
+        if 'transforms' in self._config.keys():
+            self._parse_transforms(self._config['transforms'])
+
+    def __getitem__(self, idx):
+        return self._config[idx]
 
     @property
-    def validation_data_path(self):
-        return self._config["val_data_path"]
+    def keys(self):
+        return self._config.keys()
 
-    @property
-    def train_data_path(self):
-        return self._config["train_data_path"]
+    def save_to(self, path):
+        with open(os.path.join(path, 'config.json'), 'w') as f:
+            f.write(json.dumps(self._config, indent=4, separators=(',', ': ')))
 
-    @property
-    def batch_size(self):
-        return self._config["batch_size"]
 
-    @property
-    def learning_rate(self):
-        return self._config["learning_rate"]
+    def _parse_transforms(self, conf):
+        for transform in list(conf):
+           name = transform['name']
+           self.transforms.append(
+                   eval(name).from_config(transform)
+            ) 
 
-    @property
-    def epochs(self):
-        return self._config["epochs"]
 
-    @property
-    def features(self):
-        return self._config["features"]
-
-    @property
-    def use_early_stopping(self):
-        return "early_stopping" in self._config.keys()
-
-    @property
-    def early_stopping_patience(self):
-        if self.use_early_stopping:
-            return self._config['early_stopping']['patience']
-
-    @property
-    def early_stopping_begin(self):
-        if self.use_early_stopping:
-            return self._config['early_stopping']['begin']
-
-    @property
-    def use_lr_scheduler(self):
-        return 'lr_scheduler' in self._config.keys()
-
-    @property
-    def lr_scheduler_patience(self):
-        if self.use_lr_scheduler:
-            return self._config['lr_scheduler']['patience']
-
-    @property
-    def lr_scheduler_min_lr(self):
-        if self.use_lr_scheduler:
-            return self._config['lr_scheduler']['min_lr']
-
-    @property
-    def test_data_path(self):
-        return self._config['test_data_path'] if "test_data_path" in self._config.keys() else ""
-
-    @property
-    def weight_decay(self):
-        return self._config['weight_decay'] if 'weight_decay' in self._config.keys() else 0
