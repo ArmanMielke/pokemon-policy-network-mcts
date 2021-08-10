@@ -28,6 +28,35 @@ enum RequestState {
     NONE,
 };
 
+
+// TODO move all of this somewhere else?
+struct PokemonData {
+public:
+    /// 1 if the Pokémon is active, 0 otherwise.
+    int is_active;
+    /// The current HP of the Pokémon.
+    int hp;
+    /// The Pokémon's stats in the order attack, defense, special attack, special defense, speed, maximum HP.
+    std::array<int, 6> stats = { 0 };
+    /// An array representing the Pokémon's types.
+    /// The types that the Pokémon has are 1, all other types are 0.
+    std::array<int, 18> types = { 0 };
+    /// The IDs of each of the Pokémon's moves.
+    std::array<int, 4> moves = { 0 };
+    /// For each move, the one-hot encoded type.
+    std::array<std::array<int, 18>, 4> move_types = { 0 };
+    /// The base power of each move.
+    std::array<int, 4> move_damages = { 0 };
+    /// The category of each move.
+    /// 0 for status, 1 for special, 2 for physical.
+    std::array<int, 4> move_categories = { 0 };
+};
+
+const int NUM_POKEMON = 3;
+
+typedef std::array<PokemonData, NUM_POKEMON> PlayerData;
+
+
 class ShowdownSimulator {
 public:
     explicit ShowdownSimulator();
@@ -48,7 +77,7 @@ public:
     std::array<int, 2> get_num_remaining_pokemon();
     /// Bundles information that can be used for an action selection heuristic.
     /// @return Information about given player's Pokémon.
-    void get_player_info(Player const player);
+    PlayerData get_player_info(Player const player);
     /// @return `true`, iff the game has ended.
     bool is_finished() const;
     /// @return `std::nullopt` as long as `is_finished()` returns false.
@@ -99,36 +128,8 @@ private:
     std::vector<bool> get_pokemon_fainted(Player const player);
     /// Bundles information that can be used for an action selection heuristic.
     /// @return Information about the given Pokémon from the given player.
-    void get_pokemon_info(Player const player, int const pokemon);
+    PokemonData get_pokemon_info(Player const player, int const pokemon);
 };
-
-
-// TODO move all of this somewhere else?
-struct PokemonData {
-public:
-    /// 1 if the Pokémon is active, 0 otherwise.
-    int is_active;
-    /// The current HP of the Pokémon.
-    int hp;
-    /// The Pokémon's stats in the order attack, defense, special attack, special defense, speed, maximum HP.
-    std::array<int, 6> stats = { 0 };
-    /// An array representing the Pokémon's types.
-    /// The types that the Pokémon has are 1, all other types are 0.
-    std::array<int, 18> types = { 0 };
-    /// The IDs of each of the Pokémon's moves.
-    std::array<int, 4> moves = { 0 };
-    /// For each move, the one-hot encoded type.
-    std::array<std::array<int, 18>, 4> move_types = { 0 };
-    /// The base power of each move.
-    std::array<int, 4> move_damages = { 0 };
-    /// The category of each move.
-    /// 0 for status, 1 for special, 2 for physical.
-    std::array<int, 4> move_categories = { 0 };
-};
-
-const int NUM_POKEMON = 3;
-
-typedef std::array<PokemonData, NUM_POKEMON> PlayerData;
 
 
 #endif //POKEMON_MCTS_SHOWDOWN_SIMULATOR_H

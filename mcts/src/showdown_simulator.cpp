@@ -104,16 +104,16 @@ std::array<int, 2> ShowdownSimulator::get_num_remaining_pokemon() {
 }
 
 // TODO refactor, move to another file?
-void ShowdownSimulator::get_player_info(Player const player) {
+PlayerData ShowdownSimulator::get_player_info(Player const player) {
+    std::array<PokemonData, NUM_POKEMON> player_data;
     for (int pokemon = 0; pokemon < NUM_POKEMON; pokemon++) {
-        this->get_pokemon_info(player, pokemon);
+        player_data[pokemon] = this->get_pokemon_info(player, pokemon);
     }
-    // crash the program
-    std::cout << int(this->types_json["asdfasdf"]) + 1 << std::endl;
+    return player_data;
 }
 
 // TODO refactor, move to another file?
-void ShowdownSimulator::get_pokemon_info(Player const player, int const pokemon) {
+PokemonData ShowdownSimulator::get_pokemon_info(Player const player, int const pokemon) {
     std::string const player_str = std::to_string(player);
     std::string const pokemon_str = std::to_string(pokemon);
     PokemonData pokemon_data;
@@ -186,6 +186,8 @@ void ShowdownSimulator::get_pokemon_info(Player const player, int const pokemon)
             pokemon_data.move_categories[i] = 2;
         }
     }
+
+    return pokemon_data;
 }
 
 bool ShowdownSimulator::is_finished() const {
