@@ -9,7 +9,7 @@ def create_volumes_string(volumes):
         volumes_str += f"{SPACING}{SPACING}{SPACING}- {volume}\n"
     return volumes_str
 
-def create_server(port, service_name, container_name):
+def create_server(port, service_name, container_name, network_name):
     return f"{SPACING}{service_name}: \n" \
     f"{SPACING}{SPACING} build:\n" \
     f"{SPACING}{SPACING}{SPACING} context: showdown \n" \
@@ -19,11 +19,11 @@ def create_server(port, service_name, container_name):
     f"{SPACING}{SPACING} container_name: {container_name}\n" \
     f"{SPACING}{SPACING} restart: always \n" \
     f"{SPACING}{SPACING} networks:\n" \
-    f"{SPACING}{SPACING} - back \n" \
+    f"{SPACING}{SPACING} - {network_name} \n" \
     f"{SPACING}{SPACING} mem_limit: 4GB"
 
 def create_data_pair(server_service, service_name_challenge, service_name_accept, container_name_challenge,
-        container_name_accept, port, volumes_challenge, volumes_accept, ip):
+        container_name_accept, port, volumes_challenge, volumes_accept, ip, network_name):
 
     volumes_accept_str = create_volumes_string(volumes_accept)
     volumes_challenge_str = create_volumes_string(volumes_challenge)
@@ -40,7 +40,7 @@ def create_data_pair(server_service, service_name_challenge, service_name_accept
     f"{SPACING}{SPACING} volumes:\n"\
     f"{volumes_accept_str}"\
     f"{SPACING}{SPACING} networks:\n"\
-    f"{SPACING}{SPACING} - back\n"\
+    f"{SPACING}{SPACING} - {network_name}\n"\
     f"{SPACING}{service_name_challenge}:\n"\
     f"{SPACING}{SPACING} depends_on:\n"\
     f"{SPACING}{SPACING} - {service_name_accept}\n"\
@@ -55,11 +55,11 @@ def create_data_pair(server_service, service_name_challenge, service_name_accept
     f"{SPACING}{SPACING} volumes:\n"\
     f"{volumes_challenge_str}"\
     f"{SPACING}{SPACING} networks:\n"\
-    f"{SPACING}{SPACING}{SPACING} back:\n"\
+    f"{SPACING}{SPACING}{SPACING} {network_name}:\n"\
     f"{SPACING}{SPACING}{SPACING}{SPACING} ipv4_address: {ip}\n"
 
 
-def create_data_pipeline(args) -> str:
+def create_data_pipeline(args, network_name) -> str:
     result_string = ""
     for i in range(args.count):
         accepter_name = f"pmariglia-data-accept-{i+1}{args.postfix}"
@@ -85,7 +85,7 @@ def create_data_pipeline(args) -> str:
 
         pair = create_data_pair(args.serverservice, challenge_service, accepter_service,
             challenge_name, accepter_name, args.port, volumes_challenge,
-            volumes_accept,ip)
+            volumes_accept,ip, network_name)
 
         result_string += pair
         result_string += "\n\n"
@@ -94,7 +94,7 @@ def create_data_pipeline(args) -> str:
 def create_mcts_pair(server_service, server_container, pmariglia_service_name, mcts_service_name, 
     pmariglia_container_name, mcts_container_name, port, ip, game_format,
     volumes_pmariglia, volumes_mcts, user_challenge, team_dir,
-    num_battles, username, password):
+    num_battles, username, password, network_name):
 
     volumes_mcts_str = create_volumes_string(volumes_mcts)
     volumes_pmariglia_str = create_volumes_string(volumes_pmariglia)
@@ -112,7 +112,7 @@ def create_mcts_pair(server_service, server_container, pmariglia_service_name, m
            f"{SPACING}{SPACING} volumes:\n" \
            f"{volumes_pmariglia_str}" \
            f"{SPACING}{SPACING} networks:\n" \
-           f"{SPACING}{SPACING} - back\n" \
+           f"{SPACING}{SPACING} - {network_name}\n" \
            f"{SPACING}{mcts_service_name}:\n" \
            f"{SPACING}{SPACING} depends_on:\n" \
            f"{SPACING}{SPACING} - {server_service}\n" \
@@ -127,7 +127,7 @@ def create_mcts_pair(server_service, server_container, pmariglia_service_name, m
            f"{SPACING}{SPACING} volumes:\n" \
            f"{volumes_mcts_str}" \
            f"{SPACING}{SPACING} networks: \n" \
-           f"{SPACING}{SPACING}{SPACING} back:\n" \
+           f"{SPACING}{SPACING}{SPACING} {network_name}:\n" \
            f"{SPACING}{SPACING}{SPACING}{SPACING} ipv4_address: {ip}\n" \
            f"{SPACING}{SPACING} environment:\n"\
            f"{SPACING}{SPACING} - USER_CHALLENGE={user_challenge}\n" \
@@ -140,7 +140,7 @@ def create_mcts_pair(server_service, server_container, pmariglia_service_name, m
            f"{SPACING}{SPACING} - USERNAME={username}\n"\
            f"{SPACING}{SPACING} - PASSWORD={password}\n"\
 
-def create_mcts_pipeline(args):
+def create_mcts_pipeline(args, network_name):
     result = ""
     for i in range(args.count):
         pmariglia_container = f"pmariglia-mcts-accept-{i+1}{args.postfix}"
@@ -171,7 +171,7 @@ def create_mcts_pipeline(args):
             pmariglia_service, mcts_service, pmariglia_container, 
             mcts_container, args.port, ip, args.gameformat,
             volumes_pmariglia, volumes_mcts, user_to_challenge, 
-            args.teamdir, args.numbattles, username, password)
+            args.teamdir, args.numbattles, username, password, network_name)
 
         result += pair
         result += "\n\n"
@@ -196,12 +196,14 @@ if __name__ == "__main__":
     with open(args.dest, 'w') as f:
 
         docker_compose_header = "version: \"3\"\nservices:\n"
-        server = create_server(args.port, args.serverservice, args.servername)
+        network_name = f"network_{args.kind}"
+        server = create_server(args.port, args.serverservice, args.servername, network_name)
 
         base_ip = args.baseip
 
         docker_compose_networks = f"networks:\n"\
-        f"{SPACING} back:\n"\
+        f"{SPACING} {network_name}:\n"\
+        f"{SPACING}{SPACING} name: {network_name}\n"\
         f"{SPACING}{SPACING} driver: bridge\n"\
         f"{SPACING}{SPACING} ipam:\n"\
         f"{SPACING}{SPACING}{SPACING} config:\n"\
@@ -212,7 +214,7 @@ if __name__ == "__main__":
         f.write("\n\n")
 
 
-        result = create_data_pipeline(args) if args.kind == "data" else create_mcts_pipeline(args)
+        result = create_data_pipeline(args, network_name) if args.kind == "data" else create_mcts_pipeline(args, network_name)
         f.write(result)
         
         f.write(docker_compose_networks)
