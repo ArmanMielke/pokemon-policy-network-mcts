@@ -16,7 +16,7 @@ TEAM_DIR_MCTS="/mcts/teams/switch_three_pokemon_packed"
 BATTLE_BOT="most_damage"
 ENV_DEST="pmariglia/envs"
 COUNT=1
-RUN_COUNT=5
+RUN_COUNT=1
 BASE_IP="172.25.0.0"
 SERVER_SERVICE="showdown-mcts"
 POSTFIX="-1"
@@ -34,4 +34,4 @@ python3 pmariglia/envs/create_envs.py --websocket "$WEBSOCKET:$PORT" \
 python3 create_compose.py --count $COUNT --port $PORT \
     --baseip $BASE_IP --servername $WEBSOCKET --serverservice $SERVER_SERVICE \
     --postfix $POSTFIX --kind $COMPOSE_TYPE --dest $FILE_DEST \
-    --gameformat '$GAME_MODE' --teamdir $TEAM_DIR_MCTS --numbattles $RUN_COUNT
+    --gameformat "$GAME_MODE" --teamdir $TEAM_DIR_MCTS --numbattles $RUN_COUNT
