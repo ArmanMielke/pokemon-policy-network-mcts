@@ -140,10 +140,15 @@ std::optional<bool> ShowdownClient::check_battle_over(std::string const battle_r
 }
 
 std::string ShowdownClient::get_battle_room_name(std::string const battle_format) {
+    // remove any clauses from the battle format by only keeping what comes before the "@@@"
+    std::vector<std::string> battle_format_split;
+    boost::split(battle_format_split, battle_format, boost::is_any_of("@"));
+    std::string const battle_format_no_clauses = battle_format_split[0];
+
     // the first message in the battle room
     std::string battle_room_message;
     // a message starting with this string is a message in the battle room
-    std::string const battle_room_prefix = ">battle-" + boost::algorithm::to_lower_copy(battle_format) + "-";
+    std::string const battle_room_prefix = ">battle-" + boost::algorithm::to_lower_copy(battle_format_no_clauses) + "-";
     do {
         battle_room_message = this->websocket.receive_message();
     } while (!boost::algorithm::starts_with(battle_room_message, battle_room_prefix));
