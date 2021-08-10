@@ -3,4 +3,4 @@
 	url = https://github.com/derkaczda/showdown.git
 [submodule "showdown"]
 	path = showdown
-	url = git:derkaczda/pokemon-showdown.git
+	url = https://github.com/derkaczda/pokemon-showdown.git
