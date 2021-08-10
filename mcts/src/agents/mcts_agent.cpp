@@ -1,6 +1,6 @@
 #include "mcts_agent.h"
 #include "../showdown_client/showdown_client.h"
-#include "mcts/mcts.h"
+#include "mcts/vanilla.h"
 
 #include <iostream>
 #include <optional>
@@ -29,15 +29,10 @@ bool start_mcts_agent(ShowdownClient& client, std::string const battle_room_name
     sleep(5);
 
     std::optional<bool> battle_won = std::nullopt;
-    std::cout << "test" << std::endl;
-    std::chrono::seconds timespan(10);
-    std::this_thread::sleep_for(timespan);
-    client.send_message("/choose default", battle_room_name);
-    std::this_thread::sleep_for(timespan);
     do {
         std::string const input_log = client.request_input_log_without_seed(battle_room_name);
 
-        std::string action = run_mcts(input_log);
+        std::string action = vanilla::run_mcts(input_log);
         log_action(action);
         std::cout << "[MCTS Agent] Selected action: " << action << std::endl;
 
