@@ -19,7 +19,8 @@ def create_server(port, service_name, container_name):
     f"{SPACING}{SPACING} container_name: {container_name}\n" \
     f"{SPACING}{SPACING} restart: always \n" \
     f"{SPACING}{SPACING} networks:\n" \
-    f"{SPACING}{SPACING} - back"
+    f"{SPACING}{SPACING} - back \n" \
+    f"{SPACING}{SPACING} mem_limit: 4GB"
 
 def create_data_pair(server_service, service_name_challenge, service_name_accept, container_name_challenge,
         container_name_accept, port, volumes_challenge, volumes_accept, ip):
@@ -133,7 +134,7 @@ def create_mcts_pair(server_service, server_container, pmariglia_service_name, m
            f"{SPACING}{SPACING} - SHOWDOWN_HOST={server_container}\n" \
            f"{SPACING}{SPACING} - SHOWDOWN_PORT={port}\n" \
            f"{SPACING}{SPACING} - GAME_FORMAT={game_format}\n" \
-           f"{SPACING}{SPACING} - SHOWDOWN_EXE=/shodown/pokemon-showdown\n"\
+           f"{SPACING}{SPACING} - SHOWDOWN_EXE=/showdown/pokemon-showdown\n"\
            f"{SPACING}{SPACING} - TEAM_DIR={team_dir}\n" \
            f"{SPACING}{SPACING} - NUM_BATTLES={num_battles}\n" \
            f"{SPACING}{SPACING} - USERNAME={username}\n"\
@@ -192,7 +193,7 @@ if __name__ == "__main__":
     parser.add_argument("--numbattles", type=int, default=10)
     args = parser.parse_args()
 
-    with open('docker-compose.yml', 'w') as f:
+    with open(args.dest, 'w') as f:
 
         docker_compose_header = "version: \"3\"\nservices:\n"
         server = create_server(args.port, args.serverservice, args.servername)
