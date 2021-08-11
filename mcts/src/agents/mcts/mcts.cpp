@@ -62,7 +62,6 @@ Action select_final_action(std::shared_ptr<Node> const root) {
     float best_win_rate = - std::numeric_limits<float>::infinity();
 
     for (auto const [action, child]: root->children) {
-        std::cout << "[MCTS] Final action \"" << action << "\" has win rate " << child->opponent_win_rate() << std::endl;
         if (child->opponent_win_rate() > best_win_rate) {
             best_win_rate = child->opponent_win_rate();
             best_action = action;
@@ -96,25 +95,19 @@ Action run_mcts(std::string const input_log) {
         if (simulator.is_finished() && simulator.get_winner().has_value()) {
             // game has ended => can use the actual result of the game
             winner = simulator.get_winner().value();
-            std::cout << "[MCTS i=" << i << "] Player " << winner << " wins" << std::endl;
         } else if (!simulator.is_finished()) {
             // game has not yet ended => find out who has more Pokémon left and use that to approximate the result
             std::array<int, 2> num_remaining_pokemon = simulator.get_num_remaining_pokemon();
             if (num_remaining_pokemon[0] > num_remaining_pokemon[1]) {
                 // Player 1 has more Pokémon left
-                std::cout << "[MCTS i=" << i << "] Player 1 wins (more Pokémon left)" << std::endl;
                 winner = 1;
             } else if (num_remaining_pokemon[0] < num_remaining_pokemon[1]) {
                 // Player 2 has more Pokémon left
-                std::cout << "[MCTS i=" << i << "] Player 2 wins (more Pokémon left)" << std::endl;
                 winner = 2;
             } else {
-                std::cout << "[MCTS i=" << i << "] WARNING: Game has not ended in " << MAX_ROLLOUT_LENGTH
-                          << " turns, and it's not clear who's ahead. Skipping backpropagation." << std::endl;
                 continue;
             }
         } else {
-            std::cout << "[MCTS i=" << i << "] WARNING: Game ended in a draw(?) Skipping backpropagation." << std::endl;
             continue;
         }
         // backpropagate the result of the game
