@@ -30,29 +30,32 @@ enum RequestState {
 
 
 // TODO move all of this somewhere else?
+const int NUM_POKEMON = 3;
+const int NUM_STATS = 6;
+const int NUM_TYPES = 18;
+const int NUM_MOVES = 4;
+
 struct PokemonData {
 public:
     /// 1 if the Pokémon is active, 0 otherwise.
-    int is_active;
+    float is_active;
     /// The current HP of the Pokémon.
-    int hp;
+    float hp;
     /// The Pokémon's stats in the order attack, defense, special attack, special defense, speed, maximum HP.
-    std::array<int, 6> stats = { 0 };
+    std::array<float, NUM_STATS> stats = { 0 };
     /// An array representing the Pokémon's types.
     /// The types that the Pokémon has are 1, all other types are 0.
-    std::array<int, 18> types = { 0 };
+    std::array<float, NUM_TYPES> types = { 0 };
     /// The IDs of each of the Pokémon's moves.
-    std::array<int, 4> moves = { 0 };
+    std::array<float, NUM_MOVES> moves = { 0 };
     /// For each move, the one-hot encoded type.
-    std::array<std::array<int, 18>, 4> move_types = { 0 };
+    std::array<std::array<float, NUM_TYPES>, NUM_MOVES> move_types = { 0 };
     /// The base power of each move.
-    std::array<int, 4> move_damages = { 0 };
+    std::array<float, NUM_MOVES> move_damages = { 0 };
     /// The category of each move.
     /// 0 for status, 1 for special, 2 for physical.
-    std::array<int, 4> move_categories = { 0 };
+    std::array<float, NUM_MOVES> move_categories = { 0 };
 };
-
-const int NUM_POKEMON = 3;
 
 typedef std::array<PokemonData, NUM_POKEMON> PlayerData;
 

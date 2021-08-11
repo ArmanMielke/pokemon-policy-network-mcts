@@ -134,7 +134,7 @@ PokemonData ShowdownSimulator::get_pokemon_info(Player const player, int const p
     // split into separate strings
     std::vector<std::string> stats_split;
     boost::split(stats_split, stats_string, boost::is_any_of(","));
-    // convert to int
+    // convert to number
     for (int stat_index = 0; stat_index < 6; stat_index++) {
         pokemon_data.stats[stat_index] = std::stoi(stats_split[stat_index]);
     }
@@ -146,7 +146,7 @@ PokemonData ShowdownSimulator::get_pokemon_info(Player const player, int const p
     // split into separate strings
     std::vector<std::string> types_split;
     boost::split(types_split, types_string, boost::is_any_of(","));
-    // convert to one-hot (or two-hot) encoded array of ints
+    // convert to one-hot (or two-hot) encoded array
     for (std::string type : types_split) {
         boost::trim(type);
         std::string const type_without_quotes = type.substr(1, type.size() - 2);
