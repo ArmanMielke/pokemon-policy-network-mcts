@@ -1,6 +1,7 @@
 #include "mcts.h"
 #include "node.h"
 #include "uct_score.h"
+#include "../../policy_network.h"
 #include "../../showdown_simulator.h"
 
 #include <array>
@@ -17,12 +18,14 @@ int const MAX_ROLLOUT_LENGTH = 100;
 
 /// Selects the action with the highest UCT score.
 /// @return the selected action and the node that is reached with this action.
-// TODO if node->visit_count is 0 then we haven't explored this node yet
-//      Ideally, choose a random action in this case instead of the first action,
-//      or sample from a distribution determined by the scores
-std::pair<Action, std::shared_ptr<Node>> select_action(std::shared_ptr<Node> const node) {
+// TODO policy_action_probabilities should be optional
+std::pair<Action, std::shared_ptr<Node>> select_action(
+    std::shared_ptr<Node> const node,
+    std::array<float, 4> const policy_action_probabilities
+) {
     if (node->visit_count == 0) {
         // we haven't explored this node before => choose a random action
+        // TODO use policy_action_probabilities
         std::random_device r;
         std::default_random_engine generator{r()};
         std::uniform_int_distribution<> action_distribution{0, node->children.size() - 1};
@@ -35,12 +38,19 @@ std::pair<Action, std::shared_ptr<Node>> select_action(std::shared_ptr<Node> con
     std::pair<Action, std::shared_ptr<Node>> best_action;
     float best_score = - std::numeric_limits<float>::infinity();
 
+    // TODO this implementation has multiple huge problems
+    //      1. if a pokemon has fainted and a new pokemon is chosen, then there shouldn't be any action probabilities
+    //         from the policy => should be ignored/set to uniform distribution
+    //      2. not sure what happens if pokemon 2 has fainted.
+    //         probably the probability for switching to 3 will be used instead
+    int i = 0;
     for (std::pair<Action, std::shared_ptr<Node>> const action_child_pair: node->children) {
-        float score = uct_score(node, action_child_pair.second);
+        float score = uct_score_with_policy(node, action_child_pair.second, policy_action_probabilities[i]);
         if (score > best_score) {
             best_score = score;
             best_action = action_child_pair;
         }
+        i++;
     }
 
     return best_action;
@@ -71,7 +81,8 @@ Action select_final_action(std::shared_ptr<Node> const root) {
     return best_action;
 }
 
-Action run_mcts(std::string const input_log) {
+// TODO policy_network should be optional
+Action run_mcts(std::string const input_log, PolicyNetwork& policy_network) {
     std::shared_ptr<Node> root = std::make_shared<Node>(1);
 
     for (int i = 0; i < NUM_ROLLOUTS; i++) {
@@ -82,7 +93,10 @@ Action run_mcts(std::string const input_log) {
 
         for (int j = 0; j < MAX_ROLLOUT_LENGTH && !simulator.is_finished(); j++) {
             current_node->expand(simulator);
-            auto const [action, node] = select_action(current_node);
+            PlayerData const p1 = simulator.get_player_info(1);
+            PlayerData const p2 = simulator.get_player_info(2);
+            auto const policy_action_probabilities = policy_network.evaluate_policy(p1, p2);
+            auto const [action, node] = select_action(current_node, policy_action_probabilities);
 
             // apply action
             simulator.execute_commands(">p" + std::to_string(current_node->turn_player) + " " + action);
