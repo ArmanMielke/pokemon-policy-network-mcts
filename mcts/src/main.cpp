@@ -8,6 +8,7 @@
 #include <chrono>
 #include <filesystem>
 #include <vector>
+#include <random>
 
 
 std::string const LOG_FILE = "log.txt";
@@ -40,7 +41,10 @@ std::string get_team(std::string const team_dir) {
     }
 
     // sample a random file index
-    int const file_index = std::rand() % files.size();
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distrib(0, files.size() -1);
+    int const file_index = distrib(gen);
     
     std::string line;
     std::fstream file;
