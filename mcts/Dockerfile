@@ -1,7 +1,10 @@
 FROM nvidia/cuda:11.4.1-cudnn8-devel-ubuntu20.04
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt update && apt upgrade -y
-RUN apt install -y unzip wget curl build-essential git cmake libboost-all-dev
+RUN apt install -y wget curl gpg apt-transport-https
+RUN wget https://apt.kitware.com/kitware-archive.sh
+RUN chmod +x kitware-archive.sh && ./kitware-archive.sh
+RUN apt install -y unzip cmake build-essential git libboost-all-dev
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - 
 RUN apt update && apt install -y nodejs
 RUN git clone --recursive https://github.com/nlohmann/json.git /json
