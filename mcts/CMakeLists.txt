@@ -12,6 +12,7 @@ add_executable(pokemon_mcts
 
     src/player_data.h
     src/showdown_simulator.cpp
+    src/showdown_simulator_get_pokemon_info.cpp
     src/showdown_simulator.h
 
     src/showdown_client/showdown_client.cpp
