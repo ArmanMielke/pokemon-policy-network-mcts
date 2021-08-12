@@ -6,9 +6,8 @@ using namespace torch;
 
 
 // see https://pytorch.org/tutorials/advanced/cpp_export.html#step-3-loading-your-script-module-in-c
-PolicyNetwork::PolicyNetwork(std::string const model_path) {
-    this->model = torch::jit::load(model_path);
-}
+PolicyNetwork::PolicyNetwork(std::string const model_path)
+    : model(torch::jit::load(model_path)) {}
 
 Tensor convert_p1_pokemon_to_tensor(PokemonData const pokemon) {
     return torch::cat({

@@ -7,7 +7,6 @@
 #include <string>
 
 
-// TODO can policy_network be const?
 Action run_mcts(std::string const input_log, PolicyNetwork& policy_network);
 
 

@@ -19,12 +19,10 @@ public:
     std::array<float, 4> evaluate_policy(PlayerData const p1, PlayerData const p2);
 
 private:
-    // TODO can this be const?
     torch::jit::script::Module model;
 
     /// @param p1: Team of player 1. Shape (batch_size, num_pokemon, p1_pokemon_size)
     /// @param p2: Team of player 2. Shape (batch_size, num_pokemon, p2_pokemon_size)
-    // TODO can this function be const?
     torch::Tensor model_forward(torch::Tensor const p1, torch::Tensor const p2);
 };
 

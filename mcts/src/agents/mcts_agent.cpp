@@ -18,7 +18,6 @@ bool start_mcts_agent(ShowdownClient& client, std::string const battle_room_name
     sleep(5);
 
     // TODO make this optional
-    // TODO can this be const?
     PolicyNetwork policy_network{"models/three_pokemon_with_data_augmentation.torchscript"};
 
     std::optional<bool> battle_won = std::nullopt;
