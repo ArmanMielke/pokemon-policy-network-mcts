@@ -6,8 +6,10 @@
 
 #include <string>
 
+#include <boost/optional.hpp>
 
-Action run_mcts(std::string const input_log, PolicyNetwork& policy_network);
+
+Action run_mcts(std::string const input_log, boost::optional<PolicyNetwork&> policy_network = std::nullopt);
 
 
 #endif //POKEMON_MCTS_MCTS_AGENT_MCTS_H

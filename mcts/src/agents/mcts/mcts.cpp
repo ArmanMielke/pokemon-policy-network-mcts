@@ -7,9 +7,12 @@
 #include <array>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <random>
 #include <string>
 #include <vector>
+
+#include <boost/optional.hpp>
 
 
 int const NUM_ROLLOUTS = 100;
@@ -21,7 +24,7 @@ int const MAX_ROLLOUT_LENGTH = 100;
 // TODO policy_action_probabilities should be optional
 std::pair<Action, std::shared_ptr<Node>> select_action(
     std::shared_ptr<Node> const node,
-    std::array<float, 4> const policy_action_probabilities
+    std::optional<std::array<float, 4>> const policy_action_probabilities
 ) {
     if (node->visit_count == 0) {
         // we haven't explored this node before => choose a random action
@@ -45,7 +48,13 @@ std::pair<Action, std::shared_ptr<Node>> select_action(
     //         probably the probability for switching to 3 will be used instead
     int i = 0;
     for (std::pair<Action, std::shared_ptr<Node>> const action_child_pair: node->children) {
-        float score = uct_score_with_policy(node, action_child_pair.second, policy_action_probabilities[i]);
+        float score;
+        if (policy_action_probabilities.has_value()) {
+            score = uct_score_with_policy(node, action_child_pair.second, (*policy_action_probabilities)[i]);
+        } else {
+            score = uct_score(node, action_child_pair.second);
+        }
+
         if (score > best_score) {
             best_score = score;
             best_action = action_child_pair;
@@ -81,8 +90,7 @@ Action select_final_action(std::shared_ptr<Node> const root) {
     return best_action;
 }
 
-// TODO policy_network should be optional
-Action run_mcts(std::string const input_log, PolicyNetwork& policy_network) {
+Action run_mcts(std::string const input_log, boost::optional<PolicyNetwork&> policy_network) {
     std::shared_ptr<Node> root = std::make_shared<Node>(1);
 
     for (int i = 0; i < NUM_ROLLOUTS; i++) {
@@ -93,9 +101,15 @@ Action run_mcts(std::string const input_log, PolicyNetwork& policy_network) {
 
         for (int j = 0; j < MAX_ROLLOUT_LENGTH && !simulator.is_finished(); j++) {
             current_node->expand(simulator);
-            PlayerData const p1 = simulator.get_player_info(1);
-            PlayerData const p2 = simulator.get_player_info(2);
-            auto const policy_action_probabilities = policy_network.evaluate_policy(p1, p2);
+
+            // evaluate policy (if there is one)
+            std::optional<std::array<float, 4>> policy_action_probabilities = std::nullopt;
+            if (policy_network.has_value()) {
+                PlayerData const p1 = simulator.get_player_info(1);
+                PlayerData const p2 = simulator.get_player_info(2);
+                policy_action_probabilities = (*policy_network).evaluate_policy(p1, p2);
+            }
+
             auto const [action, node] = select_action(current_node, policy_action_probabilities);
 
             // apply action

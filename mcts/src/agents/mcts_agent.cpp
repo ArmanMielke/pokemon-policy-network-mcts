@@ -8,17 +8,20 @@
 #include <stdlib.h>
 #include <string>
 
+#include <boost/optional.hpp>
+
 
 // TODO the MCTS agent assumes that it is player 1, i.e. the one who challenged the other player. doesn't work otherwise
-bool start_mcts_agent(ShowdownClient& client, std::string const battle_room_name) {
+bool start_mcts_agent(
+    ShowdownClient& client,
+    std::string const battle_room_name,
+    boost::optional<PolicyNetwork&> policy_network
+) {
     // team preview
     // TODO implement properly
     sleep(5);
     client.send_message("/choose default", battle_room_name);
     sleep(5);
-
-    // TODO make this optional
-    PolicyNetwork policy_network{"models/three_pokemon_with_data_augmentation.torchscript"};
 
     std::optional<bool> battle_won = std::nullopt;
 
