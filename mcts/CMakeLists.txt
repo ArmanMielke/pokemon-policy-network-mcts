@@ -10,6 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 add_executable(pokemon_mcts
     src/main.cpp
 
+    src/player_data.h
     src/showdown_simulator.cpp
     src/showdown_simulator.h
 

@@ -1,7 +1,7 @@
 #ifndef POKEMON_MCTS_LOAD_MODEL_H
 #define POKEMON_MCTS_LOAD_MODEL_H
 
-#include "showdown_simulator.h"
+#include "player_data.h"
 
 #include <string>
 

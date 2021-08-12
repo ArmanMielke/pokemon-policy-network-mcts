@@ -1,5 +1,9 @@
 #include "policy_network.h"
+#include "player_data.h"
 
+#include <string>
+
+#include <torch/torch.h>
 #include <torch/script.h>
 
 using namespace torch;
