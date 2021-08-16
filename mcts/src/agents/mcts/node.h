@@ -1,7 +1,7 @@
 #ifndef POKEMON_MCTS_MCTS_AGENT_NODE_H
 #define POKEMON_MCTS_MCTS_AGENT_NODE_H
 
-#include "../../showdown_simulator.h"
+#include "../../showdown_simulator/showdown_simulator.h"
 
 #include <memory>
 #include <string>

@@ -1,5 +1,5 @@
 #include "node.h"
-#include "../../showdown_simulator.h"
+#include "../../showdown_simulator/showdown_simulator.h"
 
 #include <vector>
 

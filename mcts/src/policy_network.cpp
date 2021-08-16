@@ -1,5 +1,5 @@
 #include "policy_network.h"
-#include "player_data.h"
+#include "showdown_simulator/player_data.h"
 
 #include <string>
 

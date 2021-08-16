@@ -2,7 +2,7 @@
 #include "node.h"
 #include "uct_score.h"
 #include "../../policy_network.h"
-#include "../../showdown_simulator.h"
+#include "../../showdown_simulator/showdown_simulator.h"
 
 #include <array>
 #include <iostream>
