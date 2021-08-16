@@ -1,5 +1,5 @@
 #include "simple_heuristic_policy.h"
-#include "showdown_simulator/player_data.h"
+#include "../showdown_simulator/player_data.h"
 
 #include <torch/torch.h>
 

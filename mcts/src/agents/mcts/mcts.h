@@ -2,7 +2,7 @@
 #define POKEMON_MCTS_MCTS_AGENT_MCTS_H
 
 #include "node.h"
-#include "../../policy_network.h"
+#include "../../policies/policy_network.h"
 
 #include <string>
 

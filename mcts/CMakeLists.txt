@@ -36,12 +36,12 @@ add_executable(pokemon_mcts
     src/agents/mcts/uct_score.cpp
     src/agents/mcts/uct_score.h
 
-    src/switch_equivariant_agent.cpp
-    src/switch_equivariant_agent.h
-    src/policy_network.cpp
-    src/policy_network.h
-    src/simple_heuristic_policy.cpp
-    src/simple_heuristic_policy.h
+    src/policies/switch_equivariant_agent.cpp
+    src/policies/switch_equivariant_agent.h
+    src/policies/policy_network.cpp
+    src/policies/policy_network.h
+    src/policies/simple_heuristic_policy.cpp
+    src/policies/simple_heuristic_policy.h
 )
 
 

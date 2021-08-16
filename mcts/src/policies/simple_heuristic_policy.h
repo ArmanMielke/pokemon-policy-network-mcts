@@ -1,7 +1,7 @@
 #ifndef POKEMON_MCTS_SIMPLE_HEURISTIC_POLICY_H
 #define POKEMON_MCTS_SIMPLE_HEURISTIC_POLICY_H
 
-#include "showdown_simulator/player_data.h"
+#include "../showdown_simulator/player_data.h"
 
 
 /// Estimates action probabilities based on a simple, hand-crafted heuristic.

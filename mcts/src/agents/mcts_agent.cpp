@@ -1,6 +1,6 @@
 #include "mcts_agent.h"
 #include "mcts/mcts.h"
-#include "../policy_network.h"
+#include "../policies/policy_network.h"
 #include "../showdown_client/showdown_client.h"
 
 #include <iostream>

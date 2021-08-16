@@ -2,7 +2,7 @@
 #define POKEMON_MCTS_MCTS_AGENT_H
 
 #include "../showdown_client/showdown_client.h"
-#include "../policy_network.h"
+#include "../policies/policy_network.h"
 
 #include <string>
 
