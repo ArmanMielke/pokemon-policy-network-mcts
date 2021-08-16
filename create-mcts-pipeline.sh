@@ -13,7 +13,7 @@ TEAM_DIR_MCTS="/mcts/teams/switch_three_pokemon_packed"
 
 #-------------------------------
 # Not that important to change
-BATTLE_BOT="most_damage"
+BATTLE_BOT="most_base_damage"
 ENV_DEST="pmariglia/envs"
 COUNT=10
 RUN_COUNT=2
@@ -26,7 +26,7 @@ DATA_DIR="dataset"
 TIMER="False"
 ROLLOUTS=100
 ROLLOUT_LENGTH=100
-AGENT="RANDOM"
+AGENT="MCTS_VANILLA"
 #-------------------------------
 
 python3 pmariglia/envs/create_envs.py --websocket "$WEBSOCKET:$PORT" \
