@@ -94,7 +94,7 @@ def create_data_pipeline(args, network_name) -> str:
 def create_mcts_pair(server_service, server_container, pmariglia_service_name, mcts_service_name, 
     pmariglia_container_name, mcts_container_name, port, ip, game_format,
     volumes_pmariglia, volumes_mcts, user_challenge, team_dir,
-    num_battles, username, password, network_name, rollouts, rollout_length):
+    num_battles, username, password, network_name, rollouts, rollout_length, agent):
 
     volumes_mcts_str = create_volumes_string(volumes_mcts)
     volumes_pmariglia_str = create_volumes_string(volumes_pmariglia)
@@ -140,7 +140,8 @@ def create_mcts_pair(server_service, server_container, pmariglia_service_name, m
            f"{SPACING}{SPACING} - USERNAME={username}\n"\
            f"{SPACING}{SPACING} - PASSWORD={password}\n"\
            f"{SPACING}{SPACING} - ROLLOUTS={rollouts}\n"\
-           f"{SPACING}{SPACING} - ROLLOUT_LENGTH={rollout_length}\n"
+           f"{SPACING}{SPACING} - ROLLOUT_LENGTH={rollout_length}\n" \
+           f"{SPACING}{SPACING} - AGENT={agent}\n"
 
 def create_mcts_pipeline(args, network_name):
     result = ""
@@ -174,7 +175,7 @@ def create_mcts_pipeline(args, network_name):
             mcts_container, args.port, ip, args.gameformat,
             volumes_pmariglia, volumes_mcts, user_to_challenge, 
             args.teamdir, args.numbattles, username, password, network_name,
-            args.rollouts, args.rollout_length)
+            args.rollouts, args.rollout_length, args.agent)
 
         result += pair
         result += "\n\n"
@@ -196,6 +197,7 @@ if __name__ == "__main__":
     parser.add_argument("--numbattles", type=int, default=10)
     parser.add_argument("--rollouts", type=int, default=100)
     parser.add_argument("--rollout-length", type=int, default=100)
+    parser.add_argument("--agent", type=str, default="MCTS_VANILLA")
     args = parser.parse_args()
 
     with open(args.dest, 'w') as f:

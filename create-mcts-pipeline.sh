@@ -24,8 +24,9 @@ COMPOSE_TYPE="mcts"
 FILE_DEST="mcts-docker-compose.yml"
 DATA_DIR="dataset"
 TIMER="False"
-ROLLOUTS=200
+ROLLOUTS=100
 ROLLOUT_LENGTH=100
+AGENT="RANDOM"
 #-------------------------------
 
 python3 pmariglia/envs/create_envs.py --websocket "$WEBSOCKET:$PORT" \
@@ -37,7 +38,9 @@ python3 create_compose.py --count $COUNT --port $PORT \
     --baseip $BASE_IP --servername $WEBSOCKET --serverservice $SERVER_SERVICE \
     --postfix $POSTFIX --kind $COMPOSE_TYPE --dest $FILE_DEST \
     --gameformat "$GAME_MODE" --teamdir $TEAM_DIR_MCTS --numbattles $RUN_COUNT \
-    --rollouts $ROLLOUTS --rollout-length $ROLLOUT_LENGTH
+    --rollouts $ROLLOUTS --rollout-length $ROLLOUT_LENGTH --agent $AGENT
 
-mkdir tmp
+if [ ! -d "tmp" ]; then
+    mkdir tmp
+fi
 seq $COUNT | xargs -I {} bash -c "touch tmp/accept{}.txt; touch tmp/log{}.txt"

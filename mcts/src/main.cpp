@@ -1,5 +1,6 @@
 #include "showdown_client/showdown_client.h"
 #include "agents/mcts_agent.h"
+#include "agents/random_agent.h"
 
 #include <fstream>
 #include <iostream>
@@ -19,6 +20,7 @@ std::string const GAME_FORMAT = std::getenv("GAME_FORMAT");
 std::string const TEAM_DIR = std::getenv("TEAM_DIR");
 std::string const USERNAME = std::getenv("USERNAME");
 std::string const PASSWORD = std::getenv("PASSWORD");
+std::string const AGENT = std::getenv("AGENT");
 
 void write_log(std::string const str) {
     std::fstream file_stream;
@@ -67,7 +69,14 @@ int main() {
     for (int i = 0; i < NUM_BATTLES; i++) {
         auto t1 = std::chrono::high_resolution_clock::now();
         std::string battle_room_name = client.challenge_user(USER_TO_CHALLENGE, GAME_FORMAT);
-        bool const battle_won = start_mcts_agent(client, battle_room_name);
+        bool (*play)(ShowdownClient&, std::string const);
+        if (AGENT == "MCTS_VANILLA")
+            play = &start_mcts_agent;
+        else if (AGENT == "RANDOM")
+            play = &start_random_agent;
+        std::cout << "USING AGENT: " << AGENT << std::endl;
+        bool const battle_won = play(client, battle_room_name);
+        // bool const battle_won = start_mcts_agent(client, battle_room_name);
         auto t2 = std::chrono::high_resolution_clock::now();
         auto seconds_int = std::chrono::duration_cast<std::chrono::seconds>(t2-t1);
         std::cout << "The game took: " << std::to_string(seconds_int.count()) << " seconds" << std::endl;
