@@ -1,6 +1,5 @@
 #include "showdown_client/showdown_client.h"
 #include "agents/mcts_agent.h"
-#include "agents/random_agent.h"
 
 #include <fstream>
 #include <iostream>
@@ -58,8 +57,7 @@ std::string get_team(std::string const team_dir) {
 }
 
 int main() {
-    std::chrono::seconds timespan(30);
-    std::this_thread::sleep_for(timespan);
+    sleep(30);
     ShowdownClient client{USERNAME, std::optional<std::string>{PASSWORD}};
     std::string const team_string = get_team(TEAM_DIR);
     client.set_team(team_string);
@@ -72,11 +70,8 @@ int main() {
         bool (*play)(ShowdownClient&, std::string const);
         if (AGENT == "MCTS_VANILLA")
             play = &start_mcts_agent;
-        else if (AGENT == "RANDOM")
-            play = &start_random_agent;
         std::cout << "USING AGENT: " << AGENT << std::endl;
         bool const battle_won = play(client, battle_room_name);
-        // bool const battle_won = start_mcts_agent(client, battle_room_name);
         auto t2 = std::chrono::high_resolution_clock::now();
         auto seconds_int = std::chrono::duration_cast<std::chrono::seconds>(t2-t1);
         std::cout << "The game took: " << std::to_string(seconds_int.count()) << " seconds" << std::endl;
