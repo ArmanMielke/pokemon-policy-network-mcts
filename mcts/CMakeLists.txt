@@ -40,6 +40,8 @@ add_executable(pokemon_mcts
     src/switch_equivariant_agent.h
     src/policy_network.cpp
     src/policy_network.h
+    src/simple_heuristic_policy.cpp
+    src/simple_heuristic_policy.h
 )
 
 
