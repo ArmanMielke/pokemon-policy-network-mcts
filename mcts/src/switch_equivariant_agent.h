@@ -4,7 +4,7 @@
 #include <torch/torch.h>
 
 
-const int NUM_ACTIONS = 2;
+int const NUM_ACTIONS = 2;
 
 
 // instantiate with `SwitchEquivariantAgent model{p1_pokemon_size, p2_pokemon_size, num_pokemon};`

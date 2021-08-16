@@ -27,5 +27,4 @@ private:
 };
 
 
-
 #endif //POKEMON_MCTS_LOAD_MODEL_H
