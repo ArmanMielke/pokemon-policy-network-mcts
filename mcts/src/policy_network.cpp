@@ -1,54 +1,76 @@
 #include "policy_network.h"
+#include "player_data.h"
 
-#include <iostream>
+#include <string>
 
 #include <torch/torch.h>
+#include <torch/script.h>
 
 using namespace torch;
-using namespace torch::indexing;
 
 
-PolicyNetwork::PolicyNetwork(int const p1_pokemon_size, int const p2_pokemon_size, int const num_pokemon)
-    : move_network(register_module("move_network", torch::nn::Sequential(
-        torch::nn::Linear(p1_pokemon_size + num_pokemon * p2_pokemon_size, 128),
-        torch::nn::ReLU(true),
-        torch::nn::Linear(128, 128),
-        torch::nn::ReLU(true),
-        torch::nn::Linear(128, 128),
-        torch::nn::ReLU(true),
-        torch::nn::Linear(128, NUM_ACTIONS)
-    ))),
-    switch_network(register_module("switch_network", torch::nn::Sequential(
-        torch::nn::Linear(p1_pokemon_size + num_pokemon * p2_pokemon_size, 128),
-        torch::nn::ReLU(true),
-        torch::nn::Linear(128, 128),
-        torch::nn::ReLU(true),
-        torch::nn::Linear(128, 128),
-        torch::nn::ReLU(true),
-        torch::nn::Linear(128, 1)
-    ))) {}
+// see https://pytorch.org/tutorials/advanced/cpp_export.html#step-3-loading-your-script-module-in-c
+PolicyNetwork::PolicyNetwork(std::string const model_path)
+    : model(torch::jit::load(model_path)) {}
 
-torch::Tensor PolicyNetwork::forward(Tensor const p1, Tensor const p2) {
-    Tensor const p2_flat = p2.flatten(1);
+Tensor convert_p1_pokemon_to_tensor(PokemonData const pokemon) {
+    return torch::cat({
+        torch::from_blob((int*)&pokemon.is_active, 1),
+        torch::from_blob((int*)&pokemon.hp, 1),
+        torch::from_blob((int*)pokemon.stats.data(), NUM_STATS),
+        torch::from_blob((int*)pokemon.types.data(), NUM_TYPES),
+        torch::from_blob((int*)pokemon.moves.data(), NUM_MOVES),
+        torch::from_blob((int*)pokemon.move_types[0].data(), NUM_TYPES),
+        torch::from_blob((int*)pokemon.move_types[1].data(), NUM_TYPES),
+        torch::from_blob((int*)pokemon.move_types[2].data(), NUM_TYPES),
+        torch::from_blob((int*)pokemon.move_types[3].data(), NUM_TYPES),
+        torch::from_blob((int*)pokemon.move_damages.data(), NUM_MOVES),
+        torch::from_blob((int*)pokemon.move_categories.data(), NUM_MOVES)
+    });
+}
 
-    // attacking moves
-    Tensor const p1_active_pokemon = p1.index({Slice(), 0, Slice()});  // p1[:, 0, :]
-    Tensor const active_pokemon_and_opponent = torch::cat({p1_active_pokemon, p2_flat}, 1);
-    Tensor const move_logits = this->move_network->forward(active_pokemon_and_opponent);
-    // in the python code, the logits are padded with zeros for the missing actions
-    // for MCTS it's more practical to not do this
-    // move_logits = torch::cat({move_logits, torch::zeros(move_logits.sizes())}, 1);
+Tensor convert_p2_pokemon_to_tensor(PokemonData const pokemon) {
+    return torch::cat({
+        torch::from_blob((int*)&pokemon.is_active, 1),
+        torch::from_blob((int*)&pokemon.hp, 1),
+        torch::from_blob((int*)pokemon.stats.data(), NUM_STATS),
+        torch::from_blob((int*)pokemon.types.data(), NUM_TYPES),
+        torch::from_blob((int*)pokemon.move_types[0].data(), NUM_TYPES),
+        torch::from_blob((int*)pokemon.move_types[1].data(), NUM_TYPES),
+        torch::from_blob((int*)pokemon.move_types[2].data(), NUM_TYPES),
+        torch::from_blob((int*)pokemon.move_types[3].data(), NUM_TYPES)
+    });
+}
 
-    // switch actions for the second pokemon
-    Tensor const p1_second_pokemon = p1.index({Slice(), 1, Slice()});  // p1[:, 1, :]
-    Tensor const second_pokemon_and_opponent = torch::cat({p1_second_pokemon, p2_flat}, 1);
-    Tensor const switch_2_logit = this->switch_network->forward(second_pokemon_and_opponent);
+std::array<float, 4> PolicyNetwork::evaluate_policy(PlayerData const p1, PlayerData const p2) {
+    // TODO make the number of Pokémon flexible
+    Tensor p1_tensor = torch::stack({
+        convert_p1_pokemon_to_tensor(p1[0]),
+        convert_p1_pokemon_to_tensor(p1[1]),
+        convert_p1_pokemon_to_tensor(p1[2]),
+    }, 0);
+    p1_tensor = torch::unsqueeze(p1_tensor, 0);
+    Tensor p2_tensor = torch::stack({
+        convert_p2_pokemon_to_tensor(p2[0]),
+        convert_p2_pokemon_to_tensor(p2[1]),
+        convert_p2_pokemon_to_tensor(p2[2]),
+    }, 0);
+    p2_tensor = torch::unsqueeze(p2_tensor, 0);
 
-    // switch actions for the third pokemon
-    Tensor const p1_third_pokemon = p1.index({Slice(), 2, Slice()});  // p1[:, 2, :]
-    Tensor const third_pokemon_and_opponent = torch::cat({p1_third_pokemon, p2_flat}, 1);
-    Tensor const switch_3_logit = this->switch_network->forward(third_pokemon_and_opponent);
+    Tensor action_probabilities = this->model_forward(p1_tensor, p2_tensor);
+    action_probabilities = torch::squeeze(action_probabilities, 0);
+    return {
+        action_probabilities[0].item<float>(),
+        action_probabilities[1].item<float>(),
+        action_probabilities[4].item<float>(),
+        action_probabilities[5].item<float>()
+    };
+}
 
-    // combined logits
-    return torch::cat({move_logits, switch_2_logit, switch_3_logit}, 1);
+// see https://pytorch.org/tutorials/advanced/cpp_export.html#step-4-executing-the-script-module-in-c
+torch::Tensor PolicyNetwork::model_forward(const torch::Tensor p1, const torch::Tensor p2) {
+    // create a vector of inputs
+    std::vector<torch::jit::IValue> inputs = {p1, p2};
+    // execute the model and turn its output into a tensor
+    return model.forward(inputs).toTensor();
 }

@@ -1,12 +1,15 @@
 #ifndef POKEMON_MCTS_SHOWDOWN_SIMULATOR_H
 #define POKEMON_MCTS_SHOWDOWN_SIMULATOR_H
 
+#include "player_data.h"
+
 #include <array>
 #include <string>
 #include <vector>
 #include <optional>
 
 #include <boost/process.hpp>
+#include <nlohmann/json.hpp>
 
 namespace bp = boost::process;
 
@@ -27,6 +30,7 @@ enum RequestState {
     NONE,
 };
 
+
 class ShowdownSimulator {
 public:
     explicit ShowdownSimulator();
@@ -45,6 +49,9 @@ public:
     /// Assumes that the game has not ended.
     /// @return the number of remaining Pokémon for each player.
     std::array<int, 2> get_num_remaining_pokemon();
+    /// Bundles information that can be used for an action selection heuristic.
+    /// @return Information about given player's Pokémon.
+    PlayerData get_player_info(Player const player);
     /// @return `true`, iff the game has ended.
     bool is_finished() const;
     /// @return `std::nullopt` as long as `is_finished()` returns false.
@@ -68,6 +75,8 @@ private:
     /// This is `std::nullopt` before the game ends.
     /// It is set at the end of the game if a winner could be determined.
     std::optional<Player> winner = std::nullopt;
+    nlohmann::json types_json;
+    nlohmann::json moves_json;
 
     /// Reads a line from the output of the child process.
     /// This also checks whether the game has ended during that line and updates `this.finished` and `this.winner`
@@ -91,6 +100,9 @@ private:
     /// Assumes that the game has not ended.
     /// @return a vector indicating for each pokemon whether it has fainted.
     std::vector<bool> get_pokemon_fainted(Player const player);
+    /// Bundles information that can be used for an action selection heuristic.
+    /// @return Information about the given Pokémon from the given player.
+    PokemonData get_pokemon_info(Player const player, int const pokemon);
 };
 
 

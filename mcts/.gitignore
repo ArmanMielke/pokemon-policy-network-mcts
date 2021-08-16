@@ -3,3 +3,6 @@
 
 # Compilation output
 /pokemon_mcts
+
+# PyTorch C++
+/libtorch/

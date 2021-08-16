@@ -1,5 +1,6 @@
 #include "showdown_client/showdown_client.h"
 #include "agents/mcts_agent.h"
+#include "policy_network.h"
 
 #include <fstream>
 #include <iostream>
@@ -63,21 +64,11 @@ int main() {
     client.set_team(team_string);
     write_log("++++++\nStarting a new Battle\n+++++++++\n Using team " + team_string);
 
-    int win_count = 0;
+    PolicyNetwork policy_network{"models/three_pokemon_with_data_augmentation.torchscript"};
     for (int i = 0; i < NUM_BATTLES; i++) {
-        auto t1 = std::chrono::high_resolution_clock::now();
-        std::string battle_room_name = client.challenge_user(USER_TO_CHALLENGE, GAME_FORMAT);
-        bool (*play)(ShowdownClient&, std::string const);
-        if (AGENT == "MCTS_VANILLA")
-            play = &start_mcts_agent;
-        std::cout << "USING AGENT: " << AGENT << std::endl;
-        bool const battle_won = play(client, battle_room_name);
-        auto t2 = std::chrono::high_resolution_clock::now();
-        auto seconds_int = std::chrono::duration_cast<std::chrono::seconds>(t2-t1);
-        std::cout << "The game took: " << std::to_string(seconds_int.count()) << " seconds" << std::endl;
-        write_log("Finished game " + std::to_string(i) + " took " + std::to_string(seconds_int.count()) + " seconds (result " + std::to_string((int)battle_won) + ")");
-        // log_result(battle_won);
-        win_count += (int)battle_won;
+        std::string battle_room_name = client.challenge_user("pmariglia-sidudhc", "gen8customgame@@@Dynamax Clause");
+        bool const battle_won = start_mcts_agent(client, battle_room_name, policy_network);
+        log_result(battle_won);
 
         std::cout << "Battle result: " << battle_won << std::endl;
     }

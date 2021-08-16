@@ -1,27 +1,22 @@
 #include "mcts_agent.h"
+#include "mcts/mcts.h"
+#include "../policy_network.h"
 #include "../showdown_client/showdown_client.h"
-#include "mcts/vanilla.h"
 
 #include <iostream>
 #include <optional>
 #include <stdlib.h>
 #include <string>
 
-#include <thread>
-#include <chrono>
-
-std::string const ACTION_FILE = "action.txt";
-
-void log_action(std::string const action) {
-    std::fstream file_stream;
-    file_stream.open(ACTION_FILE, std::ios::app);
-    file_stream << action << std::endl;
-    file_stream.close();
-}
+#include <boost/optional.hpp>
 
 
 // TODO the MCTS agent assumes that it is player 1, i.e. the one who challenged the other player. doesn't work otherwise
-bool start_mcts_agent(ShowdownClient& client, std::string const battle_room_name) {
+bool start_mcts_agent(
+    ShowdownClient& client,
+    std::string const battle_room_name,
+    boost::optional<PolicyNetwork&> policy_network
+) {
     // team preview
     // TODO implement properly
     sleep(5);
@@ -32,9 +27,14 @@ bool start_mcts_agent(ShowdownClient& client, std::string const battle_room_name
     do {
         std::string const input_log = client.request_input_log(battle_room_name);
 
-        std::string action = vanilla::run_mcts(input_log);
-        log_action(action);
-        std::cout << "[MCTS Agent] Selected action: " << action << std::endl;
+        if (std::getenv("AGENT") == "MCTS_VANILLA") {
+            std::string action = vanilla::run_mcts(input_log);
+            std::cout << "[MCTS Agent] Selected action: " << action << std::endl;
+        }
+        else {
+            std::string action = run_mcts(input_log, policy_network);
+            std::cout << "[MCTS Agent] Selected action: " << action << std::endl;
+        }
 
         client.send_message("/choose " + action, battle_room_name);
 
