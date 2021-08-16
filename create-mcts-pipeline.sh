@@ -24,7 +24,7 @@ COMPOSE_TYPE="mcts"
 FILE_DEST="mcts-docker-compose.yml"
 DATA_DIR="dataset"
 TIMER="False"
-ROLLOUTS=150
+ROLLOUTS=200
 ROLLOUT_LENGTH=100
 #-------------------------------
 
@@ -38,3 +38,6 @@ python3 create_compose.py --count $COUNT --port $PORT \
     --postfix $POSTFIX --kind $COMPOSE_TYPE --dest $FILE_DEST \
     --gameformat "$GAME_MODE" --teamdir $TEAM_DIR_MCTS --numbattles $RUN_COUNT \
     --rollouts $ROLLOUTS --rollout-length $ROLLOUT_LENGTH
+
+mkdir tmp
+seq $COUNT | xargs -I {} bash -c "touch tmp/accept{}.txt; touch tmp/log{}.txt"
