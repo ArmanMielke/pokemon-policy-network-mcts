@@ -11,8 +11,8 @@
 #include <vector>
 
 
-int const NUM_ROLLOUTS = 100;
-int const MAX_ROLLOUT_LENGTH = 100;
+int const NUM_ROLLOUTS = std::atoi(std::getenv("ROLLOUTS"));//200;
+int const MAX_ROLLOUT_LENGTH = std::atoi(std::getenv("ROLLOUT_LENGTH"));//100;
 
 namespace vanilla {
 
@@ -76,6 +76,7 @@ Action select_final_action(std::shared_ptr<Node> const root) {
 Action run_mcts(std::string const input_log) {
     std::shared_ptr<Node> root = std::make_shared<Node>(1);
 
+    std::cout << "Using " << std::to_string(NUM_ROLLOUTS) << " rollouts with length " << std::to_string(MAX_ROLLOUT_LENGTH) << std::endl;
     for (int i = 0; i < NUM_ROLLOUTS; i++) {
         ShowdownSimulator simulator;
         simulator.execute_commands(input_log);
