@@ -2,35 +2,23 @@
 
 ## Data collection pipeline
 
-In ```pmariglia/envs``` you can find the configuration
-files for the challenger and challenge accepter agent. 
-For the challenger you need to use a registered user account
-with password to get the admin rights. You also need to
-add this username to ```showdown/usergroups.csv```. <br><br>
-The team configurations are located in ```teams``` where
-for the simple setting currently ```only_damage_two_pokemon```
-is used. For now the teams are randomily selected at startup.
+For data collection we use Docker and docker-compose
+to create multiple pmariglia agents playing against
+each other. <br><br>
 
-### With Docker and Docker compose
+To start the data collection process run
+```
+docker-compose build
+docker-compose up
+```
+which will create by default one pair of agents
+playing against each other and saving the game states
+to `datasets/collector`. <br><br>
 
-First we need to create the configuration files for the agents. In
-the project root directory run:
-```
-python3 pmariglia/envs/create_envs.py --teamdir physical_special --dest pmariglia/envs
-```
-(NOTE: you can change `--teamdir` to any of the folder names in the folder `teams`)
-
-Next we need to setup the docker-compose file. Run in the root dir of the project:
-```
-python3 create_compose.py
-```
-This will create a correctly configured `docker-compose.yml`. Finally the 
-collection process can be started with:
-```
-docker-compose up --build
-```
-This will build the showdown server and 32 agents 
-challenging each other.
+To change the amount of agents or other configuration
+options for this pipeline have a look into `create-data-pipeline.sh`
+which creates all important configuration files.
+For more indepth information have a look at our [data documentation](./doc/data.md)
 
 ## Dataloader
 

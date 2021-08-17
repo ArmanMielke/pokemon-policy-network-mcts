@@ -18,17 +18,20 @@ COUNT=16
 RUN_COUNT=10
 BASE_IP="172.25.0.0"
 SERVER_SERVICE="showdown"
-POSTFIX="-1"
+POSTFIX="-2"
 COMPOSE_TYPE="data"
 FILE_DEST="docker-compose.yml"
 DATA_DIR="dataset"
 #-------------------------------
 
+
+# Create the pmariglia environment files
 python3 pmariglia/envs/create_envs.py --websocket "'$WEBSOCKET:$PORT'" \
     --count $COUNT --runcount $RUN_COUNT --gamemode "$GAME_MODE" \
     --datadir $DATA_DIR --teamdir $TEAM_DIR --battlebot $BATTLE_BOT \
     --dest $ENV_DEST
 
+# create the docker compose file
 python3 create_compose.py --count $COUNT --port $PORT --baseip $BASE_IP \
     --servername $WEBSOCKET --serverservice $SERVER_SERVICE \
     --postfix $POSTFIX --kind $COMPOSE_TYPE --dest $FILE_DEST
