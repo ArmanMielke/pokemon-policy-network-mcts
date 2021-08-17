@@ -48,8 +48,8 @@ ShowdownSimulator::ShowdownSimulator() {
         bp::std_out > this->child_output
     };
 
-    std::string const TYPES_JSON = "../simple_mlp/dataloader/data/types.json";
-    std::string const MOVES_JSON = "../simple_mlp/dataloader/data/moves.json";
+    std::string const TYPES_JSON = "data/types.json";
+    std::string const MOVES_JSON = "data/moves.json";
     std::ifstream types_file_stream(TYPES_JSON);
     types_file_stream >> this->types_json;
     std::ifstream moves_file_stream(MOVES_JSON);
