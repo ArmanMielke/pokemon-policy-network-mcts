@@ -11,7 +11,7 @@
 
 
 /// Estimates action probabilities using a pre-trained neural network.
-class PolicyNetwork : Policy {
+class PolicyNetwork : public Policy {
 public:
     /// Loads the model from the given path.
     explicit PolicyNetwork(std::string const model_path);

@@ -8,7 +8,7 @@
 
 
 /// Estimates action probabilities based on a simple, hand-crafted heuristic.
-class SimpleHeuristicPolicy : Policy {
+class SimpleHeuristicPolicy : public Policy {
 public:
     std::array<float, 4> evaluate_policy(PlayerData const p1, PlayerData const p2) override;
 };

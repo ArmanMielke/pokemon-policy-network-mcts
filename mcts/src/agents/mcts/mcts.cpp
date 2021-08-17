@@ -1,7 +1,7 @@
 #include "mcts.h"
 #include "node.h"
 #include "uct_score.h"
-#include "../../policies/policy_network.h"
+#include "../../policies/policy.h"
 #include "../../showdown_simulator/showdown_simulator.h"
 
 #include <array>
@@ -90,7 +90,7 @@ Action select_final_action(std::shared_ptr<Node> const root) {
     return best_action;
 }
 
-Action run_mcts(std::string const input_log, boost::optional<PolicyNetwork&> policy_network) {
+Action run_mcts(std::string const input_log, boost::optional<Policy&> policy) {
     std::shared_ptr<Node> root = std::make_shared<Node>(1);
 
     for (int i = 0; i < NUM_ROLLOUTS; i++) {
@@ -104,10 +104,10 @@ Action run_mcts(std::string const input_log, boost::optional<PolicyNetwork&> pol
 
             // evaluate policy (if there is one)
             std::optional<std::array<float, 4>> policy_action_probabilities = std::nullopt;
-            if (policy_network.has_value()) {
+            if (policy.has_value()) {
                 PlayerData const p1 = simulator.get_player_info(1);
                 PlayerData const p2 = simulator.get_player_info(2);
-                policy_action_probabilities = (*policy_network).evaluate_policy(p1, p2);
+                policy_action_probabilities = (*policy).evaluate_policy(p1, p2);
             }
 
             auto const [action, node] = select_action(current_node, policy_action_probabilities);
