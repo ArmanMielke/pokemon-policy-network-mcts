@@ -1,5 +1,6 @@
 #include "mcts_agent.h"
-#include "mcts/mcts.h"
+// #include "mcts/mcts.h"
+#include "mcts/vanilla.h"
 #include "../policy_network.h"
 #include "../showdown_client/showdown_client.h"
 
@@ -27,16 +28,17 @@ bool start_mcts_agent(
     do {
         std::string const input_log = client.request_input_log(battle_room_name);
 
-        if (std::getenv("AGENT") == "MCTS_VANILLA") {
+        //if (std::getenv("AGENT") == "MCTS_VANILLA") {
             std::string action = vanilla::run_mcts(input_log);
             std::cout << "[MCTS Agent] Selected action: " << action << std::endl;
-        }
-        else {
-            std::string action = run_mcts(input_log, policy_network);
-            std::cout << "[MCTS Agent] Selected action: " << action << std::endl;
-        }
+            client.send_message("/choose " + action, battle_room_name);
+        //}
+        // else {
+        //     std::string action = run_mcts(input_log, policy_network);
+        //     std::cout << "[MCTS Agent] Selected action: " << action << std::endl;
+        //     client.send_message("/choose " + action, battle_room_name);
+        // }
 
-        client.send_message("/choose " + action, battle_room_name);
 
         // TODO properly wait until it's the agent's turn to do something again
         sleep(5);

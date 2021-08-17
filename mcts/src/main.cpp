@@ -54,25 +54,25 @@ std::string get_team(std::string const team_dir) {
     if (file.is_open()) {
         std::getline(file, line);
     }
+    file.close();
     return line;
 }
 
 int main() {
+    // Let the other agent do it's setup
     sleep(30);
+
     ShowdownClient client{USERNAME, std::optional<std::string>{PASSWORD}};
     std::string const team_string = get_team(TEAM_DIR);
     client.set_team(team_string);
-    write_log("++++++\nStarting a new Battle\n+++++++++\n Using team " + team_string);
-
+    int win_count = 0;
     PolicyNetwork policy_network{"models/three_pokemon_with_data_augmentation.torchscript"};
     for (int i = 0; i < NUM_BATTLES; i++) {
-        std::string battle_room_name = client.challenge_user("pmariglia-sidudhc", "gen8customgame@@@Dynamax Clause");
+        std::string battle_room_name = client.challenge_user(USER_TO_CHALLENGE, GAME_FORMAT);
         bool const battle_won = start_mcts_agent(client, battle_room_name, policy_network);
         log_result(battle_won);
-
+    win_count += (int)battle_won;
         std::cout << "Battle result: " << battle_won << std::endl;
     }
-
     write_log("Winrate: "+ std::to_string(win_count) + "/" + std::to_string(NUM_BATTLES));
-    write_log("\n++++++++ End of game ++++++++++++++++\n");
 }
