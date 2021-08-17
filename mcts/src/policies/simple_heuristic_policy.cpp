@@ -67,7 +67,7 @@ std::array<float, 4> SimpleHeuristicPolicy::evaluate_policy(PlayerData const p1,
     std::cout << move_logits << std::endl;
 
     // we're currently only using two moves => throw away the logits of the other two moves
-    move_logits = move_logits.index({Slice(0, 1)});
+    move_logits = move_logits.index({Slice(0, 2)});
     std::cout << move_logits << std::endl;
 
     Tensor const logits = torch::cat({move_logits, SWITCH_LOGITS}, 0);
