@@ -8,13 +8,11 @@ services:
    - 8081:8081
    container_name: showdown-server
    restart: always 
-   volumes:
-   - ./showdown/config.js:/pokemon-showdown/config/config.js
-   - ./showdown/usergroups.csv:/pokemon-showdown/config/usergroups.csv
    networks:
-   - back
+   - network_data 
+   mem_limit: 4GB
 
- pmariglia_accept_1:
+ pmariglia_data_accept_1-1:
    depends_on:
    - showdown
    build:
@@ -22,36 +20,37 @@ services:
     dockerfile: Dockerfile
    expose:
    - 8081
-   container_name: pmariglia-accept-1
+   container_name: pmariglia-data-accept-1-1
    restart: always
    volumes:
    - ./pmariglia/envs/accept1:/showdown/.env
    - ./datasets/collector:/showdown/dataset
    - ./teams:/showdown/teams/teams
    networks:
-   - back
- pmariglia_challenge_1:
+   - network_data
+ pmariglia_data_challenge_1-1:
    depends_on:
-   - pmariglia_accept_1
+   - pmariglia_data_accept_1-1
    - showdown
    build:
     context: pmariglia
     dockerfile: Dockerfile
    expose:
    - 8081
-   container_name: pmariglia-challenge-1
+   container_name: pmariglia-data-challenge-1-1
    restart: always
    volumes:
    - ./pmariglia/envs/challenge1:/showdown/.env
    - ./datasets/collector:/showdown/dataset
    - ./teams:/showdown/teams/teams
    networks:
-    back:
+    network_data:
      ipv4_address: 172.25.0.101
 
 
 networks:
-  back:
+  network_data:
+   name: network_data
    driver: bridge
    ipam:
     config:
