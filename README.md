@@ -18,17 +18,8 @@ to `datasets/collector`. <br><br>
 To change the amount of agents or other configuration
 options for this pipeline have a look into `create-data-pipeline.sh`
 which creates all important configuration files.
-For more indepth information have a look at our [data documentation](./doc/data.md)
+For more indepth information have a look at our [data documentation](./doc/data.md) <br><br>
 
-## Dataloader
-
-### Current supported features
-
- * `is_active`  Is the Pokemon the active Pokemon
- * `hp` The health points of the Pokemon
- * `stats` The attack, defense etc. of the Pokemon 
- * `type` The element type (e.g. Water, Fire ...) of the Pokemon
- * `move` The move ids of the Pokemon
- * `move_type` The move elements of the Pokemon
- * `move_damage` The move damages of the Pokemon
- * `move_category` The move categories (physical or special) 
+The data for our 3 Pokemon, 2 Attack setting can be found [here](https://drive.google.com/file/d/1w-p0EcoAz1jilWVLY4zx-RAOws7qGUnd/view?usp=sharing). You need
+to extract the zip and change the directories in `simple_mlp/configs/config.json`
+accordingly.
