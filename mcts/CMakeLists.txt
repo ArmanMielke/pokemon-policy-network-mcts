@@ -9,10 +9,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 add_executable(pokemon_mcts
     src/main.cpp
 
-    src/player_data.h
-    src/showdown_simulator.cpp
-    src/showdown_simulator_get_pokemon_info.cpp
-    src/showdown_simulator.h
+    src/showdown_simulator/player_data.h
+    src/showdown_simulator/showdown_simulator.cpp
+    src/showdown_simulator/showdown_simulator_get_pokemon_info.cpp
+    src/showdown_simulator/showdown_simulator.h
 
     src/showdown_client/showdown_client.cpp
     src/showdown_client/showdown_client.h
@@ -37,10 +37,13 @@ add_executable(pokemon_mcts
     src/agents/mcts/vanilla.h
     src/agents/mcts/vanilla.cpp
 
-    src/switch_equivariant_agent.cpp
-    src/switch_equivariant_agent.h
-    src/policy_network.cpp
-    src/policy_network.h
+    src/policies/policy.h
+    src/policies/switch_equivariant_agent.cpp
+    src/policies/switch_equivariant_agent.h
+    src/policies/policy_network.cpp
+    src/policies/policy_network.h
+    src/policies/simple_heuristic_policy.cpp
+    src/policies/simple_heuristic_policy.h
 )
 
 

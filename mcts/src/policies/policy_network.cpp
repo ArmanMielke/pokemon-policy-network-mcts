@@ -1,12 +1,12 @@
 #include "policy_network.h"
-#include "player_data.h"
+#include "../showdown_simulator/player_data.h"
 
 #include <string>
 
 #include <torch/torch.h>
 #include <torch/script.h>
 
-using namespace torch;
+using torch::Tensor;
 
 
 // see https://pytorch.org/tutorials/advanced/cpp_export.html#step-3-loading-your-script-module-in-c
@@ -68,7 +68,7 @@ std::array<float, 4> PolicyNetwork::evaluate_policy(PlayerData const p1, PlayerD
 }
 
 // see https://pytorch.org/tutorials/advanced/cpp_export.html#step-4-executing-the-script-module-in-c
-torch::Tensor PolicyNetwork::model_forward(const torch::Tensor p1, const torch::Tensor p2) {
+Tensor PolicyNetwork::model_forward(Tensor const p1, Tensor const p2) {
     // create a vector of inputs
     std::vector<torch::jit::IValue> inputs = {p1, p2};
     // execute the model and turn its output into a tensor

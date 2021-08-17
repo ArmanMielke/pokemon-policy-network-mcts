@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-using namespace torch;
-using namespace torch::indexing;
+using torch::Tensor;
+using torch::indexing::Slice;
 
 
 SwitchEquivariantAgentImpl::SwitchEquivariantAgentImpl(
@@ -29,7 +29,7 @@ SwitchEquivariantAgentImpl::SwitchEquivariantAgentImpl(
         torch::nn::Linear(128, 1)
     ))) {}
 
-torch::Tensor SwitchEquivariantAgentImpl::forward(Tensor const p1, Tensor const p2) {
+Tensor SwitchEquivariantAgentImpl::forward(Tensor const p1, Tensor const p2) {
     Tensor const p2_flat = p2.flatten(1);
 
     // attacking moves

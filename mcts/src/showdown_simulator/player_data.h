@@ -5,10 +5,10 @@
 #include <array>
 
 
-const int NUM_POKEMON = 3;
-const int NUM_STATS = 6;
-const int NUM_TYPES = 18;
-const int NUM_MOVES = 4;
+int const NUM_POKEMON = 3;
+int const NUM_STATS = 6;
+int const NUM_TYPES = 18;
+int const NUM_MOVES = 4;
 
 
 /// Information describing one Pokémon.
