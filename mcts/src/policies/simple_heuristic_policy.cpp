@@ -58,26 +58,14 @@ std::array<float, 4> SimpleHeuristicPolicy::evaluate_policy(PlayerData const p1,
 
         // type effectiveness
         Tensor move_effectiveness = matmul(move_type, TYPE_EFFECTIVENESS_MATRIX);
-        std::cout << move_effectiveness << std::endl;
         type_effectiveness_modifier[move] = matmul(move_effectiveness, defending_pokemon_type);
-        std::cout << type_effectiveness_modifier[move] << std::endl;
     }
 
-    std::cout << base_damages << std::endl;
-    std::cout << stab_bonus << std::endl;
-    std::cout << type_effectiveness_modifier << std::endl;
     Tensor move_logits = base_damages * stab_bonus * type_effectiveness_modifier;
-    std::cout << move_logits << std::endl;
-
     // we're currently only using two moves => throw away the logits of the other two moves
     move_logits = move_logits.index({Slice(0, 2)});
-    std::cout << move_logits << std::endl;
-
     Tensor const logits = torch::cat({move_logits, SWITCH_LOGITS}, 0);
-    std::cout << logits * LOGIT_FACTOR << std::endl;
-
     Tensor const action_probabilities = torch::softmax(logits * LOGIT_FACTOR, 0);
-    std::cout << action_probabilities << std::endl;
 
     return {
             action_probabilities[0].item<float>(),
