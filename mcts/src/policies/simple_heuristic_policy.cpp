@@ -9,6 +9,9 @@ using torch::indexing::Slice;
 
 float const SWITCH_LOGIT = 60;
 Tensor const SWITCH_LOGITS = SWITCH_LOGIT * torch::ones(NUM_POKEMON - 1);
+// all logits are multiplied with this number before being passed to the softmax in order to avoid the probability
+// of the best action being almost one and the probability of all other actions being almost 0
+float const LOGIT_FACTOR = 0.015;
 
 // the order of the types is the same order that Pokémon Showdown uses (in types.json)
 std::array<float, NUM_TYPES * NUM_TYPES> const TYPE_EFFECTIVENESS_CHART = {
@@ -71,9 +74,9 @@ std::array<float, 4> SimpleHeuristicPolicy::evaluate_policy(PlayerData const p1,
     std::cout << move_logits << std::endl;
 
     Tensor const logits = torch::cat({move_logits, SWITCH_LOGITS}, 0);
-    std::cout << logits << std::endl;
+    std::cout << logits * LOGIT_FACTOR << std::endl;
 
-    Tensor const action_probabilities = torch::softmax(logits, 0);
+    Tensor const action_probabilities = torch::softmax(logits * LOGIT_FACTOR, 0);
     std::cout << action_probabilities << std::endl;
 
     return {
