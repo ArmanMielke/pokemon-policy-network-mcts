@@ -14,6 +14,9 @@
 #include <vector>
 
 #include <boost/optional.hpp>
+#include <boost/range/adaptor/map.hpp>
+#include <boost/range/adaptor/transformed.hpp>
+#include <boost/range/algorithm/copy.hpp>
 
 
 int const NUM_ROLLOUTS = 100;
@@ -35,14 +38,30 @@ std::pair<Action, std::shared_ptr<Node>> select_action(
 
     if (node->visit_count == 0) {
         // we haven't explored this node before => choose a random action
-        // TODO use policy_action_probabilities
         std::random_device r;
         std::default_random_engine generator{r()};
-        std::uniform_int_distribution<> action_distribution{0, node->children.size() - 1};
-        int const action_index = action_distribution(generator);
+        if (policy_action_probabilities.has_value()) {
+            // get the available actions and the probabilities assigned to them by the policy as vector
+            std::vector<Action> available_actions;
+            boost::copy(node->children | boost::adaptors::map_keys, std::back_inserter(available_actions));
+            std::vector<float> available_action_probs;
+            boost::copy(available_actions | boost::adaptors::transformed(
+                [&policy_action_probabilities](std::string action) { return policy_action_probabilities->at(action); }
+            ), std::back_inserter(available_action_probs));
 
-        auto const pair = std::next(std::begin(node->children), action_index);
-        return {pair->first, pair->second};
+            // sample from the probability distribution over the available actions
+            std::discrete_distribution<size_t> action_distribution{available_action_probs.begin(), available_action_probs.end()};
+            size_t const action_index = action_distribution(generator);
+            Action const chosen_action = available_actions[action_index];
+            return {chosen_action, node->children[chosen_action]};
+        } else {
+            // there is no policy => use uniform distribution
+            std::uniform_int_distribution<size_t> action_distribution{0, node->children.size() - 1};
+            size_t const action_index = action_distribution(generator);
+
+            auto const pair = std::next(std::begin(node->children), action_index);
+            return {pair->first, pair->second};
+        }
     }
 
     std::pair<Action, std::shared_ptr<Node>> best_action;
