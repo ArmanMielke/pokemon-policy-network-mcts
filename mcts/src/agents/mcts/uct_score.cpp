@@ -5,7 +5,7 @@
 #include <memory>
 
 
-float const EXPLORATION_FACTOR = 5;
+float const EXPLORATION_FACTOR = 10;
 
 // the opponent of the child's turn player is the parent's turn player, so child->opponent_win_rate() gives the
 // win rate of the parent's turn player when choosing the action that leads to that child

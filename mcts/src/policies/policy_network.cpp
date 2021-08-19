@@ -8,6 +8,10 @@
 #include <torch/script.h>
 
 using torch::Tensor;
+using torch::indexing::Slice;
+
+
+float const LOGIT_FACTOR = 0.2;
 
 
 // see https://pytorch.org/tutorials/advanced/cpp_export.html#step-3-loading-your-script-module-in-c
@@ -58,13 +62,17 @@ std::unordered_map<std::string, float> PolicyNetwork::evaluate_policy(PlayerData
     }, 0);
     p2_tensor = torch::unsqueeze(p2_tensor, 0);
 
-    Tensor action_probabilities = this->model_forward(p1_tensor, p2_tensor);
-    action_probabilities = torch::squeeze(action_probabilities, 0);
+    Tensor logits = this->model_forward(p1_tensor, p2_tensor);
+    logits = torch::squeeze(logits, 0);
+    // we're currently only using two moves => throw away the logits of the other two moves
+    logits = torch::cat({logits.index({Slice(0, 2)}), logits.index({Slice(4, 6)})}, 0);
+
+    Tensor action_probabilities = torch::softmax(logits * LOGIT_FACTOR, 0);
     return {
         {"move 1", action_probabilities[0].item<float>()},
         {"move 2", action_probabilities[1].item<float>()},
-        {"switch 2", action_probabilities[4].item<float>()},
-        {"switch 3", action_probabilities[5].item<float>()}
+        {"switch 2", action_probabilities[2].item<float>()},
+        {"switch 3", action_probabilities[3].item<float>()}
     };
 }
 
