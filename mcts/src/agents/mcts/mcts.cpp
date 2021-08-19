@@ -10,9 +10,13 @@
 #include <optional>
 #include <random>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/optional.hpp>
+#include <boost/range/adaptor/map.hpp>
+#include <boost/range/adaptor/transformed.hpp>
+#include <boost/range/algorithm/copy.hpp>
 
 
 int const NUM_ROLLOUTS = 100;
@@ -24,42 +28,57 @@ int const MAX_ROLLOUT_LENGTH = 100;
 // TODO policy_action_probabilities should be optional
 std::pair<Action, std::shared_ptr<Node>> select_action(
     std::shared_ptr<Node> const node,
-    std::optional<std::array<float, 4>> const policy_action_probabilities
+    std::optional<std::unordered_map<Action, float>> policy_action_probabilities
 ) {
+    if (policy_action_probabilities.has_value()) {
+        // insert a dummy value for noop. it doesn't matter which value is inserted, because this action can only
+        // be taken if there is no other action available
+        policy_action_probabilities->insert({"noop", 1});
+    }
+
     if (node->visit_count == 0) {
         // we haven't explored this node before => choose a random action
-        // TODO use policy_action_probabilities
         std::random_device r;
         std::default_random_engine generator{r()};
-        std::uniform_int_distribution<> action_distribution{0, node->children.size() - 1};
-        int const action_index = action_distribution(generator);
+        if (policy_action_probabilities.has_value()) {
+            // get the available actions and the probabilities assigned to them by the policy as vector
+            std::vector<Action> available_actions;
+            boost::copy(node->children | boost::adaptors::map_keys, std::back_inserter(available_actions));
+            std::vector<float> available_action_probs;
+            boost::copy(available_actions | boost::adaptors::transformed(
+                [&policy_action_probabilities](std::string action) { return policy_action_probabilities->at(action); }
+            ), std::back_inserter(available_action_probs));
 
-        auto const pair = std::next(std::begin(node->children), action_index);
-        return std::pair<Action, std::shared_ptr<Node>>{pair->first, pair->second};
+            // sample from the probability distribution over the available actions
+            std::discrete_distribution<size_t> action_distribution{available_action_probs.begin(), available_action_probs.end()};
+            size_t const action_index = action_distribution(generator);
+            Action const chosen_action = available_actions[action_index];
+            return {chosen_action, node->children[chosen_action]};
+        } else {
+            // there is no policy => use uniform distribution
+            std::uniform_int_distribution<size_t> action_distribution{0, node->children.size() - 1};
+            size_t const action_index = action_distribution(generator);
+
+            auto const pair = std::next(std::begin(node->children), action_index);
+            return {pair->first, pair->second};
+        }
     }
 
     std::pair<Action, std::shared_ptr<Node>> best_action;
     float best_score = - std::numeric_limits<float>::infinity();
 
-    // TODO this implementation has multiple huge problems
-    //      1. if a pokemon has fainted and a new pokemon is chosen, then there shouldn't be any action probabilities
-    //         from the policy => should be ignored/set to uniform distribution
-    //      2. not sure what happens if pokemon 2 has fainted.
-    //         probably the probability for switching to 3 will be used instead
-    int i = 0;
-    for (std::pair<Action, std::shared_ptr<Node>> const action_child_pair: node->children) {
+    for (auto const [action, child]: node->children) {
         float score;
         if (policy_action_probabilities.has_value()) {
-            score = uct_score_with_policy(node, action_child_pair.second, (*policy_action_probabilities)[i]);
+            score = uct_score_with_policy(node, child, policy_action_probabilities->at(action));
         } else {
-            score = uct_score(node, action_child_pair.second);
+            score = uct_score(node, child);
         }
 
         if (score > best_score) {
             best_score = score;
-            best_action = action_child_pair;
+            best_action = {action, child};
         }
-        i++;
     }
 
     return best_action;
@@ -75,7 +94,6 @@ void backpropagate(std::vector<std::shared_ptr<Node>> search_path, Player const 
 }
 
 /// @return the action with the highest win rate.
-// TODO consider sampling from a distribution determined by the win rates instead of choosing the highest win rate
 Action select_final_action(std::shared_ptr<Node> const root) {
     Action best_action;
     float best_win_rate = - std::numeric_limits<float>::infinity();
@@ -103,7 +121,7 @@ Action run_mcts(std::string const input_log, boost::optional<Policy&> policy) {
             current_node->expand(simulator);
 
             // evaluate policy (if there is one)
-            std::optional<std::array<float, 4>> policy_action_probabilities = std::nullopt;
+            std::optional<std::unordered_map<Action, float>> policy_action_probabilities = std::nullopt;
             if (policy.has_value()) {
                 PlayerData const p1 = simulator.get_player_info(1);
                 PlayerData const p2 = simulator.get_player_info(2);

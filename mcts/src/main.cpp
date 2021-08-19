@@ -1,6 +1,7 @@
 #include "showdown_client/showdown_client.h"
 #include "agents/mcts_agent.h"
 #include "policies/policy_network.h"
+#include "policies/simple_heuristic_policy.h"
 
 #include <fstream>
 #include <iostream>
@@ -59,17 +60,20 @@ std::string get_team(std::string const team_dir) {
 }
 
 int main() {
-    // Let the other agent do it's setup
+    // Let the other agent do its setup
     sleep(30);
 
     ShowdownClient client{USERNAME, std::optional<std::string>{PASSWORD}};
     std::string const team_string = get_team(TEAM_DIR);
     client.set_team(team_string);
+
+    PolicyNetwork policy{"models/three_pokemon_with_data_augmentation.torchscript"};
+    // SimpleHeuristicPolicy policy;
+
     int win_count = 0;
-    PolicyNetwork policy_network{"models/three_pokemon_with_data_augmentation.torchscript"};
     for (int i = 0; i < NUM_BATTLES; i++) {
         std::string battle_room_name = client.challenge_user(USER_TO_CHALLENGE, GAME_FORMAT);
-        bool const battle_won = start_mcts_agent(client, battle_room_name, policy_network);
+        bool const battle_won = start_mcts_agent(client, battle_room_name, policy);
         log_result(battle_won);
         win_count += (int)battle_won;
         std::cout << "Battle result: " << battle_won << std::endl;

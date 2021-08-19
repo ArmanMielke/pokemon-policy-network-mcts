@@ -14,7 +14,6 @@
 namespace bp = boost::process;
 
 
-// TODO insert path to showdown executable
 std::string const SHOWDOWN_EXECUTABLE = std::getenv("SHOWDOWN_EXE");
 std::string const ARGUMENT = "simulate-battle";
 

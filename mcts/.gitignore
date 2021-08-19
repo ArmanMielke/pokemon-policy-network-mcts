@@ -6,3 +6,6 @@
 
 # PyTorch C++
 /libtorch/
+
+# log file
+/log.txt
