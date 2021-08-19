@@ -1,6 +1,10 @@
 #include "simple_heuristic_policy.h"
 #include "../showdown_simulator/player_data.h"
 
+#include <array>
+#include <string>
+#include <unordered_map>
+
 #include <torch/torch.h>
 
 using torch::Tensor;
@@ -38,7 +42,7 @@ std::array<float, NUM_TYPES * NUM_TYPES> const TYPE_EFFECTIVENESS_CHART = {
 Tensor const TYPE_EFFECTIVENESS_MATRIX = torch::from_blob((int*)TYPE_EFFECTIVENESS_CHART.data(), {NUM_TYPES, NUM_TYPES});
 
 
-std::array<float, 4> SimpleHeuristicPolicy::evaluate_policy(PlayerData const p1, PlayerData const p2) {
+std::unordered_map<std::string, float> SimpleHeuristicPolicy::evaluate_policy(PlayerData const p1, PlayerData const p2) {
     // the logits for attacks are the move's base damage times the STAB bonus times the type effectiveness modifier
     // (assuming the opponent doesn't switch)
     Tensor const base_damages = torch::from_blob((int*)p1[0].move_damages.data(), NUM_MOVES);
@@ -68,9 +72,9 @@ std::array<float, 4> SimpleHeuristicPolicy::evaluate_policy(PlayerData const p1,
     Tensor const action_probabilities = torch::softmax(logits * LOGIT_FACTOR, 0);
 
     return {
-            action_probabilities[0].item<float>(),
-            action_probabilities[1].item<float>(),
-            action_probabilities[2].item<float>(),
-            action_probabilities[3].item<float>()
+        {"move 1", action_probabilities[0].item<float>()},
+        {"move 2", action_probabilities[1].item<float>()},
+        {"switch 2", action_probabilities[2].item<float>()},
+        {"switch 3", action_probabilities[3].item<float>()}
     };
 }

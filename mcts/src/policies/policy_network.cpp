@@ -2,11 +2,16 @@
 #include "../showdown_simulator/player_data.h"
 
 #include <string>
+#include <unordered_map>
 
 #include <torch/torch.h>
 #include <torch/script.h>
 
 using torch::Tensor;
+using torch::indexing::Slice;
+
+
+float const LOGIT_FACTOR = 0.2;
 
 
 // see https://pytorch.org/tutorials/advanced/cpp_export.html#step-3-loading-your-script-module-in-c
@@ -42,7 +47,7 @@ Tensor convert_p2_pokemon_to_tensor(PokemonData const pokemon) {
     });
 }
 
-std::array<float, 4> PolicyNetwork::evaluate_policy(PlayerData const p1, PlayerData const p2) {
+std::unordered_map<std::string, float> PolicyNetwork::evaluate_policy(PlayerData const p1, PlayerData const p2) {
     // TODO make the number of Pokémon flexible
     Tensor p1_tensor = torch::stack({
         convert_p1_pokemon_to_tensor(p1[0]),
@@ -57,13 +62,17 @@ std::array<float, 4> PolicyNetwork::evaluate_policy(PlayerData const p1, PlayerD
     }, 0);
     p2_tensor = torch::unsqueeze(p2_tensor, 0);
 
-    Tensor action_probabilities = this->model_forward(p1_tensor, p2_tensor);
-    action_probabilities = torch::squeeze(action_probabilities, 0);
+    Tensor logits = this->model_forward(p1_tensor, p2_tensor);
+    logits = torch::squeeze(logits, 0);
+    // we're currently only using two moves => throw away the logits of the other two moves
+    logits = torch::cat({logits.index({Slice(0, 2)}), logits.index({Slice(4, 6)})}, 0);
+
+    Tensor action_probabilities = torch::softmax(logits * LOGIT_FACTOR, 0);
     return {
-        action_probabilities[0].item<float>(),
-        action_probabilities[1].item<float>(),
-        action_probabilities[4].item<float>(),
-        action_probabilities[5].item<float>()
+        {"move 1", action_probabilities[0].item<float>()},
+        {"move 2", action_probabilities[1].item<float>()},
+        {"switch 2", action_probabilities[2].item<float>()},
+        {"switch 3", action_probabilities[3].item<float>()}
     };
 }
 
