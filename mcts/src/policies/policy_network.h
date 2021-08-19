@@ -6,6 +6,7 @@
 
 #include <array>
 #include <string>
+#include <unordered_map>
 
 #include <torch/torch.h>
 
@@ -15,7 +16,7 @@ class PolicyNetwork : public Policy {
 public:
     /// Loads the model from the given path.
     explicit PolicyNetwork(std::string const model_path);
-    std::array<float, 4> evaluate_policy(PlayerData const p1, PlayerData const p2) override;
+    std::unordered_map<std::string, float> evaluate_policy(PlayerData const p1, PlayerData const p2) override;
 
 private:
     torch::jit::script::Module model;

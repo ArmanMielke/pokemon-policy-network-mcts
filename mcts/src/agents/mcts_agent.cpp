@@ -21,7 +21,7 @@ bool start_mcts_agent(
     // TODO implement properly
     sleep(5);
     client.send_message("/choose default", battle_room_name);
-    sleep(5);
+    sleep(10);
 
     std::optional<bool> battle_won = std::nullopt;
 
