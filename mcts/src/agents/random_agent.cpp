@@ -8,7 +8,7 @@
 
 
 // TODO properly determine available actions
-std::vector<std::string> const ACTIONS = {"move 1", "move 2", "switch 2"};
+std::vector<std::string> const ACTIONS = {"move 1", "move 2", "switch 2", "switch 3"};
 
 
 bool start_random_agent(ShowdownClient& client, std::string const battle_room_name) {
