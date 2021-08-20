@@ -24,12 +24,14 @@ bool start_mcts_agent(
     sleep(10);
 
     std::optional<bool> battle_won = std::nullopt;
+
     do {
         std::string const input_log = client.request_input_log(battle_room_name);
 
         std::string action = run_mcts(input_log, policy);
         std::cout << "[MCTS Agent] Selected action: " << action << std::endl;
 
+        client.send_message("/choose " + action, battle_room_name);
 
         // TODO properly wait until it's the agent's turn to do something again
         sleep(5);
