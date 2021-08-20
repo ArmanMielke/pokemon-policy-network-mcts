@@ -15,7 +15,7 @@ float const SWITCH_LOGIT = 60;
 Tensor const SWITCH_LOGITS = SWITCH_LOGIT * torch::ones(NUM_POKEMON - 1);
 // all logits are multiplied with this number before being passed to the softmax in order to avoid the probability
 // of the best action being almost one and the probability of all other actions being almost 0
-float const LOGIT_FACTOR = 0.015;
+float const LOGIT_FACTOR = 0.2;
 
 // the order of the types is the same order that Pokémon Showdown uses (in types.json)
 std::array<float, NUM_TYPES * NUM_TYPES> const TYPE_EFFECTIVENESS_CHART = {
