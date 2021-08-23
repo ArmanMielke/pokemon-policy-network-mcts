@@ -44,7 +44,7 @@ bool start_mcts_agent(
         // TODO properly wait until it's the agent's turn to do something again
         sleep(5);
         turn_counter++;
-        acc_turn_time += duration.count()
+        acc_turn_time += duration.count();
 
         battle_won = client.check_battle_over(battle_room_name);
     } while (!battle_won.has_value());
