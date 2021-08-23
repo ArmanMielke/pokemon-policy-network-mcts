@@ -26,7 +26,7 @@ bool start_mcts_agent(
 
     std::optional<bool> battle_won = std::nullopt;
     int turn_counter = 0;
-    int acc_turn_time = 0
+    int acc_turn_time = 0;
 
     do {
         std::string const input_log = client.request_input_log(battle_room_name);
