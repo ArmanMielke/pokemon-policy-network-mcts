@@ -76,7 +76,11 @@ int main() {
     int win_count = 0;
     for (int i = 0; i < NUM_BATTLES; i++) {
         std::string battle_room_name = client.challenge_user(USER_TO_CHALLENGE, GAME_FORMAT);
+        auto start = std::chrono::high_resolution_clock::now();
         bool const battle_won = start_mcts_agent(client, battle_room_name, policy);
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto duration = duration_cast<std::chrono::seconds>(stop - start);
+        write_log("Round took: " + std::to_string(duration.count()) + " seconds");
         win_count += (int)battle_won;
         std::cout << "Battle result: " << battle_won << std::endl;
     }
