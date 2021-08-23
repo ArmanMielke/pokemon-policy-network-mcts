@@ -38,5 +38,5 @@ which creates all important configuration files.
 For more indepth information have a look at our [data documentation](./doc/data.md) <br><br>
 
 The data for our 3 Pokemon, 2 Attack setting can be found [here](https://drive.google.com/file/d/1w-p0EcoAz1jilWVLY4zx-RAOws7qGUnd/view?usp=sharing). You need
-to extract the zip and change the directories in `simple_mlp/configs/config.json`
+to extract the zip and change the directories in `policynet/configs/config.json`
 accordingly.
