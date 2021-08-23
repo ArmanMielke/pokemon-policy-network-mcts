@@ -19,8 +19,8 @@
 #include <boost/range/algorithm/copy.hpp>
 
 
-int const NUM_ROLLOUTS = 100;
-int const MAX_ROLLOUT_LENGTH = 100;
+int const NUM_ROLLOUTS = std::getenv("ROLLOUTS") != nullptr ? std::atoi(std::getenv("ROLLOUTS")) : 100;
+int const MAX_ROLLOUT_LENGTH = std::getenv("ROLLOUT_LENGTH") != nullptr ? std::atoi(std::getenv("ROLLOUT_LENGTH")) : 100;
 
 
 /// Selects the action with the highest UCT score.

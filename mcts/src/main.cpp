@@ -11,17 +11,16 @@
 #include <filesystem>
 #include <vector>
 #include <random>
-
+#include <stdexcept>
 
 std::string const LOG_FILE = "log.txt";
 
-int const NUM_BATTLES = std::atoi(std::getenv("NUM_BATTLES"));
-std::string const USER_TO_CHALLENGE = std::getenv("USER_CHALLENGE");
-std::string const GAME_FORMAT = std::getenv("GAME_FORMAT");
+int const NUM_BATTLES = std::getenv("NUM_BATTLES") != nullptr ? std::atoi(std::getenv("NUM_BATTLES")) : 2;
+std::string const USER_TO_CHALLENGE = std::getenv("USER_CHALLENGE") != nullptr ? std::getenv("USER_CHALLENGE") : "dlinvcaccept1";
+std::string const GAME_FORMAT = std::getenv("GAME_FORMAT") != nullptr ? std::getenv("GAME_FORMAT") : "gen8custombattle@@@Dynamax Clause";
 std::string const TEAM_DIR = std::getenv("TEAM_DIR");
-std::string const USERNAME = std::getenv("USERNAME");
-std::string const PASSWORD = std::getenv("PASSWORD");
-std::string const AGENT = std::getenv("AGENT");
+std::string const USERNAME = std::getenv("USERNAME") != nullptr ? std::getenv("USERNAME") : "dlinvcchallenge1";
+std::string const PASSWORD = std::getenv("PASSWORD") != nullptr ? std::getenv("PASSWORD") : "NbmjPcthUbzT4LGz";
 
 void write_log(std::string const str) {
     std::fstream file_stream;
@@ -38,6 +37,10 @@ void log_result(bool const battle_won) {
 }
 
 std::string get_team(std::string const team_dir) {
+    if (team_dir == "") {
+        throw std::invalid_argument("Team directory is not a path");
+    }
+
     std::vector<std::string> files;
     for (const auto& file : std::filesystem::directory_iterator(team_dir)) {
         files.push_back(file.path());
