@@ -36,8 +36,8 @@ data can be found in the same directory as the original data in the subfolder
 
 The dataloader and dataconverter are located in
 ```
-simple_mlp/dataloader/dataset.py
-simple_mlp/dataloader/dataconverter.py
+policynet/dataloader/dataset.py
+policynet/dataloader/dataconverter.py
 ```
 
 ### Current supported features
