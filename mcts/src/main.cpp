@@ -74,7 +74,6 @@ int main() {
     for (int i = 0; i < NUM_BATTLES; i++) {
         std::string battle_room_name = client.challenge_user(USER_TO_CHALLENGE, GAME_FORMAT);
         bool const battle_won = start_mcts_agent(client, battle_room_name, policy);
-        log_result(battle_won);
         win_count += (int)battle_won;
         std::cout << "Battle result: " << battle_won << std::endl;
     }
