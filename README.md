@@ -8,15 +8,15 @@ pre-trained on a three Pokemon, two move dataset (available [here](https://drive
 
 The MCTS pipeline is a docker compose setup where
 our MCTS agent plays against our baseline agent
-pmariglia. <br>
+[pmariglia](https://github.com/pmariglia/showdown). <br>
 To start the data collection process run
 ```
 docker-compose -f mcts-docker-compose.yml build
 docker-compose -f mcts-docker-compose.yml up
 ```
 which will create a MCTS agent and one baseline
-agent challenging each other on a local Pokemon
-showdown server. <br>
+agent challenging each other on a local [Pokemon
+showdown server](https://github.com/smogon/pokemon-showdown). <br>
 
 To configure the pipeline have a look at `scripts/create-mcts-pipeline.sh`.
 
